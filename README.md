@@ -1,2 +1,0 @@
-## Anggota
-- Zalda
