@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <meta content="web_standard" name="shell-type">
+  <title>SHIFT - Profil Pelanggan VIP & Pengaturan Akun</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+
+  <style>
+    @layer base {
+      html, body { margin: 0; padding: 0; }
+      body { overscroll-behavior: none; }
+      main > :first-child { margin-top: 0 !important; }
+      main > :last-child { margin-bottom: 0 !important; }
+    }
+    ::-webkit-scrollbar { display: none; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+
+  <!-- Tailwind CSS CDN & Stitch exact config -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-container-lowest": "#ffffff",
+            "surface-bright": "#faf8ff",
+            "surface": "#faf8ff",
+            "secondary-fixed-dim": "#eec200",
+            "outline-variant": "#bfc7d2",
+            "surface-container-highest": "#dae2fd",
+            "on-tertiary-container": "#fcfcff",
+            "tertiary-fixed-dim": "#7bd0ff",
+            "on-error-container": "#93000a",
+            "primary-container": "#007bb9",
+            "inverse-on-surface": "#eef0ff",
+            "on-tertiary-fixed-variant": "#004c69",
+            "background": "#faf8ff",
+            "on-surface": "#131b2e",
+            "on-secondary-fixed-variant": "#574500",
+            "surface-container": "#eaedff",
+            "primary": "#006194",
+            "on-error": "#ffffff",
+            "primary-fixed": "#cce5ff",
+            "tertiary": "#006387",
+            "surface-variant": "#dae2fd",
+            "secondary-container": "#fed01b",
+            "primary-fixed-dim": "#93ccff",
+            "tertiary-fixed": "#c4e7ff",
+            "surface-container-low": "#f2f3ff",
+            "on-tertiary-fixed": "#001e2c",
+            "inverse-primary": "#93ccff",
+            "on-primary-fixed-variant": "#004b73",
+            "on-primary": "#ffffff",
+            "on-surface-variant": "#3f4850",
+            "surface-container-high": "#e2e7ff",
+            "surface-dim": "#d2d9f4",
+            "on-background": "#131b2e",
+            "error": "#ba1a1a",
+            "on-tertiary": "#ffffff",
+            "tertiary-container": "#007da9",
+            "secondary": "#735c00",
+            "on-secondary-container": "#6f5900",
+            "error-container": "#ffdad6",
+            "on-primary-container": "#fdfcff",
+            "on-primary-fixed": "#001d31",
+            "outline": "#707881",
+            "surface-tint": "#006398",
+            "on-secondary": "#ffffff",
+            "inverse-surface": "#283044",
+            "secondary-fixed": "#ffe083",
+            "on-secondary-fixed": "#231b00"
+          },
+          borderRadius: {
+            "DEFAULT": "1rem",
+            "lg": "2rem",
+            "xl": "3rem",
+            "full": "9999px"
+          },
+          spacing: {
+            "space-sm": "0.5rem",
+            "gutter-mobile": "1rem",
+            "margin": "2rem",
+            "gutter": "1.5rem",
+            "space-xl": "2.5rem",
+            "space-md": "1rem",
+            "space-xs": "0.25rem",
+            "margin-mobile": "1rem",
+            "space-lg": "1.5rem"
+          },
+          fontFamily: {
+            "body-md": ["Plus Jakarta Sans"],
+            "headline-sm": ["Plus Jakarta Sans"],
+            "label-sm": ["Plus Jakarta Sans"],
+            "label-lg": ["Plus Jakarta Sans"],
+            "headline-xl-mobile": ["Plus Jakarta Sans"],
+            "display": ["Plus Jakarta Sans"],
+            "display-mobile": ["Plus Jakarta Sans"],
+            "body-lg": ["Plus Jakarta Sans"],
+            "headline-lg": ["Plus Jakarta Sans"],
+            "body-sm": ["Plus Jakarta Sans"],
+            "headline-xl": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"],
+            "label-md": ["Plus Jakarta Sans"]
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-surface font-body-md text-body-md text-on-surface antialiased">
+  
+  <!-- Header Navbar with Sticky Blur -->
+  <header class="fixed top-0 left-0 w-full z-50 bg-surface-container-lowest/80 backdrop-blur-xl shadow-[0_4px_24px_rgba(0,97,148,0.06)] border-b border-slate-100">
+    <div class="h-20 max-w-7xl mx-auto px-margin flex items-center justify-between gap-space-md">
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-space-xl">
+        <a class="flex items-center gap-space-xs" data-path="beranda" href="./index.html">
+          <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center shadow-[0_4px_12px_rgba(0,97,148,0.3)]">
+            <span class="material-symbols-outlined text-on-primary text-[22px]">local_shipping</span>
+          </div>
+          <span class="font-headline-md text-headline-md text-primary tracking-tight font-extrabold">SHIFT</span>
+        </a>
+        <nav class="hidden lg:flex items-center gap-space-xs p-space-xs bg-surface-container-low rounded-full">
+          <a class="px-space-md py-space-xs text-on-surface-variant hover:text-on-surface font-label-lg text-label-lg transition-colors" data-path="beranda" href="./index.html">Beranda</a>
+          <a class="px-space-md py-space-xs text-on-surface-variant hover:text-on-surface font-label-lg text-label-lg transition-colors" data-path="pesan-layanan" href="./booking.html">Pesan Layanan</a>
+          <a class="px-space-md py-space-xs text-on-surface-variant hover:text-on-surface font-label-lg text-label-lg transition-colors" data-path="riwayat-dan-bantuan" href="./history.html">Riwayat & Bantuan</a>
+        </nav>
+      </div>
+
+      <!-- Right Header Controls -->
+      <div class="flex items-center gap-space-md">
+        <!-- Notification Dropdown Toggle -->
+        <div class="relative" id="notifDropdownWrapper">
+          <button id="notifToggleBtn" onclick="toggleNotifDropdown(event)" class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all relative cursor-pointer focus:outline-none">
+            <span class="material-symbols-outlined text-[20px]">notifications</span>
+            <span id="notifBadgeCount" class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-[10px] font-extrabold flex items-center justify-center shadow-sm">3</span>
+          </button>
+
+          <!-- Notification Popover -->
+          <div id="notifPopover" class="hidden absolute right-0 mt-2 w-96 max-w-[calc(100vw-2rem)] rounded-3xl bg-surface-container-lowest/95 backdrop-blur-2xl shadow-[0_24px_50px_-16px_rgba(0,97,148,0.22)] p-space-md flex flex-col gap-space-sm z-50 transition-all border border-outline-variant/30">
+            <div class="flex items-center justify-between pb-2 border-b border-outline-variant/30">
+              <div class="flex items-center gap-1.5">
+                <span class="font-label-lg text-label-lg font-bold text-on-surface">Notifikasi Terkini</span>
+                <span class="px-2 py-0.2 rounded-full bg-secondary-fixed text-on-secondary-fixed text-[10px] font-bold" id="notifUnreadBadge">3 Baru</span>
+              </div>
+              <button onclick="markAllNotifsRead()" class="font-label-sm text-label-sm font-semibold text-primary hover:underline cursor-pointer">Tandai Semua Dibaca</button>
+            </div>
+            
+            <div class="flex flex-col gap-2 max-h-[360px] overflow-y-auto no-scrollbar" id="notifListContainer">
+              <div class="p-space-sm rounded-2xl bg-surface-container-low flex items-start gap-2.5 hover:bg-surface-container transition-colors cursor-pointer">
+                <div class="w-9 h-9 rounded-full bg-primary-fixed text-primary flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span class="material-symbols-outlined text-[18px]">local_shipping</span>
+                </div>
+                <div class="flex flex-col flex-1">
+                  <div class="flex items-center justify-between">
+                    <span class="font-label-sm text-label-sm font-bold text-on-surface">Armada OTW #SHF-90214</span>
+                    <span class="text-[10px] text-on-surface-variant font-medium">10m lalu</span>
+                  </div>
+                  <p class="font-body-sm text-[12px] text-on-surface-variant mt-0.5">Driver Budi Santoso menuju titik jemput Kost Melati Sleman.</p>
+                </div>
+              </div>
+              <div class="p-space-sm rounded-2xl bg-surface-container-low flex items-start gap-2.5 hover:bg-surface-container transition-colors cursor-pointer">
+                <div class="w-9 h-9 rounded-full bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span class="material-symbols-outlined text-[18px]">qr_code_2</span>
+                </div>
+                <div class="flex flex-col flex-1">
+                  <div class="flex items-center justify-between">
+                    <span class="font-label-sm text-label-sm font-bold text-on-surface">Top Up QRIS Berhasil</span>
+                    <span class="text-[10px] text-on-surface-variant font-medium">2 jam lalu</span>
+                  </div>
+                  <p class="font-body-sm text-[12px] text-on-surface-variant mt-0.5">Saldo SHIFT Pay sebesar Rp 200.000 telah masuk ke dompet Anda.</p>
+                </div>
+              </div>
+              <div class="p-space-sm rounded-2xl bg-surface-container-low flex items-start gap-2.5 hover:bg-surface-container transition-colors cursor-pointer">
+                <div class="w-9 h-9 rounded-full bg-primary-fixed text-primary flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span class="material-symbols-outlined text-[18px]">loyalty</span>
+                </div>
+                <div class="flex flex-col flex-1">
+                  <div class="flex items-center justify-between">
+                    <span class="font-label-sm text-label-sm font-bold text-on-surface">Voucher VIP Aktif</span>
+                    <span class="text-[10px] text-on-surface-variant font-medium">1 hari lalu</span>
+                  </div>
+                  <p class="font-body-sm text-[12px] text-on-surface-variant mt-0.5">Kupon diskon 15% 'SHIFT-VIP-HEMAT' siap digunakan untuk booking armada.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-outline-variant/30 flex items-center justify-between">
+              <button onclick="switchTab('notifikasi'); closeNotifDropdown();" class="text-primary hover:underline font-label-sm text-label-sm font-bold flex items-center gap-1 cursor-pointer">
+                Preferensi Notifikasi <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+              </button>
+              <a href="./notifications.html" onclick="closeNotifDropdown();" class="text-on-surface-variant hover:text-primary font-label-sm text-label-sm font-semibold">Arsip Lengkap</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- User Profile Pill -->
+        <a class="flex items-center gap-space-sm pl-space-xs pr-space-md py-space-xs bg-surface-container hover:bg-surface-container-high rounded-full transition-all border border-slate-200" data-path="profil-saya" href="./profile.html">
+          <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-on-primary font-bold text-xs" id="navAvatarInitials">
+            DP
+          </div>
+          <div class="hidden sm:flex flex-col text-left">
+            <span class="font-label-md text-label-md text-on-surface font-bold leading-none" id="navUserName">Dimas Pratama</span>
+            <span class="font-label-sm text-label-sm text-secondary font-bold uppercase tracking-wider mt-0.5" id="navUserRole">VIP Gold</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="w-full pt-20 bg-surface min-h-[calc(100vh-20rem)] pb-space-xl">
+    <div class="flex flex-col w-full">
+      <!-- Ambient Atmospheric Backdrops -->
+      <div class="relative w-full overflow-hidden pb-space-xl">
+        <div class="absolute -top-32 left-1/2 -translate-x-1/2 w-[780px] h-[340px] bg-gradient-to-r from-primary-fixed-dim/35 via-tertiary-fixed/30 to-secondary-fixed/20 blur-3xl pointer-events-none -z-10 rounded-full"></div>
+        <div class="absolute top-96 right-10 w-96 h-96 bg-primary-fixed/20 blur-3xl pointer-events-none -z-10 rounded-full"></div>
+
+        <div class="max-w-7xl mx-auto px-margin">
+          
+          <!-- VIP Header Glass Slab -->
+          <section class="mt-space-lg w-full relative rounded-3xl p-space-lg sm:p-space-xl bg-surface-container-lowest/80 backdrop-blur-2xl shadow-[0_24px_50px_-16px_rgba(0,97,148,0.12)] border border-slate-100">
+            <div class="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-space-lg">
+              
+              <!-- Avatar + Member Bio Details -->
+              <div class="flex items-center gap-space-md sm:gap-space-lg">
+                <div class="relative flex-shrink-0">
+                  <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-primary-container to-primary flex items-center justify-center text-on-primary font-headline-xl text-headline-xl font-extrabold shadow-[0_12px_28px_rgba(0,97,148,0.28)]" id="profileHeaderAvatar">
+                    DP
+                  </div>
+                  <div class="absolute -bottom-1 -right-1 bg-gradient-to-r from-secondary-fixed to-secondary-container text-on-secondary-fixed px-space-xs py-0.5 rounded-full flex items-center gap-0.5 shadow-md">
+                    <span class="material-symbols-outlined text-[15px]" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+                    <span class="font-label-sm text-label-sm uppercase font-bold tracking-tight">VIP</span>
+                  </div>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <div class="flex flex-wrap items-center gap-space-xs">
+                    <span class="font-headline-md text-headline-md font-extrabold text-on-surface" id="profileHeaderName">Dimas Pratama</span>
+                    <span class="flex items-center gap-0.5 px-2.5 py-0.5 rounded-full bg-surface-container-highest text-primary font-label-md text-label-md font-bold">
+                      <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+                      Terverifikasi
+                    </span>
+                    <span class="px-2.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm uppercase tracking-wider font-bold">
+                      Gold Tier
+                    </span>
+                  </div>
+                  <div class="flex flex-wrap items-center gap-space-sm text-on-surface-variant font-body-sm text-body-sm">
+                    <span class="flex items-center gap-1 font-semibold text-primary" id="profileHeaderId">
+                      <span class="material-symbols-outlined text-[16px]">badge</span>
+                      #SHF-VIP-9921
+                    </span>
+                    <span>•</span>
+                    <span class="flex items-center gap-1">
+                      <span class="material-symbols-outlined text-[16px]">calendar_today</span>
+                      Member sejak Jan 2024
+                    </span>
+                    <span>•</span>
+                    <span class="text-tertiary font-medium">Prioritas Pengemudi & Helper 24/7</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick Metric Pods -->
+              <div class="w-full xl:w-auto grid grid-cols-1 sm:grid-cols-3 gap-space-sm">
+                <!-- Dompet Card -->
+                <div class="p-space-md rounded-2xl bg-surface-container-low flex flex-col justify-between gap-space-xs shadow-sm min-w-[200px] border border-slate-200">
+                  <div class="flex items-center justify-between text-on-surface-variant">
+                    <span class="font-label-sm text-label-sm uppercase tracking-wider font-bold">Saldo SHIFT Pay</span>
+                    <span class="material-symbols-outlined text-primary text-[18px]">account_balance_wallet</span>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="font-headline-sm text-headline-sm font-extrabold text-on-surface" id="walletBalanceDisplay">Rp 345.000</span>
+                    <span class="font-body-sm text-body-sm text-primary flex items-center gap-0.5">
+                      <span class="material-symbols-outlined text-[14px]">bolt</span> Instan Siap Pakai
+                    </span>
+                  </div>
+                  <button class="mt-1 w-full py-1.5 px-3 rounded-full bg-secondary-container hover:bg-secondary-fixed text-on-secondary-fixed font-label-md text-label-md font-bold flex items-center justify-center gap-1 shadow-sm transition-all hover:scale-[1.02] cursor-pointer" onclick="openTopupModal()">
+                    <span class="material-symbols-outlined text-[16px]">add_circle</span>
+                    Top Up QRIS
+                  </button>
+                </div>
+
+                <!-- Poin Card -->
+                <div class="p-space-md rounded-2xl bg-surface-container-low flex flex-col justify-between gap-space-xs shadow-sm min-w-[170px] border border-slate-200">
+                  <div class="flex items-center justify-between text-on-surface-variant">
+                    <span class="font-label-sm text-label-sm uppercase tracking-wider font-bold">Poin Loyalitas</span>
+                    <span class="material-symbols-outlined text-secondary text-[18px]">stars</span>
+                  </div>
+                  <div class="flex flex-col">
+                    <div class="flex items-baseline gap-1">
+                      <span class="font-headline-sm text-headline-sm font-extrabold text-on-surface" id="loyaltyPointsDisplay">1.250</span>
+                      <span class="font-label-sm text-label-sm text-on-surface-variant">PTS</span>
+                    </div>
+                    <span class="font-body-sm text-body-sm text-secondary font-medium">Level VIP Gold Aktif</span>
+                  </div>
+                  <div class="w-full bg-surface-container-highest rounded-full h-1.5 mt-2">
+                    <div class="bg-secondary-fixed-dim h-1.5 rounded-full w-[72%]"></div>
+                  </div>
+                </div>
+
+                <!-- Voucher Card -->
+                <div class="p-space-md rounded-2xl bg-surface-container-low flex flex-col justify-between gap-space-xs shadow-sm min-w-[170px] border border-slate-200">
+                  <div class="flex items-center justify-between text-on-surface-variant">
+                    <span class="font-label-sm text-label-sm uppercase tracking-wider font-bold">Voucher Saya</span>
+                    <span class="material-symbols-outlined text-tertiary text-[18px]">confirmation_number</span>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="font-headline-sm text-headline-sm font-extrabold text-on-surface">2 Kupon</span>
+                    <span class="font-body-sm text-body-sm text-tertiary font-semibold">Siap digunakan</span>
+                  </div>
+                  <button onclick="switchTab('voucher')" class="mt-1 w-full py-1.5 px-3 rounded-full bg-surface-container-lowest text-primary hover:text-primary-container font-label-md text-label-md font-bold flex items-center justify-center gap-1 shadow-sm transition-all cursor-pointer">
+                    Lihat Kupon
+                    <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- Navigation Tabs (Floating Capsule Style) -->
+          <section class="mt-space-lg w-full flex items-center overflow-x-auto no-scrollbar py-2">
+            <div class="p-1.5 bg-surface-container-low/90 backdrop-blur-lg rounded-full flex items-center gap-1 shadow-sm border border-slate-200">
+              <button class="tab-pill px-space-md py-2 rounded-full font-label-lg text-label-lg font-bold transition-all bg-primary-container text-on-primary-container shadow-sm flex items-center gap-1.5 cursor-pointer" id="tab-btn-profil" onclick="switchTab('profil')">
+                <span class="material-symbols-outlined text-[18px]">person</span>
+                Profil & Data Diri
+              </button>
+              <button class="tab-pill px-space-md py-2 rounded-full font-label-lg text-label-lg font-bold text-on-surface-variant hover:text-on-surface transition-all flex items-center gap-1.5 cursor-pointer" id="tab-btn-alamat" onclick="switchTab('alamat')">
+                <span class="material-symbols-outlined text-[18px]">location_on</span>
+                Alamat Tersimpan
+                <span class="ml-1 px-1.5 py-0.2 rounded-full bg-primary-fixed text-on-primary-fixed text-[10px] font-bold" id="addressCountBadge">2</span>
+              </button>
+              <button class="tab-pill px-space-md py-2 rounded-full font-label-lg text-label-lg font-bold text-on-surface-variant hover:text-on-surface transition-all flex items-center gap-1.5 cursor-pointer" id="tab-btn-keamanan" onclick="switchTab('keamanan')">
+                <span class="material-symbols-outlined text-[18px]">security</span>
+                Keamanan & Pembayaran
+              </button>
+              <button class="tab-pill px-space-md py-2 rounded-full font-label-lg text-label-lg font-bold text-on-surface-variant hover:text-on-surface transition-all flex items-center gap-1.5 cursor-pointer" id="tab-btn-voucher" onclick="switchTab('voucher')">
+                <span class="material-symbols-outlined text-[18px]">loyalty</span>
+                Dompet & Kupon VIP
+              </button>
+              <button class="tab-pill px-space-md py-2 rounded-full font-label-lg text-label-lg font-bold text-on-surface-variant hover:text-on-surface transition-all flex items-center gap-1.5 cursor-pointer" id="tab-btn-notifikasi" onclick="switchTab('notifikasi')">
+                <span class="material-symbols-outlined text-[18px]">notifications_active</span>
+                Preferensi Notifikasi
+              </button>
+            </div>
+          </section>
+
+          <!-- TAB CONTENT CONTAINERS -->
+          <div class="mt-space-lg w-full flex flex-col gap-space-xl">
+            
+            <!-- TAB 1: DATA DIRI & KONTAK -->
+            <div class="tab-panel flex flex-col lg:flex-row gap-space-lg w-full" id="panel-profil">
+              <!-- Main Personal Form Card -->
+              <div class="flex-1 rounded-3xl p-space-lg sm:p-space-xl bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_16px_36px_rgba(0,97,148,0.06)] border border-slate-100 flex flex-col gap-space-lg">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <span class="font-headline-sm text-headline-sm font-bold text-on-surface">Data Pribadi Pelanggan</span>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Informasi digunakan untuk identifikasi serah-terima muatan dan asuransi proteksi.</p>
+                  </div>
+                  <span class="px-3 py-1 rounded-full bg-surface-container-highest text-primary font-label-sm text-label-sm font-bold flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[14px]">lock</span>
+                    Privasi Terenkripsi 256-bit
+                  </span>
+                </div>
+
+                <form class="grid grid-cols-1 sm:grid-cols-2 gap-space-md" id="profileForm" onsubmit="saveProfileToSupabase(event)">
+                  <!-- Nama Lengkap -->
+                  <div class="flex flex-col gap-1.5 sm:col-span-2">
+                    <label for="inputFullName" class="font-label-lg text-label-lg font-bold text-on-surface">Nama Lengkap (Sesuai KTP)</label>
+                    <div class="relative">
+                      <span class="absolute left-3.5 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-[20px]">person_outline</span>
+                      <input id="inputFullName" class="w-full pl-11 pr-4 py-3 rounded-2xl bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary border border-slate-200 shadow-inner transition-all" required type="text" value="" placeholder="Contoh: Nama Lengkap Anda">
+                    </div>
+                  </div>
+
+                  <!-- Email -->
+                  <div class="flex flex-col gap-1.5">
+                    <div class="flex items-center justify-between">
+                      <label for="inputEmail" class="font-label-lg text-label-lg font-bold text-on-surface">Alamat Email</label>
+                      <span class="font-label-sm text-label-sm font-bold text-primary flex items-center gap-0.5">
+                        <span class="material-symbols-outlined text-[14px]">verified</span> Terverifikasi
+                      </span>
+                    </div>
+                    <div class="relative">
+                      <span class="absolute left-3.5 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-[20px]">mail</span>
+                      <input id="inputEmail" class="w-full pl-11 pr-4 py-3 rounded-2xl bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary border border-slate-200 shadow-inner transition-all" required type="email" value="" placeholder="nama@gmail.com">
+                    </div>
+                  </div>
+
+                  <!-- WhatsApp -->
+                  <div class="flex flex-col gap-1.5">
+                    <div class="flex items-center justify-between">
+                      <label for="inputPhone" class="font-label-lg text-label-lg font-bold text-on-surface">Nomor WhatsApp Aktif</label>
+                      <span class="font-label-sm text-label-sm font-bold text-primary flex items-center gap-0.5">
+                        <span class="material-symbols-outlined text-[14px]">check_circle</span> OTP Aktif
+                      </span>
+                    </div>
+                    <div class="relative">
+                      <span class="absolute left-3.5 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-[20px]">chat</span>
+                      <input id="inputPhone" class="w-full pl-11 pr-4 py-3 rounded-2xl bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary border border-slate-200 shadow-inner transition-all" required type="tel" value="" placeholder="08xxxxxxxxxx">
+                    </div>
+                  </div>
+
+                  <!-- Jenis Kelamin -->
+                  <div class="flex flex-col gap-1.5">
+                    <label class="font-label-lg text-label-lg font-bold text-on-surface">Jenis Kelamin</label>
+                    <div class="grid grid-cols-2 gap-2">
+                      <label class="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-primary-container text-on-primary-container font-label-md text-label-md font-bold cursor-pointer transition-all shadow-sm" id="genderLabelL">
+                        <input checked class="hidden" name="gender" type="radio" value="L" onchange="toggleGenderUI('L')">
+                        <span class="material-symbols-outlined text-[18px]">male</span>
+                        Laki-laki
+                      </label>
+                      <label class="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md font-bold cursor-pointer transition-all" id="genderLabelP">
+                        <input class="hidden" name="gender" type="radio" value="P" onchange="toggleGenderUI('P')">
+                        <span class="material-symbols-outlined text-[18px]">female</span>
+                        Perempuan
+                      </label>
+                    </div>
+                  </div>
+
+                  <!-- Tanggal Lahir -->
+                  <div class="flex flex-col gap-1.5">
+                    <label for="inputDob" class="font-label-lg text-label-lg font-bold text-on-surface">Tanggal Lahir</label>
+                    <div class="relative">
+                      <span class="absolute left-3.5 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-[20px]">cake</span>
+                      <input id="inputDob" class="w-full pl-11 pr-4 py-3 rounded-2xl bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary border border-slate-200 shadow-inner transition-all" type="date" value="">
+                    </div>
+                  </div>
+
+                  <!-- Action Bar -->
+                  <div class="sm:col-span-2 flex flex-col sm:flex-row items-center justify-between gap-space-md pt-space-sm mt-2">
+                    <p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1.5">
+                      <span class="material-symbols-outlined text-primary text-[18px]">info</span>
+                      Pembaruan data otomatis memperbarui sertifikat asuransi aktif.
+                    </p>
+                    <button class="w-full sm:w-auto px-8 py-3.5 rounded-full bg-gradient-to-r from-secondary-container to-secondary-fixed text-on-secondary-fixed font-headline-sm text-headline-sm font-extrabold shadow-[0_12px_24px_rgba(238,194,0,0.3)] hover:scale-105 active:scale-95 transition-all cursor-pointer" type="submit">
+                      Simpan Perubahan
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              <!-- Side Panel: VIP Perks -->
+              <div class="w-full lg:w-96 flex flex-col gap-space-md">
+                <div class="p-space-lg rounded-3xl bg-gradient-to-br from-surface-container-high via-surface-container to-surface-container-lowest shadow-md flex flex-col gap-space-md border border-slate-200">
+                  <div class="flex items-center gap-space-sm">
+                    <div class="w-12 h-12 rounded-2xl bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center shadow-sm">
+                      <span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">military_tech</span>
+                    </div>
+                    <div class="flex flex-col">
+                      <span class="font-headline-sm text-headline-sm font-bold text-on-surface">Hak Istimewa VIP Gold</span>
+                      <span class="font-label-sm text-label-sm text-secondary font-bold uppercase tracking-wider">Garansi Tanpa Ribet</span>
+                    </div>
+                  </div>
+
+                  <ul class="flex flex-col gap-3 font-body-sm text-body-sm text-on-surface">
+                    <li class="flex items-center gap-2.5">
+                      <span class="w-6 h-6 rounded-full bg-primary-fixed flex items-center justify-center text-primary flex-shrink-0">
+                        <span class="material-symbols-outlined text-[16px]">check</span>
+                      </span>
+                      <span>Prioritas penugasan armada & helper terbaik</span>
+                    </li>
+                    <li class="flex items-center gap-2.5">
+                      <span class="w-6 h-6 rounded-full bg-primary-fixed flex items-center justify-center text-primary flex-shrink-0">
+                        <span class="material-symbols-outlined text-[16px]">check</span>
+                      </span>
+                      <span>Garansi asuransi perlindungan barang hingga Rp 25.000.000</span>
+                    </li>
+                    <li class="flex items-center gap-2.5">
+                      <span class="w-6 h-6 rounded-full bg-primary-fixed flex items-center justify-center text-primary flex-shrink-0">
+                        <span class="material-symbols-outlined text-[16px]">check</span>
+                      </span>
+                      <span>Gratis pembatalan atau reschedule hingga H-2 jam</span>
+                    </li>
+                    <li class="flex items-center gap-2.5">
+                      <span class="w-6 h-6 rounded-full bg-primary-fixed flex items-center justify-center text-primary flex-shrink-0">
+                        <span class="material-symbols-outlined text-[16px]">check</span>
+                      </span>
+                      <span>Dedicated Personal Concierge di WhatsApp</span>
+                    </li>
+                  </ul>
+
+                  <div class="mt-2 pt-space-sm bg-surface-container-lowest/60 rounded-2xl p-space-sm flex items-center justify-between border border-slate-100">
+                    <div class="flex flex-col">
+                      <span class="font-label-sm text-label-sm text-on-surface-variant font-bold">Progress ke VIP Platinum</span>
+                      <span class="font-body-sm text-body-sm text-primary font-semibold">Kurang 3 pesanan lagi</span>
+                    </div>
+                    <span class="font-headline-sm text-headline-sm font-extrabold text-primary">70%</span>
+                  </div>
+                </div>
+
+                <!-- Concierge CS pod -->
+                <div class="p-space-lg rounded-3xl bg-surface-container-lowest/80 backdrop-blur-md shadow-sm border border-slate-100 flex items-center gap-space-md">
+                  <div class="w-12 h-12 rounded-full bg-primary-fixed text-primary flex items-center justify-center flex-shrink-0">
+                    <span class="material-symbols-outlined text-[24px]">support_agent</span>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="font-label-lg text-label-lg font-bold text-on-surface">Pusat Bantuan VIP</span>
+                    <span class="font-body-sm text-body-sm text-on-surface-variant">Hubungi tim concierge jika butuh penyesuaian khusus.</span>
+                    <a class="mt-1 text-primary font-label-md text-label-md font-bold hover:underline flex items-center gap-1" href="https://wa.me/6281234567890" target="_blank">
+                      Chat Personal Officer <span class="material-symbols-outlined text-[14px]">arrow_outward</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 2: ALAMAT TERSIMPAN -->
+            <div class="tab-panel hidden flex-col gap-space-lg w-full" id="panel-alamat">
+              <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-space-md">
+                <div>
+                  <span class="font-headline-lg text-headline-lg font-extrabold text-on-surface">Alamat Favorit Tersimpan</span>
+                  <p class="font-body-md text-body-md text-on-surface-variant">Alamat ini digunakan untuk mempercepat booking armada dan instruksi supir.</p>
+                </div>
+                <button class="px-6 py-3 rounded-full bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg font-bold shadow-md flex items-center gap-2 transition-all hover:scale-105 cursor-pointer" onclick="openAddressModal()">
+                  <span class="material-symbols-outlined text-[20px]">add_location_alt</span>
+                  Tambah Alamat Baru
+                </button>
+              </div>
+
+              <!-- Address Cards Grid Container -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-space-lg" id="addressCardsGrid">
+                <!-- Dynamic cards rendered via renderSavedAddressGrid() -->
+              </div>
+            </div>
+
+            <!-- TAB 3: KEAMANAN & PEMBAYARAN -->
+            <div class="tab-panel hidden flex-col gap-space-lg w-full" id="panel-keamanan">
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-space-lg">
+                <!-- Keamanan -->
+                <div class="rounded-3xl p-space-lg sm:p-space-xl bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_16px_36px_rgba(0,97,148,0.06)] border border-slate-100 flex flex-col gap-space-lg">
+                  <div>
+                    <span class="font-headline-sm text-headline-sm font-bold text-on-surface">Keamanan Akun & Proteksi</span>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Kelola kata sandi, otentikasi lapis dua, dan PIN transaksi aman.</p>
+                  </div>
+
+                  <div class="flex flex-col gap-space-md">
+                    <div class="p-space-md rounded-2xl bg-surface-container-low flex items-center justify-between border border-slate-200">
+                      <div class="flex items-center gap-space-sm">
+                        <div class="w-10 h-10 rounded-full bg-primary-fixed text-primary flex items-center justify-center flex-shrink-0">
+                          <span class="material-symbols-outlined text-[20px]">phonelink_lock</span>
+                        </div>
+                        <div class="flex flex-col">
+                          <span class="font-label-lg text-label-lg font-bold text-on-surface">Verifikasi 2 Langkah (2FA)</span>
+                          <span class="font-body-sm text-body-sm text-on-surface-variant">Kirim kode OTP ke WhatsApp terdaftar</span>
+                        </div>
+                      </div>
+                      <span class="px-3 py-1 rounded-full bg-surface-container-highest text-primary font-label-sm text-label-sm font-bold">
+                        Aktif
+                      </span>
+                    </div>
+
+                    <div class="p-space-md rounded-2xl bg-surface-container-low flex items-center justify-between border border-slate-200">
+                      <div class="flex items-center gap-space-sm">
+                        <div class="w-10 h-10 rounded-full bg-surface-container-highest text-primary flex items-center justify-center flex-shrink-0">
+                          <span class="material-symbols-outlined text-[20px]">password</span>
+                        </div>
+                        <div class="flex flex-col">
+                          <span class="font-label-lg text-label-lg font-bold text-on-surface">Kata Sandi Akun</span>
+                          <span class="font-body-sm text-body-sm text-on-surface-variant">Terakhir diganti 45 hari yang lalu</span>
+                        </div>
+                      </div>
+                      <button onclick="showToast('Fitur Ubah Kata Sandi aktif!', 'info')" class="px-4 py-2 rounded-full bg-surface-container-lowest text-primary hover:bg-surface-container font-label-md text-label-md font-bold shadow-sm transition-all cursor-pointer">
+                        Ubah
+                      </button>
+                    </div>
+
+                    <div class="p-space-md rounded-2xl bg-surface-container-low flex items-center justify-between border border-slate-200">
+                      <div class="flex items-center gap-space-sm">
+                        <div class="w-10 h-10 rounded-full bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center flex-shrink-0">
+                          <span class="material-symbols-outlined text-[20px]">pin</span>
+                        </div>
+                        <div class="flex flex-col">
+                          <span class="font-label-lg text-label-lg font-bold text-on-surface">PIN Transaksi 6-Digit</span>
+                          <span class="font-body-sm text-body-sm text-on-surface-variant">Wajib saat konfirmasi pembayaran & penarikan saldo</span>
+                        </div>
+                      </div>
+                      <button onclick="showToast('PIN Transaksi Anda aktif [849201]', 'info')" class="px-4 py-2 rounded-full bg-surface-container-lowest text-primary hover:bg-surface-container font-label-md text-label-md font-bold shadow-sm transition-all cursor-pointer">
+                        Ganti PIN
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Payment Methods -->
+                <div class="rounded-3xl p-space-lg sm:p-space-xl bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_16px_36px_rgba(0,97,148,0.06)] border border-slate-100 flex flex-col justify-between gap-space-lg">
+                  <div>
+                    <div class="flex items-center justify-between">
+                      <span class="font-headline-sm text-headline-sm font-bold text-on-surface">Metode Pembayaran</span>
+                      <button onclick="openTopupModal()" class="px-3.5 py-1.5 rounded-full bg-surface-container-low text-primary font-label-md text-label-md font-bold hover:bg-surface-container transition-all flex items-center gap-1 cursor-pointer">
+                        <span class="material-symbols-outlined text-[16px]">add</span> Tambah
+                      </button>
+                    </div>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Metode cepat untuk konfirmasi pesanan instan tanpa input ulang.</p>
+                  </div>
+
+                  <div class="flex flex-col gap-space-sm">
+                    <div class="p-space-md rounded-2xl bg-primary-fixed/20 flex items-center justify-between border border-primary/20">
+                      <div class="flex items-center gap-space-sm">
+                        <div class="w-12 h-12 rounded-xl bg-surface-container-lowest flex items-center justify-center shadow-sm">
+                          <span class="material-symbols-outlined text-primary text-[26px]">qr_code_scanner</span>
+                        </div>
+                        <div class="flex flex-col">
+                          <div class="flex items-center gap-2">
+                            <span class="font-label-lg text-label-lg font-bold text-on-surface">QRIS Dinamis Otomatis</span>
+                            <span class="px-2 py-0.2 rounded-full bg-primary text-on-primary font-label-sm text-label-sm font-bold">Utama</span>
+                          </div>
+                          <span class="font-body-sm text-body-sm text-on-surface-variant">Scan instan via semua m-Banking / e-Wallet</span>
+                        </div>
+                      </div>
+                      <span class="material-symbols-outlined text-primary text-[22px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                    </div>
+
+                    <div class="p-space-md rounded-2xl bg-surface-container-low flex items-center justify-between border border-slate-200">
+                      <div class="flex items-center gap-space-sm">
+                        <div class="w-12 h-12 rounded-xl bg-surface-container-lowest flex items-center justify-center shadow-sm">
+                          <span class="material-symbols-outlined text-secondary text-[26px]">account_balance</span>
+                        </div>
+                        <div class="flex flex-col">
+                          <span class="font-label-lg text-label-lg font-bold text-on-surface">BCA Virtual Account</span>
+                          <span class="font-body-sm text-body-sm text-on-surface-variant">Terhubung •••• 8921</span>
+                        </div>
+                      </div>
+                      <button onclick="showToast('BCA VA ditetapkan sebagai metode utama', 'success')" class="text-on-surface-variant hover:text-primary font-label-sm text-label-sm font-bold cursor-pointer">Jadikan Utama</button>
+                    </div>
+
+                    <div class="p-space-md rounded-2xl bg-surface-container-low flex items-center justify-between border border-slate-200">
+                      <div class="flex items-center gap-space-sm">
+                        <div class="w-12 h-12 rounded-xl bg-surface-container-lowest flex items-center justify-center shadow-sm">
+                          <span class="material-symbols-outlined text-tertiary text-[26px]">account_balance_wallet</span>
+                        </div>
+                        <div class="flex flex-col">
+                          <span class="font-label-lg text-label-lg font-bold text-on-surface">GoPay Wallet</span>
+                          <span class="font-body-sm text-body-sm text-on-surface-variant">Saldo Terhubung (+62 812-3456-••••)</span>
+                        </div>
+                      </div>
+                      <span class="font-label-sm text-label-sm text-primary font-bold">Terhubung</span>
+                    </div>
+                  </div>
+
+                  <div class="p-space-sm rounded-2xl bg-surface-container-low/70 flex items-center gap-2 border border-slate-200">
+                    <span class="material-symbols-outlined text-outline text-[18px]">verified_user</span>
+                    <span class="font-body-sm text-body-sm text-on-surface-variant">Semua transaksi dijamin sistem proteksi anti penipuan SHIFT Guarantee.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 4: DOMPET & KUPON PROMO -->
+            <div class="tab-panel hidden flex-col gap-space-lg w-full" id="panel-voucher">
+              <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-space-md">
+                <div>
+                  <span class="font-headline-lg text-headline-lg font-extrabold text-on-surface">Dompet & Kupon VIP Aktif</span>
+                  <p class="font-body-md text-body-md text-on-surface-variant">Gunakan voucher eksklusif pada halaman pembayaran pesanan pindahan & cleaning.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="font-label-md text-label-md text-on-surface-variant">Total Voucher Tersedia:</span>
+                  <span class="px-3 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-headline-sm text-headline-sm font-black">2</span>
+                </div>
+              </div>
+
+              <!-- Voucher Tickets Grid -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-space-lg">
+                <!-- Ticket 1 -->
+                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-surface-container-lowest via-surface-container-low to-surface-container p-space-lg shadow-[0_16px_36px_rgba(0,97,148,0.06)] border border-slate-200 flex flex-col justify-between gap-space-md">
+                  <div class="flex items-start justify-between">
+                    <div class="flex flex-col">
+                      <span class="px-2.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-bold uppercase tracking-wider w-fit">
+                        VIP Special Promo
+                      </span>
+                      <h3 class="font-headline-md text-headline-md font-extrabold text-on-surface mt-2">SHIFT-VIP-HEMAT</h3>
+                      <p class="font-body-sm text-body-sm text-on-surface-variant">Diskon Rp 25.000 (15% OFF) untuk semua layanan armada pindahan kost/apartemen.</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center shadow-sm">
+                      <span class="material-symbols-outlined text-[24px]">percent</span>
+                    </div>
+                  </div>
+                  <div class="pt-space-sm border-t-2 border-dashed border-outline-variant/30 flex items-center justify-between">
+                    <div class="flex items-center gap-1.5 text-on-surface-variant font-body-sm text-body-sm">
+                      <span class="material-symbols-outlined text-secondary text-[16px]">schedule</span>
+                      <span>Berlaku hingga <strong>9 hari lagi</strong></span>
+                    </div>
+                    <button class="px-4 py-1.5 rounded-full bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-bold transition-all shadow-sm cursor-pointer" onclick="copyVoucherCode('SHIFT-VIP-HEMAT')">
+                      Salin Kode
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Ticket 2 -->
+                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-surface-container-lowest via-surface-container-low to-surface-container p-space-lg shadow-[0_16px_36px_rgba(0,97,148,0.06)] border border-slate-200 flex flex-col justify-between gap-space-md">
+                  <div class="flex items-start justify-between">
+                    <div class="flex flex-col">
+                      <span class="px-2.5 py-0.5 rounded-full bg-surface-container-highest text-primary font-label-sm text-label-sm font-bold uppercase tracking-wider w-fit">
+                        Free Extra Hand
+                      </span>
+                      <h3 class="font-headline-md text-headline-md font-extrabold text-on-surface mt-2">BEBAS-HELPER</h3>
+                      <p class="font-body-sm text-body-sm text-on-surface-variant">Gratis 1 Helper Tambahan (Angkat & Susun Barang) untuk relokasi 1 hari penuh.</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-primary-fixed text-primary flex items-center justify-center shadow-sm">
+                      <span class="material-symbols-outlined text-[24px]">group_add</span>
+                    </div>
+                  </div>
+                  <div class="pt-space-sm border-t-2 border-dashed border-outline-variant/30 flex items-center justify-between">
+                    <div class="flex items-center gap-1.5 text-on-surface-variant font-body-sm text-body-sm">
+                      <span class="material-symbols-outlined text-secondary text-[16px]">schedule</span>
+                      <span>Berlaku hingga <strong>18 hari lagi</strong></span>
+                    </div>
+                    <button class="px-4 py-1.5 rounded-full bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-bold transition-all shadow-sm cursor-pointer" onclick="copyVoucherCode('BEBAS-HELPER')">
+                      Salin Kode
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 5: PREFERENSI NOTIFIKASI -->
+            <div class="tab-panel hidden flex-col gap-space-lg w-full" id="panel-notifikasi">
+              <div class="rounded-3xl p-space-lg sm:p-space-xl bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_16px_36px_rgba(0,97,148,0.06)] border border-slate-100 flex flex-col gap-space-lg">
+                <div>
+                  <span class="font-headline-sm text-headline-sm font-bold text-on-surface">Preferensi Notifikasi & Saluran Informasi</span>
+                  <p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Atur bagaimana kami memberitahu posisi armada, promo eksklusif, dan audit keamanan.</p>
+                </div>
+
+                <div class="flex flex-col gap-space-md">
+                  <label class="p-space-md rounded-2xl bg-surface-container-low flex items-center justify-between cursor-pointer border border-slate-200 hover:bg-surface-container transition-all">
+                    <div class="flex items-center gap-space-sm">
+                      <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center flex-shrink-0">
+                        <span class="material-symbols-outlined text-[20px]">chat</span>
+                      </div>
+                      <div class="flex flex-col">
+                        <span class="font-label-lg text-label-lg font-bold text-on-surface">Pesan WhatsApp & Live Tracker</span>
+                        <span class="font-body-sm text-body-sm text-on-surface-variant">Update status posisi armada & komunikasi helper via WA</span>
+                      </div>
+                    </div>
+                    <input checked class="w-5 h-5 text-primary rounded border-slate-300 focus:ring-primary cursor-pointer" type="checkbox" onchange="showToast('Preferensi WhatsApp diperbarui', 'success')">
+                  </label>
+
+                  <label class="p-space-md rounded-2xl bg-surface-container-low flex items-center justify-between cursor-pointer border border-slate-200 hover:bg-surface-container transition-all">
+                    <div class="flex items-center gap-space-sm">
+                      <div class="w-10 h-10 rounded-full bg-primary-fixed text-primary flex items-center justify-center flex-shrink-0">
+                        <span class="material-symbols-outlined text-[20px]">notifications</span>
+                      </div>
+                      <div class="flex flex-col">
+                        <span class="font-label-lg text-label-lg font-bold text-on-surface">Notifikasi Push Browser & Aplikasi</span>
+                        <span class="font-body-sm text-body-sm text-on-surface-variant">Pemberitahuan real-time saat driver tiba di lokasi</span>
+                      </div>
+                    </div>
+                    <input checked class="w-5 h-5 text-primary rounded border-slate-300 focus:ring-primary cursor-pointer" type="checkbox" onchange="showToast('Preferensi Push Browser diperbarui', 'success')">
+                  </label>
+
+                  <label class="p-space-md rounded-2xl bg-surface-container-low flex items-center justify-between cursor-pointer border border-slate-200 hover:bg-surface-container transition-all">
+                    <div class="flex items-center gap-space-sm">
+                      <div class="w-10 h-10 rounded-full bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center flex-shrink-0">
+                        <span class="material-symbols-outlined text-[20px]">mail</span>
+                      </div>
+                      <div class="flex flex-col">
+                        <span class="font-label-lg text-label-lg font-bold text-on-surface">Kwitansi PDF & Promo Email</span>
+                        <span class="font-body-sm text-body-sm text-on-surface-variant">Kirim bukti bayar, asuransi, dan voucher diskon bulanan</span>
+                      </div>
+                    </div>
+                    <input checked class="w-5 h-5 text-primary rounded border-slate-300 focus:ring-primary cursor-pointer" type="checkbox" onchange="showToast('Preferensi Email diperbarui', 'success')">
+                  </label>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL 1: TAMBAH ALAMAT BARU -->
+  <div class="fixed inset-0 z-50 hidden flex items-center justify-center p-margin-mobile bg-on-surface/40 backdrop-blur-md" id="modalAddress">
+    <div class="w-full max-w-lg rounded-3xl bg-surface-container-lowest p-space-lg sm:p-space-xl shadow-2xl flex flex-col gap-space-md border border-slate-100 animate-fadeIn">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-200">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary text-[24px]">add_location_alt</span>
+          <h3 class="font-headline-sm text-headline-sm font-extrabold text-on-surface">Tambah Alamat Favorit Baru</h3>
+        </div>
+        <button onclick="closeAddressModal()" class="w-8 h-8 rounded-full bg-surface-container-low hover:bg-surface-container flex items-center justify-center text-on-surface-variant cursor-pointer">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+
+      <form onsubmit="saveAddress(event)" class="flex flex-col gap-space-md">
+        <div class="flex flex-col gap-1">
+          <label for="newAddrLabel" class="font-label-lg text-label-lg font-bold text-on-surface">Label Alamat</label>
+          <input id="newAddrLabel" type="text" required placeholder="Contoh: Kost Pogung Kamar 10, Rumah Orang Tua" class="w-full px-4 py-3 rounded-2xl bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary border border-slate-200 outline-none">
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label for="newAddrType" class="font-label-lg text-label-lg font-bold text-on-surface">Tipe Alamat / Fungsi</label>
+          <select id="newAddrType" class="w-full px-4 py-3 rounded-2xl bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary border border-slate-200 outline-none cursor-pointer">
+            <option value="Kost / Titik Jemput">Kost / Titik Penjemputan Utama</option>
+            <option value="Rumah / Titik Tujuan">Rumah / Titik Tujuan Pengantaran</option>
+            <option value="Apartemen / Kontrakan">Apartemen / Kontrakan Sebagian</option>
+            <option value="Kantor / Gudang">Kantor / Gudang Logistik</option>
+          </select>
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label for="newAddrDetail" class="font-label-lg text-label-lg font-bold text-on-surface">Alamat Lengkap Presisi</label>
+          <textarea id="newAddrDetail" required rows="3" placeholder="Jl. Kaliurang KM 5, Gang Melati No. 12, Caturtunggal, Depok, Sleman, Yogyakarta 55281" class="w-full px-4 py-3 rounded-2xl bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary border border-slate-200 outline-none resize-none"></textarea>
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label for="newAddrAccessNote" class="font-label-lg text-label-lg font-bold text-on-surface">Catatan Akses Pengemudi & Helper (Opsional)</label>
+          <input id="newAddrAccessNote" type="text" placeholder="Contoh: Lantai 2 ada tangga lebar, masuk gang muat Pick-up Bak" class="w-full px-4 py-3 rounded-2xl bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary border border-slate-200 outline-none">
+        </div>
+
+        <div class="flex items-center gap-2 pt-2">
+          <button type="submit" class="flex-1 py-3.5 rounded-full bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg font-bold shadow-md transition-all cursor-pointer">
+            Simpan Alamat Ke Profile
+          </button>
+          <button type="button" onclick="closeAddressModal()" class="px-5 py-3.5 rounded-full bg-surface-container-low text-on-surface-variant font-label-lg text-label-lg font-semibold hover:bg-surface-container transition-all cursor-pointer">
+            Batal
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: TOP UP SALDO SHIFT PAY QRIS -->
+  <div class="fixed inset-0 z-50 hidden flex items-center justify-center p-margin-mobile bg-on-surface/40 backdrop-blur-md" id="modalTopup">
+    <div class="w-full max-w-md rounded-3xl bg-surface-container-lowest p-space-lg sm:p-space-xl shadow-2xl flex flex-col gap-space-md border border-slate-100 animate-fadeIn">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-200">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-secondary text-[24px]">account_balance_wallet</span>
+          <h3 class="font-headline-sm text-headline-sm font-extrabold text-on-surface">Top Up Saldo SHIFT Pay</h3>
+        </div>
+        <button onclick="closeTopupModal()" class="w-8 h-8 rounded-full bg-surface-container-low hover:bg-surface-container flex items-center justify-center text-on-surface-variant cursor-pointer">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+
+      <div class="flex flex-col gap-space-md">
+        <span class="font-label-lg text-label-lg font-bold text-on-surface">Pilih Nominal Top Up:</span>
+        <div class="grid grid-cols-3 gap-2">
+          <button type="button" onclick="selectTopupNominal(50000, this)" class="topup-nominal-btn py-3 px-2 rounded-2xl bg-surface-container-low text-on-surface font-label-lg text-label-lg font-bold border border-slate-200 hover:border-primary transition-all text-center cursor-pointer">
+            Rp 50rb
+          </button>
+          <button type="button" onclick="selectTopupNominal(100000, this)" class="topup-nominal-btn py-3 px-2 rounded-2xl bg-surface-container-low text-on-surface font-label-lg text-label-lg font-bold border border-slate-200 hover:border-primary transition-all text-center cursor-pointer">
+            Rp 100rb
+          </button>
+          <button type="button" onclick="selectTopupNominal(200000, this)" class="topup-nominal-btn py-3 px-2 rounded-2xl bg-primary-container text-on-primary-container font-label-lg text-label-lg font-bold border border-primary transition-all text-center cursor-pointer shadow-sm">
+            Rp 200rb
+          </button>
+        </div>
+
+        <div class="p-space-md rounded-2xl bg-surface-container-low flex flex-col items-center gap-2 border border-slate-200 text-center">
+          <span class="font-label-sm text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">Scan Kode QRIS Bank Indonesia</span>
+          <img src="https://lh3.googleusercontent.com/aida/AEtjO1U3wZqFkL9BqV3j-pW04_Cj0WqjN2LzH4qQ0KzL_vJ8yA" alt="Kode QRIS Dynamic Top Up SHIFT Pay" class="w-44 h-44 object-contain rounded-xl bg-white p-2 shadow-sm border border-slate-200">
+          <span class="font-body-sm text-[12px] text-on-surface-variant">Dapat discan menggunakan GoPay, OVO, ShopeePay, Dana, BCA, Mandiri, BRI, & BNI.</span>
+        </div>
+
+        <div class="flex flex-col gap-2 pt-1">
+          <button type="button" onclick="submitTopup()" class="w-full py-3.5 rounded-full bg-gradient-to-r from-secondary-container to-secondary-fixed text-on-secondary-fixed font-label-lg text-label-lg font-extrabold shadow-md hover:scale-[1.02] transition-all cursor-pointer">
+            Saya Sudah Bayar QRIS
+          </button>
+          <button type="button" onclick="closeTopupModal()" class="w-full py-2.5 rounded-full text-on-surface-variant hover:text-on-surface font-label-md text-label-md cursor-pointer">
+            Batal
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Inline Tab & Modal Engine Script -->
+  <script>
+    let selectedTopupAmount = 200000;
+
+    function switchTab(tabKey) {
+      const allTabs = document.querySelectorAll('.tab-pill');
+      allTabs.forEach(tab => {
+        tab.className = 'tab-pill px-space-md py-2 rounded-full font-label-lg text-label-lg font-bold text-on-surface-variant hover:text-on-surface transition-all flex items-center gap-1.5 cursor-pointer';
+      });
+
+      const activeBtn = document.getElementById(`tab-btn-${tabKey}`);
+      if (activeBtn) {
+        activeBtn.className = 'tab-pill px-space-md py-2 rounded-full font-label-lg text-label-lg font-bold transition-all bg-primary-container text-on-primary-container shadow-sm flex items-center gap-1.5 cursor-pointer';
+      }
+
+      const allPanels = document.querySelectorAll('.tab-panel');
+      allPanels.forEach(panel => panel.classList.add('hidden'));
+
+      const activePanel = document.getElementById(`panel-${tabKey}`);
+      if (activePanel) {
+        activePanel.classList.remove('hidden');
+        activePanel.classList.add('flex');
+      }
+    }
+
+    function toggleGenderUI(genderVal) {
+      const lblL = document.getElementById('genderLabelL');
+      const lblP = document.getElementById('genderLabelP');
+      if (genderVal === 'L') {
+        if (lblL) lblL.className = 'flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-primary-container text-on-primary-container font-label-md text-label-md font-bold cursor-pointer transition-all shadow-sm';
+        if (lblP) lblP.className = 'flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md font-bold cursor-pointer transition-all';
+      } else {
+        if (lblP) lblP.className = 'flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-primary-container text-on-primary-container font-label-md text-label-md font-bold cursor-pointer transition-all shadow-sm';
+        if (lblL) lblL.className = 'flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md font-bold cursor-pointer transition-all';
+      }
+    }
+
+    function toggleNotifDropdown(e) {
+      if (e) e.stopPropagation();
+      const popover = document.getElementById('notifPopover');
+      if (popover) popover.classList.toggle('hidden');
+    }
+
+    function closeNotifDropdown() {
+      const popover = document.getElementById('notifPopover');
+      if (popover) popover.classList.add('hidden');
+    }
+
+    document.addEventListener('click', function(e) {
+      const wrapper = document.getElementById('notifDropdownWrapper');
+      if (wrapper && !wrapper.contains(e.target)) {
+        closeNotifDropdown();
+      }
+    });
+
+    function markAllNotifsRead() {
+      const badgeCount = document.getElementById('notifBadgeCount');
+      const unreadBadge = document.getElementById('notifUnreadBadge');
+      if (badgeCount) badgeCount.textContent = '0';
+      if (unreadBadge) unreadBadge.textContent = '0 Baru';
+      if (typeof window.showToast === 'function') {
+        window.showToast('Semua notifikasi telah ditandai dibaca!', 'success');
+      }
+    }
+
+    function openAddressModal() {
+      const modal = document.getElementById('modalAddress');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeAddressModal() {
+      const modal = document.getElementById('modalAddress');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function openTopupModal() {
+      const modal = document.getElementById('modalTopup');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeTopupModal() {
+      const modal = document.getElementById('modalTopup');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function selectTopupNominal(amount, btnEl) {
+      selectedTopupAmount = amount;
+      document.querySelectorAll('.topup-nominal-btn').forEach(btn => {
+        btn.className = 'topup-nominal-btn py-3 px-2 rounded-2xl bg-surface-container-low text-on-surface font-label-lg text-label-lg font-bold border border-slate-200 hover:border-primary transition-all text-center cursor-pointer';
+      });
+      if (btnEl) {
+        btnEl.className = 'topup-nominal-btn py-3 px-2 rounded-2xl bg-primary-container text-on-primary-container font-label-lg text-label-lg font-bold border border-primary transition-all text-center cursor-pointer shadow-sm';
+      }
+    }
+
+    function copyVoucherCode(code) {
+      if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+        navigator.clipboard.writeText(code);
+      }
+      if (typeof window.showToast === 'function') {
+        window.showToast(`Kode voucher [${code}] berhasil disalin ke clipboard!`, 'success');
+      }
+    }
+  </script>
+
+  <!-- Supabase JS SDK CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- App Dynamic Engine Script -->
+  <script src="./src/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <meta content="web_standard" name="shell-type"/>
+  <title>SHIFT - Live Tracker Armada (Halaman Utama)</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+  <!-- Leaflet.js Interactive Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+  <style>
+    @layer base {
+      html, body { margin: 0; padding: 0; }
+      body { overscroll-behavior: none; }
+      main > :first-child { margin-top: 0 !important; }
+      main > :last-child { margin-bottom: 0 !important; }
+    }
+    ::-webkit-scrollbar { display: none; }
+  </style>
+
+  <!-- Tailwind CSS CDN & Exact Stitch Configuration -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      "darkMode": "class",
+      "theme": {
+        "extend": {
+          "colors": {
+            "surface-container-highest": "#dae2fd",
+            "on-primary-fixed": "#001d31",
+            "on-secondary-fixed": "#231b00",
+            "tertiary-fixed-dim": "#7bd0ff",
+            "surface-container": "#eaedff",
+            "outline-variant": "#bfc7d2",
+            "error-container": "#ffdad6",
+            "surface-tint": "#006398",
+            "secondary": "#735c00",
+            "outline": "#707881",
+            "surface-variant": "#dae2fd",
+            "on-error": "#ffffff",
+            "error": "#ba1a1a",
+            "secondary-fixed-dim": "#eec200",
+            "primary-fixed-dim": "#93ccff",
+            "on-error-container": "#93000a",
+            "on-surface": "#131b2e",
+            "secondary-fixed": "#ffe083",
+            "tertiary-fixed": "#c4e7ff",
+            "on-tertiary-container": "#fcfcff",
+            "primary": "#006194",
+            "surface-bright": "#faf8ff",
+            "tertiary-container": "#007da9",
+            "tertiary": "#006387",
+            "surface-container-lowest": "#ffffff",
+            "inverse-on-surface": "#eef0ff",
+            "on-tertiary": "#ffffff",
+            "surface-container-low": "#f2f3ff",
+            "on-background": "#131b2e",
+            "on-surface-variant": "#3f4850",
+            "on-secondary-fixed-variant": "#574500",
+            "primary-fixed": "#cce5ff",
+            "on-tertiary-fixed-variant": "#004c69",
+            "secondary-container": "#fed01b",
+            "inverse-primary": "#93ccff",
+            "on-secondary-container": "#6f5900",
+            "surface-container-high": "#e2e7ff",
+            "primary-container": "#007bb9",
+            "surface-dim": "#d2d9f4",
+            "on-primary": "#ffffff",
+            "background": "#faf8ff",
+            "on-secondary": "#ffffff",
+            "on-tertiary-fixed": "#001e2c",
+            "surface": "#faf8ff",
+            "on-primary-fixed-variant": "#004b73",
+            "on-primary-container": "#fdfcff",
+            "inverse-surface": "#283044"
+          },
+          "borderRadius": {
+            "DEFAULT": "1rem",
+            "lg": "2rem",
+            "xl": "3rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-xl": "2.5rem",
+            "margin-mobile": "1rem",
+            "gutter": "1.5rem",
+            "gutter-mobile": "1rem",
+            "space-md": "1rem",
+            "space-lg": "1.5rem",
+            "margin": "2rem",
+            "space-sm": "0.5rem",
+            "space-xs": "0.25rem"
+          },
+          "fontFamily": {
+            "body-sm": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"],
+            "headline-lg": ["Plus Jakarta Sans"],
+            "headline-sm": ["Plus Jakarta Sans"],
+            "body-md": ["Plus Jakarta Sans"],
+            "label-sm": ["Plus Jakarta Sans"],
+            "display-mobile": ["Plus Jakarta Sans"],
+            "headline-xl": ["Plus Jakarta Sans"],
+            "label-lg": ["Plus Jakarta Sans"],
+            "display": ["Plus Jakarta Sans"],
+            "body-lg": ["Plus Jakarta Sans"],
+            "label-md": ["Plus Jakarta Sans"],
+            "headline-xl-mobile": ["Plus Jakarta Sans"]
+          },
+          "fontSize": {
+            "body-sm": ["12px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "400" }],
+            "headline-md": ["22px", { "lineHeight": "30px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.015em", "fontWeight": "700" }],
+            "headline-sm": ["18px", { "lineHeight": "26px", "letterSpacing": "0", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "22px", "letterSpacing": "0", "fontWeight": "400" }],
+            "label-sm": ["10px", { "lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+            "display-mobile": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "800" }],
+            "headline-xl": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+            "display": ["56px", { "lineHeight": "64px", "letterSpacing": "-0.03em", "fontWeight": "800" }],
+            "body-lg": ["16px", { "lineHeight": "26px", "letterSpacing": "0", "fontWeight": "400" }],
+            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }],
+            "headline-xl-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-background font-body-md text-body-md text-on-surface antialiased">
+  
+  <!-- Header Navbar -->
+  <header class="fixed top-0 left-0 right-0 z-50 px-margin py-space-sm">
+    <div class="max-w-[1280px] mx-auto h-20 bg-surface-container-lowest/80 backdrop-blur-2xl rounded-2xl shadow-[0_20px_40px_-15px_rgba(2,132,199,0.08),0_0_1px_rgba(2,132,199,0.05)] px-space-lg flex items-center justify-between gap-space-md border border-slate-100">
+      
+      <div class="flex items-center gap-space-sm cursor-pointer" onclick="window.location.href='./index.html'">
+        <img alt="Brand Logo SHIFT" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1V4-AKvjApTZir1tWpoRbOjlMUugVvCZpxtOzGcwFdpp2Rh6EmLtYbR7GWCf5g_Ev5KURZ2Rr4ErMp_oYXMzw7o7sXV36aiEN6G6MZGr1Qynx4pdRW3Yx2NjItYFhMYgGzLRWnxUocc3bNyt0c3cVwnbn7CyKqPxfqd2vPmG2LDz9jB3h-gkebU18cH-4Wlw2hRmYDtvAPpyhxGjXHb5JcpeqYJvZFobwORAeIkicoGdd6n2RXhSwT-K5E"/>
+        <div class="flex flex-col">
+          <span class="font-headline-sm text-headline-sm text-primary tracking-tight font-bold">SHIFT</span>
+          <span class="font-label-sm text-label-sm text-on-surface-variant">Pindahan &amp; Bersih-bersih</span>
+        </div>
+      </div>
+
+      <nav class="hidden xl:flex items-center gap-space-xs bg-surface-container-low/70 p-1.5 rounded-full" data-active-classes="bg-primary-container text-on-primary-container font-label-lg text-label-lg rounded-full px-space-md py-space-xs shadow-sm">
+        <a class="px-space-md py-space-xs rounded-full font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest/60 transition-all" data-path="beranda" href="./index.html">Beranda</a>
+        <a class="px-space-md py-space-xs rounded-full font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest/60 transition-all" data-path="pesan-layanan" href="./booking.html">Pesan Layanan</a>
+        <a class="px-space-md py-space-xs rounded-full font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest/60 transition-all" data-path="pembayaran" href="./payment.html">Pembayaran</a>
+        <a aria-current="page" class="transition-all flex items-center gap-1.5 bg-primary-container text-on-primary-container font-label-lg text-label-lg rounded-full px-space-md py-space-xs shadow-sm" data-path="lacak-pesanan" href="./tracking.html">
+          Lacak Pesanan
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-tertiary opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-primary-container"></span>
+          </span>
+        </a>
+        <a class="px-space-md py-space-xs rounded-full font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest/60 transition-all" data-path="riwayat-bantuan" href="./history.html">Riwayat &amp; Bantuan</a>
+      </nav>
+
+      <div class="flex items-center gap-space-sm">
+        <button onclick="openWhatsAppCS()" class="hidden md:flex items-center gap-1.5 bg-secondary-container text-on-secondary-container px-space-md py-space-xs rounded-full font-label-md text-label-md shadow-[0_4px_14px_rgba(254,208,27,0.35)] hover:bg-secondary-fixed transition-all cursor-pointer">
+          <span class="material-symbols-outlined text-[16px]">support_agent</span>
+          <span class="font-bold">CS 24 Jam: 0812-3456-7890</span>
+        </button>
+        <button class="relative p-2 rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors">
+          <span class="material-symbols-outlined text-[20px]">notifications</span>
+          <span class="absolute top-1 right-1 w-4 h-4 bg-error text-on-error rounded-full font-label-sm text-label-sm flex items-center justify-center font-bold">1</span>
+        </button>
+        <!-- User Profile & Dynamic Auth Status Nav -->
+        <div id="authHeaderNav" class="flex items-center gap-space-xs pl-space-xs">
+          <!-- Rendered dynamically by app.js renderAuthHeaderNav() -->
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Body Content -->
+  <main class="w-full pt-20 bg-background min-h-[calc(100vh-280px)]">
+    <div class="flex flex-col w-full">
+      <div class="max-w-[1280px] mx-auto w-full px-margin-mobile md:px-margin py-space-md">
+        
+        <!-- Transparent Booking Stepper Flow -->
+        <div class="w-full bg-surface-container-lowest/80 backdrop-blur-xl rounded-2xl shadow-[0_20px_40px_-15px_rgba(2,132,199,0.06)] p-space-md mb-space-md border border-slate-100">
+          <div class="flex flex-wrap lg:flex-nowrap items-center justify-between gap-space-sm">
+            
+            <div onclick="window.location.href='./index.html'" class="flex items-center gap-2 cursor-pointer">
+              <div class="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-label-sm">
+                <span class="material-symbols-outlined text-[16px]">check</span>
+              </div>
+              <div class="flex flex-col">
+                <span class="font-label-sm text-label-sm text-primary uppercase font-bold tracking-wider">Tahap 1</span>
+                <span class="font-label-md text-label-md text-on-surface font-semibold">Pilih Layanan</span>
+              </div>
+            </div>
+            <div class="hidden lg:block w-10 h-0.5 bg-primary/20"></div>
+
+            <div onclick="window.location.href='./booking.html'" class="flex items-center gap-2 cursor-pointer">
+              <div class="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-label-sm">
+                <span class="material-symbols-outlined text-[16px]">check</span>
+              </div>
+              <div class="flex flex-col">
+                <span class="font-label-sm text-label-sm text-primary uppercase font-bold tracking-wider">Tahap 2</span>
+                <span class="font-label-md text-label-md text-on-surface font-semibold">Detail &amp; Tarif</span>
+              </div>
+            </div>
+            <div class="hidden lg:block w-10 h-0.5 bg-primary/20"></div>
+
+            <div onclick="window.location.href='./payment.html'" class="flex items-center gap-2 cursor-pointer">
+              <div class="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-label-sm">
+                <span class="material-symbols-outlined text-[16px]">check</span>
+              </div>
+              <div class="flex flex-col">
+                <span class="font-label-sm text-label-sm text-primary uppercase font-bold tracking-wider">Tahap 3</span>
+                <span class="font-label-md text-label-md text-on-surface font-semibold">Lunas QRIS Rp 182.750</span>
+              </div>
+            </div>
+            <div class="hidden lg:block w-10 h-0.5 bg-secondary-container"></div>
+
+            <!-- Step 4: Active Live Tracker -->
+            <div class="flex items-center gap-2 bg-primary/5 px-space-md py-1.5 rounded-full border border-primary/20">
+              <div class="w-7 h-7 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-label-sm shadow-sm animate-pulse">
+                4
+              </div>
+              <div class="flex flex-col">
+                <span class="font-label-sm text-label-sm text-primary font-bold uppercase tracking-wider flex items-center gap-1">
+                  Live Tracker
+                  <span class="w-1.5 h-1.5 rounded-full bg-primary animate-ping"></span>
+                </span>
+                <span class="font-label-md text-label-md text-primary font-bold">Lacak Armada Live</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Status Header Banner -->
+        <div class="w-full bg-surface-container-lowest/90 backdrop-blur-2xl rounded-2xl shadow-[0_20px_40px_-15px_rgba(2,132,199,0.08)] p-space-md md:p-space-lg mb-space-lg flex flex-col md:flex-row md:items-center justify-between gap-space-md border border-slate-100">
+          <div class="flex flex-col gap-1">
+            <div class="flex items-center gap-space-xs flex-wrap">
+              <span class="font-label-sm text-label-sm text-primary font-bold uppercase tracking-wider bg-primary-fixed/60 px-2.5 py-0.5 rounded-full js-ticket-id">
+                No. Tiket #SHF-90214
+              </span>
+              <span class="font-label-sm text-label-sm text-on-surface-variant font-medium">
+                Pindahan Kos ke Apartemen • Sleman ke Sleman Kota
+              </span>
+            </div>
+
+            <div class="flex items-center gap-2 mt-1">
+              <span class="relative flex h-3 w-3">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-tertiary opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-tertiary"></span>
+              </span>
+              <h1 id="orderStatusTitle" class="font-headline-sm md:font-headline-md text-headline-sm md:text-headline-md text-on-surface font-bold js-order-status-title">
+                Mitra Meluncur ke Lokasi Jemput (OTW)
+              </h1>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-space-sm self-start md:self-auto flex-wrap">
+            <div class="flex items-center gap-2 bg-secondary-container/30 px-space-md py-2 rounded-full shadow-sm border border-secondary-container/50">
+              <span class="material-symbols-outlined text-secondary text-[20px] animate-bounce">timer</span>
+              <div class="flex flex-col">
+                <span class="font-label-sm text-label-sm text-on-secondary-container font-semibold uppercase tracking-wider">Perkiraan Tiba</span>
+                <span id="etaBadge" class="font-label-lg text-label-lg text-secondary font-extrabold leading-tight js-eta-badge">~6 Menit (1.8 km)</span>
+              </div>
+            </div>
+
+            <button id="refreshGpsBtn" class="p-2.5 rounded-full bg-surface-container hover:bg-surface-container-highest text-primary transition-all shadow-sm active:rotate-180 cursor-pointer border border-slate-200" title="Sinkronkan GPS Live">
+              <span class="material-symbols-outlined text-[20px]">refresh</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Main Live Tracking Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+          
+          <!-- LEFT COLUMN: Live Map Canvas (7 Cols) -->
+          <div class="lg:col-span-7 flex flex-col gap-space-md">
+            
+            <div class="relative w-full h-[460px] md:h-[540px] rounded-2xl overflow-hidden shadow-[0_20px_40px_-15px_rgba(2,132,199,0.12)] bg-surface-container-low flex flex-col justify-between p-space-md border border-slate-200">
+              <!-- Interactive Leaflet Map Container -->
+              <div id="liveTrackingMapContainer" class="absolute inset-0 w-full h-full z-0"></div>
+
+              <div class="absolute inset-0 w-full h-full bg-cover bg-center pointer-events-none opacity-40 mix-blend-multiply" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCJ6WSbbAg0cek4rpPcr3LEDxHWaSQVyJlKB19YX1Nt5uUuje5XQZs0BAMdL8kMlxJnJmnSAsJWqDp90Om4tNLHBupc3CQspQTTHWBlZs1WZeoieWApY7rw1OHmw0IIJmR4lfqwZ5qFKQKG-pEzX20hdTBfSzW9cxdEWNmEi3Ba9xugtZVG3CXe3rs3KC7UZ3vYj5E4QsKOUno45HSHmkFz9hl8U6zyKzdsKUTRvSn1iP9Gtw3MgX03')"></div>
+
+              <!-- SVG Route Pathway Vector -->
+              <div class="absolute inset-0 pointer-events-none">
+                <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="routeGradient" x1="0%" x2="100%" y1="0%" y2="100%">
+                      <stop offset="0%" stop-color="#006194"></stop>
+                      <stop offset="50%" stop-color="#007da9"></stop>
+                      <stop offset="100%" stop-color="#fed01b"></stop>
+                    </linearGradient>
+                    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                      <feGaussianBlur stdDeviation="3" result="glow"></feGaussianBlur>
+                      <feComposite in="SourceGraphic" in2="glow" operator="over"></feComposite>
+                    </filter>
+                  </defs>
+                  <path d="M 120 440 Q 240 380, 290 280 T 480 140" fill="none" stroke="#dae2fd" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"></path>
+                  <path class="animate-pulse" d="M 120 440 Q 240 380, 290 280 T 480 140" fill="none" stroke="url(#routeGradient)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="8 6"></path>
+                  <path d="M 120 440 Q 180 410, 230 350" fill="none" stroke="#006194" stroke-width="5" stroke-linecap="round"></path>
+                </svg>
+              </div>
+
+              <!-- Top Floating Map HUD -->
+              <div class="relative z-10 flex items-center justify-between gap-space-sm flex-wrap">
+                <div class="bg-surface-container-lowest/90 backdrop-blur-md px-space-md py-2 rounded-full shadow-md flex items-center gap-2 border border-slate-100">
+                  <span class="w-2.5 h-2.5 rounded-full bg-tertiary animate-ping"></span>
+                  <span class="font-label-md text-label-md text-on-surface font-semibold">GPS Akurasi Tinggi (±3m)</span>
+                  <span class="text-outline-variant">•</span>
+                  <span id="lastUpdatedText" class="font-label-sm text-label-sm text-on-surface-variant js-last-updated-text">Update: Baru saja</span>
+                </div>
+
+                <button onclick="openGoogleMaps()" class="bg-surface-container-lowest/90 hover:bg-surface-container-lowest backdrop-blur-md text-primary font-label-md text-label-md font-bold px-space-md py-2 rounded-full shadow-md flex items-center gap-1 transition-all border border-slate-100 cursor-pointer">
+                  <span>Buka Google Maps</span>
+                  <span class="material-symbols-outlined text-[16px]">open_in_new</span>
+                </button>
+              </div>
+
+              <!-- Map Interactive Spatial Pins -->
+              <div class="relative z-10 w-full h-full flex flex-col justify-between pointer-events-none py-space-lg">
+                
+                <!-- Destination Pin -->
+                <div class="absolute top-10 right-12 md:right-28 pointer-events-auto flex flex-col items-center group">
+                  <div class="bg-surface-container-lowest/95 backdrop-blur-md px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 mb-1 transition-transform group-hover:scale-105 border border-slate-100">
+                    <span class="w-2 h-2 rounded-full bg-outline"></span>
+                    <span class="font-label-sm text-label-sm font-bold text-on-surface js-dropoff-loc-text">Titik Antar: Grand Kamala</span>
+                  </div>
+                  <div class="w-9 h-9 rounded-full bg-surface-container-highest text-primary flex items-center justify-center shadow-md">
+                    <span class="material-symbols-outlined text-[20px]">apartment</span>
+                  </div>
+                </div>
+
+                <!-- Driver Pin with Radar Ping -->
+                <div id="driverMarkerPin" class="pointer-events-auto flex flex-col items-center group z-20" style="position: absolute; left: 46%; top: 48%; transform: translate(-50%, -50%); transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);">
+                  <div class="bg-primary text-on-primary px-3 py-1 rounded-full shadow-lg flex items-center gap-1.5 mb-1.5">
+                    <span class="material-symbols-outlined text-[14px]">local_shipping</span>
+                    <span class="font-label-sm text-label-sm font-bold tracking-tight js-marker-label">Budi • 32 km/j</span>
+                  </div>
+                  <div class="relative flex items-center justify-center">
+                    <div class="absolute w-14 h-14 rounded-full bg-primary/20 animate-ping"></div>
+                    <div class="absolute w-10 h-10 rounded-full bg-primary/30"></div>
+                    <div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-lg">
+                      <span class="material-symbols-outlined text-[18px]">directions_car</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Pickup Pin -->
+                <div class="absolute bottom-6 left-6 md:left-14 pointer-events-auto flex flex-col items-start group">
+                  <div class="w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center shadow-md mb-1">
+                    <span class="material-symbols-outlined text-[20px]">home_pin</span>
+                  </div>
+                  <div class="bg-surface-container-lowest/95 backdrop-blur-md px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 border border-slate-100">
+                    <span class="w-2 h-2 rounded-full bg-secondary-container"></span>
+                    <span class="font-label-sm text-label-sm font-bold text-on-surface">Titik Jemput: Kost Melati</span>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Bottom Map Telemetry Card -->
+              <div class="relative z-10 bg-surface-container-lowest/90 backdrop-blur-xl p-space-sm md:p-space-md rounded-2xl shadow-lg flex items-center justify-between gap-space-sm flex-wrap border border-slate-100">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-tertiary-fixed flex items-center justify-center text-tertiary">
+                    <span class="material-symbols-outlined text-[22px]">speed</span>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="font-label-sm text-label-sm text-on-surface-variant">Laju Kecepatan</span>
+                    <span id="speedText" class="font-label-lg text-label-lg font-bold text-on-surface js-speed-text">32 km/jam • Melaju Lancar</span>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-primary-fixed flex items-center justify-center text-primary">
+                    <span class="material-symbols-outlined text-[22px]">alt_route</span>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="font-label-sm text-label-sm text-on-surface-variant">Jalur yang Dipilih</span>
+                    <span id="currentRouteText" class="font-label-lg text-label-lg font-bold text-on-surface js-current-route">Via Jl. Gejayan Bebas Hambatan</span>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <span id="etaClockText" class="font-label-sm text-label-sm bg-surface-container px-3 py-1.5 rounded-full font-medium text-on-surface-variant js-eta-clock">
+                    Perkiraan Sampai: 10:14 WIB
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Safety Guarantee Card -->
+            <div class="bg-surface-container-lowest/80 backdrop-blur-xl rounded-2xl p-space-md shadow-[0_20px_40px_-15px_rgba(2,132,199,0.06)] grid grid-cols-1 md:grid-cols-3 gap-space-sm border border-slate-100">
+              <div class="flex items-center gap-3 p-2 bg-surface-container-low/60 rounded-xl border border-slate-100">
+                <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                  <span class="material-symbols-outlined text-[18px]">lock</span>
+                </div>
+                <div class="flex flex-col">
+                  <span class="font-label-sm text-label-sm font-bold text-on-surface">Terpal Box Rapat</span>
+                  <span class="font-body-sm text-body-sm text-on-surface-variant">Anti-hujan &amp; debu jalanan</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-3 p-2 bg-surface-container-low/60 rounded-xl border border-slate-100">
+                <div class="w-8 h-8 rounded-full bg-tertiary/10 text-tertiary flex items-center justify-center">
+                  <span class="material-symbols-outlined text-[18px]">verified</span>
+                </div>
+                <div class="flex flex-col">
+                  <span class="font-label-sm text-label-sm font-bold text-on-surface">Troli Hidrolik Siap</span>
+                  <span class="font-body-sm text-body-sm text-on-surface-variant">Kompensasi tangga lantai 2</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-3 p-2 bg-surface-container-low/60 rounded-xl border border-slate-100">
+                <div class="w-8 h-8 rounded-full bg-secondary-container/40 text-secondary flex items-center justify-center">
+                  <span class="material-symbols-outlined text-[18px]">security</span>
+                </div>
+                <div class="flex flex-col">
+                  <span class="font-label-sm text-label-sm font-bold text-on-surface">Klaim Pecah 100%</span>
+                  <span class="font-body-sm text-body-sm text-on-surface-variant">Proteksi asuransi aktif</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- RIGHT COLUMN: Driver Info Card & Live Step Milestones (5 Cols) -->
+          <div class="lg:col-span-5 flex flex-col gap-space-md">
+            
+            <div class="bg-surface-container-lowest/90 backdrop-blur-2xl rounded-2xl p-space-md shadow-[0_20px_40px_-15px_rgba(2,132,199,0.08)] flex flex-col gap-space-md border border-slate-100">
+              <div class="flex items-center justify-between">
+                <span class="font-label-sm text-label-sm font-bold uppercase tracking-wider text-primary bg-primary-fixed/50 px-3 py-1 rounded-full">
+                  Kru Angkut Bertugas
+                </span>
+                <span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+                  <span class="w-2 h-2 rounded-full bg-tertiary"></span>
+                  Siap Bantu Bongkar-Muat
+                </span>
+              </div>
+
+              <div class="flex items-center gap-space-md">
+                <div class="relative">
+                  <img class="w-20 h-20 rounded-2xl object-cover shadow-md border-2 border-primary-200" alt="Budi Santoso Mitra Driver SHIFT" src="https://lh3.googleusercontent.com/aida/AEtjO1WHGwcRiVH-f1BlnLaDj0XOOksY9K3qA4al2qdKH-aT2pfwYszXSIm9rDb3ww8LBT5YwgjhzP9Uk-abuEVDHcxN18lv2H--jcZp1O0VTVGegAikaEhOSDB4ne49JMK3NyATsxubQ0VVAJGNEnxi_8PWtmqQCAL6Fai95QV8g76Z0-IxrdsOIBTihgv2WfmRu3ZjleUstioCk1ZyHJu3Dhc7iRZ6wjH38xgvTjq_GHEuROcprdC28LUegrQ"/>
+                  <div class="absolute -bottom-1.5 -right-1.5 w-6 h-6 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center shadow-sm">
+                    <span class="material-symbols-outlined text-[14px]">shield</span>
+                  </div>
+                </div>
+                <div class="flex flex-col flex-1 min-w-0">
+                  <div class="flex items-center gap-1.5">
+                    <h3 class="font-headline-sm text-headline-sm text-on-surface font-bold truncate js-driver-name">Budi Santoso</h3>
+                    <span class="material-symbols-outlined text-primary text-[18px]" title="Mitra Terverifikasi">verified</span>
+                  </div>
+                  <p class="font-body-sm text-body-sm text-on-surface-variant truncate">Master Kru Pindahan • Level VIP Gold</p>
+                  <div class="flex items-center gap-2 mt-1">
+                    <div class="flex items-center text-secondary font-bold text-label-md">
+                      <span class="material-symbols-outlined text-[16px] mr-0.5" style="font-variation-settings: 'FILL' 1;">star</span>
+                      4.9
+                    </div>
+                    <span class="text-outline-variant">•</span>
+                    <span class="font-body-sm text-body-sm text-on-surface-variant js-driver-orders">1.240 Pesanan Sukses</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Vehicle Specification Badge -->
+              <div class="p-space-sm bg-surface-container-low rounded-xl flex items-center justify-between border border-slate-100">
+                <div class="flex items-center gap-2">
+                  <span class="material-symbols-outlined text-primary text-[20px]">local_shipping</span>
+                  <div class="flex flex-col">
+                    <span class="font-label-sm text-label-sm text-on-surface-variant">Kendaraan Armada</span>
+                    <span class="font-label-md text-label-md text-on-surface font-bold">GranMax Box Tertutup</span>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span class="font-label-sm text-label-sm text-on-surface-variant">Nomor Polisi</span>
+                  <span class="font-label-md text-label-md font-mono font-bold text-primary block js-driver-plate">AB 1420 YK</span>
+                </div>
+              </div>
+
+              <!-- Direct Action Triggers (WA & Phone) -->
+              <div class="grid grid-cols-2 gap-space-sm">
+                <button onclick="openWhatsAppMitra()" class="flex items-center justify-center gap-2 bg-secondary-container hover:bg-secondary-fixed text-on-secondary-container font-label-md text-label-md font-bold py-2.5 px-space-md rounded-full shadow-[0_8px_16px_-4px_rgba(254,208,27,0.4)] transition-all cursor-pointer">
+                  <span class="material-symbols-outlined text-[18px]">chat</span>
+                  Chat WhatsApp
+                </button>
+                <a href="tel:081234567890" class="flex items-center justify-center gap-2 bg-surface-container-lowest hover:bg-surface-container-high text-primary font-label-md text-label-md font-bold py-2.5 px-space-md rounded-full shadow-sm transition-all border border-slate-200">
+                  <span class="material-symbols-outlined text-[18px]">call</span>
+                  Telepon Driver
+                </a>
+              </div>
+            </div>
+
+            <!-- Dynamic Live Step Progress Timeline Card -->
+            <div class="bg-surface-container-lowest/80 backdrop-blur-2xl rounded-2xl p-space-md md:p-space-lg shadow-[0_20px_40px_-15px_rgba(2,132,199,0.06)] flex flex-col gap-space-md border border-slate-100">
+              <div class="flex items-center justify-between pb-space-xs border-b border-slate-100">
+                <h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">Status Alur Berjalan</h3>
+                <span class="font-label-sm text-label-sm text-primary font-semibold">Realtime Sinkron</span>
+              </div>
+
+              <!-- Milestones Timeline Container -->
+              <div id="milestoneContainer" class="flex flex-col relative pl-6 space-y-6 before:content-[''] before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-surface-container-highest">
+                <!-- Dynamically rendered by src/app.js -->
+              </div>
+
+              <!-- Emergency Action Trigger -->
+              <div class="pt-space-xs border-t border-slate-100">
+                <button id="helpModalBtn" onclick="openWhatsAppCS()" class="w-full flex items-center justify-center gap-2 py-2.5 px-space-md rounded-full bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors font-label-md text-label-md font-semibold cursor-pointer border border-slate-200">
+                  <span class="material-symbols-outlined text-[18px]">support</span>
+                  Butuh Ubah Jadwal / Bantuan Darurat
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Toast Notification Container for GPS Sync -->
+        <div id="toastNotification" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+          <div class="bg-surface-container-lowest/95 backdrop-blur-xl border border-slate-200 px-space-md py-3 rounded-2xl shadow-xl flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-primary-fixed text-primary flex items-center justify-center">
+              <span class="material-symbols-outlined text-[18px]">gps_fixed</span>
+            </div>
+            <div class="flex flex-col">
+              <span class="font-label-sm text-label-sm font-bold text-on-surface">GPS Diperbarui</span>
+              <span class="font-body-sm text-body-sm text-on-surface-variant">Lokasi Budi Santoso tersinkronisasi presisi.</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="w-full bg-surface-container-low/80 mt-space-xl py-space-xl">
+    <div class="max-w-[1280px] mx-auto px-margin">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-space-md pb-space-lg">
+        <div class="bg-surface-container-lowest/90 p-space-md rounded-2xl flex items-center gap-space-md shadow-[0_10px_25px_-10px_rgba(2,132,199,0.06)]">
+          <div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-primary"><span class="material-symbols-outlined text-[24px]">verified_user</span></div>
+          <div><h4 class="font-label-lg text-label-lg text-on-surface font-bold">Garansi Barang Utuh 100%</h4><p class="font-body-sm text-body-sm text-on-surface-variant">Proteksi ganti rugi menyeluruh tanpa syarat berbelit</p></div>
+        </div>
+        <div class="bg-surface-container-lowest/90 p-space-md rounded-2xl flex items-center gap-space-md shadow-[0_10px_25px_-10px_rgba(2,132,199,0.06)]">
+          <div class="w-12 h-12 rounded-full bg-tertiary-fixed flex items-center justify-center text-tertiary"><span class="material-symbols-outlined text-[24px]">sanitizer</span></div>
+          <div><h4 class="font-label-lg text-label-lg text-on-surface font-bold">Higienitas Tersertifikasi</h4><p class="font-body-sm text-body-sm text-on-surface-variant">Standar pembersihan klinis untuk hunian steril</p></div>
+        </div>
+        <div class="bg-surface-container-lowest/90 p-space-md rounded-2xl flex items-center gap-space-md shadow-[0_10px_25px_-10px_rgba(2,132,199,0.06)]">
+          <div class="w-12 h-12 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary"><span class="material-symbols-outlined text-[24px]">local_shipping</span></div>
+          <div><h4 class="font-label-lg text-label-lg text-on-surface font-bold">Armada &amp; Tim Terverifikasi</h4><p class="font-body-sm text-body-sm text-on-surface-variant">Kru terdidik, berlatar belakang aman &amp; teruji</p></div>
+        </div>
+      </div>
+      <div class="flex flex-col md:flex-row items-center justify-between pt-space-lg gap-space-md">
+        <div class="flex items-center gap-space-sm">
+          <span class="font-headline-sm text-headline-sm text-primary font-bold tracking-tight">SHIFT</span>
+          <span class="font-body-sm text-body-sm text-on-surface-variant">© 2025 PT Siap Hadir Fleksibel Tuntas. Seluruh hak cipta dilindungi.</span>
+        </div>
+        <div class="flex items-center gap-space-lg">
+          <a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Syarat &amp; Ketentuan</a>
+          <a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Kebijakan Privasi</a>
+          <a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors" href="#" onclick="openWhatsAppCS()">Pusat Bantuan</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Leaflet.js Interactive Map Engine -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Supabase JS SDK CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- App Logic Engine -->
+  <script src="./src/app.js"></script>
+</body>
+</html>

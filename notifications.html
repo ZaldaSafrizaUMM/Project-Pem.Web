@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <meta content="web_standard" name="shell-type">
+  <title>Pusat Notifikasi & Log Sistem - SHIFT</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+
+  <style>
+    @layer base {
+      html, body { margin: 0; padding: 0; }
+      body { overscroll-behavior: none; }
+      main > :first-child { margin-top: 0 !important; }
+      main > :last-child { margin-bottom: 0 !important; }
+    }
+    ::-webkit-scrollbar { display: none; }
+  </style>
+
+  <!-- Tailwind CSS CDN & Custom Config -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      "darkMode": "class",
+      "theme": {
+        "extend": {
+          "colors": {
+            "surface-container-highest": "#dae2fd",
+            "on-primary-fixed": "#001d31",
+            "on-secondary-fixed": "#231b00",
+            "tertiary-fixed-dim": "#7bd0ff",
+            "surface-container": "#eaedff",
+            "outline-variant": "#bfc7d2",
+            "error-container": "#ffdad6",
+            "surface-tint": "#006398",
+            "secondary": "#735c00",
+            "outline": "#707881",
+            "surface-variant": "#dae2fd",
+            "on-error": "#ffffff",
+            "error": "#ba1a1a",
+            "secondary-fixed-dim": "#eec200",
+            "primary-fixed-dim": "#93ccff",
+            "on-error-container": "#93000a",
+            "on-surface": "#131b2e",
+            "secondary-fixed": "#ffe083",
+            "tertiary-fixed": "#c4e7ff",
+            "on-tertiary-container": "#fcfcff",
+            "primary": "#006194",
+            "surface-bright": "#faf8ff",
+            "tertiary-container": "#007da9",
+            "tertiary": "#006387",
+            "surface-container-lowest": "#ffffff",
+            "inverse-on-surface": "#eef0ff",
+            "on-tertiary": "#ffffff",
+            "surface-container-low": "#f2f3ff",
+            "on-background": "#131b2e",
+            "on-surface-variant": "#3f4850",
+            "on-secondary-fixed-variant": "#574500",
+            "primary-fixed": "#cce5ff",
+            "on-tertiary-fixed-variant": "#004c69",
+            "secondary-container": "#fed01b",
+            "inverse-primary": "#93ccff",
+            "on-secondary-container": "#6f5900",
+            "surface-container-high": "#e2e7ff",
+            "primary-container": "#007bb9",
+            "surface-dim": "#d2d9f4",
+            "on-primary": "#ffffff",
+            "background": "#faf8ff",
+            "on-secondary": "#ffffff",
+            "on-tertiary-fixed": "#001e2c",
+            "surface": "#faf8ff",
+            "on-primary-fixed-variant": "#004b73",
+            "on-primary-container": "#fdfcff",
+            "inverse-surface": "#283044"
+          },
+          "borderRadius": {
+            "DEFAULT": "1rem",
+            "lg": "2rem",
+            "xl": "3rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-xl": "2.5rem",
+            "margin-mobile": "1rem",
+            "gutter": "1.5rem",
+            "gutter-mobile": "1rem",
+            "space-md": "1rem",
+            "space-lg": "1.5rem",
+            "margin": "2rem",
+            "space-sm": "0.5rem",
+            "space-xs": "0.25rem"
+          },
+          "fontFamily": {
+            "body-sm": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"],
+            "headline-lg": ["Plus Jakarta Sans"],
+            "headline-sm": ["Plus Jakarta Sans"],
+            "body-md": ["Plus Jakarta Sans"],
+            "label-sm": ["Plus Jakarta Sans"],
+            "display-mobile": ["Plus Jakarta Sans"],
+            "headline-xl": ["Plus Jakarta Sans"],
+            "label-lg": ["Plus Jakarta Sans"],
+            "display": ["Plus Jakarta Sans"],
+            "body-lg": ["Plus Jakarta Sans"],
+            "label-md": ["Plus Jakarta Sans"],
+            "headline-xl-mobile": ["Plus Jakarta Sans"]
+          },
+          "fontSize": {
+            "body-sm": ["12px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "400" }],
+            "headline-md": ["22px", { "lineHeight": "30px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.015em", "fontWeight": "700" }],
+            "headline-sm": ["18px", { "lineHeight": "26px", "letterSpacing": "0", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "22px", "letterSpacing": "0", "fontWeight": "400" }],
+            "label-sm": ["10px", { "lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+            "display-mobile": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "800" }],
+            "headline-xl": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+            "display": ["56px", { "lineHeight": "64px", "letterSpacing": "-0.03em", "fontWeight": "800" }],
+            "body-lg": ["16px", { "lineHeight": "26px", "letterSpacing": "0", "fontWeight": "400" }],
+            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }],
+            "headline-xl-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+          }
+        }
+      }
+    };
+  </script>
+</head>
+
+<body class="bg-background font-body-md text-body-md text-on-surface antialiased">
+  
+  <!-- Header Navbar -->
+  <header class="fixed top-0 left-0 right-0 z-50 px-margin py-space-sm">
+    <div class="max-w-[1280px] mx-auto h-20 bg-surface-container-lowest/80 backdrop-blur-2xl rounded-2xl shadow-[0_20px_40px_-15px_rgba(2,132,199,0.08),0_0_1px_rgba(2,132,199,0.05)] px-space-lg flex items-center justify-between gap-space-md">
+      
+      <!-- Brand Logo -->
+      <a href="./index.html" class="flex items-center gap-space-sm cursor-pointer">
+        <img alt="Brand Logo SHIFT" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1V4-AKvjApTZir1tWpoRbOjlMUugVvCZpxtOzGcwFdpp2Rh6EmLtYbR7GWCf5g_Ev5KURZ2Rr4ErMp_oYXMzw7o7sXV36aiEN6G6MZGr1Qynx4pdRW3Yx2NjItYFhMYgGzLRWnxUocc3bNyt0c3cVwnbn7CyKqPxfqd2vPmG2LDz9jB3h-gkebU18cH-4Wlw2hRmYDtvAPpyhxGjXHb5JcpeqYJvZFobwORAeIkicoGdd6n2RXhSwT-K5E">
+        <div class="flex flex-col">
+          <span class="font-headline-sm text-headline-sm text-primary tracking-tight font-bold">SHIFT</span>
+          <span class="font-label-sm text-label-sm text-on-surface-variant">Pindahan &amp; Bersih-bersih</span>
+        </div>
+      </a>
+
+      <!-- Navigation Links -->
+      <nav class="hidden xl:flex items-center gap-space-xs bg-surface-container-low/70 p-1.5 rounded-full">
+        <a class="px-space-md py-space-xs rounded-full font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest/60 transition-all" href="./index.html">Beranda</a>
+        <a class="px-space-md py-space-xs rounded-full font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest/60 transition-all" href="./booking.html">Pesan Layanan</a>
+        <a class="px-space-md py-space-xs rounded-full font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest/60 transition-all" href="./payment.html">Pembayaran</a>
+        <a class="px-space-md py-space-xs rounded-full font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest/60 transition-all flex items-center gap-1.5" href="./tracking.html">
+          Lacak Pesanan
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-tertiary opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-primary-container"></span>
+          </span>
+        </a>
+        <a class="px-space-md py-space-xs rounded-full font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest/60 transition-all" href="./history.html">Riwayat &amp; Bantuan</a>
+      </nav>
+
+      <!-- Right User Actions -->
+      <div class="flex items-center gap-space-sm">
+        <a class="hidden md:flex items-center gap-1.5 bg-secondary-container text-on-secondary-container px-space-md py-space-xs rounded-full font-label-md text-label-md shadow-[0_4px_14px_rgba(254,208,27,0.35)] hover:bg-secondary-fixed transition-all" href="https://wa.me/6281234567890" target="_blank">
+          <span class="material-symbols-outlined text-[16px]">support_agent</span>
+          <span class="font-bold">CS 24 Jam: 0812-3456-7890</span>
+        </a>
+
+        <!-- Header Notification Bell & Dropdown Wrapper -->
+        <div class="relative" id="notificationWrapper">
+          <button id="notifBellBtn" onclick="toggleNotifDropdown()" class="relative p-2.5 rounded-full text-primary bg-primary-container/20 hover:bg-primary-container/30 transition-colors cursor-pointer" aria-label="Buka Notifikasi" title="Pusat Notifikasi">
+            <span class="material-symbols-outlined text-[22px]">notifications</span>
+            <span id="notifBellBadge" class="js-notif-badge absolute -top-1 -right-1 w-5 h-5 bg-error text-on-error rounded-full font-label-sm text-label-sm flex items-center justify-center font-extrabold animate-pulse shadow-sm">3</span>
+          </button>
+
+          <!-- Dropdown Panel -->
+          <div id="notifDropdownPanel" class="hidden absolute right-0 top-14 w-[390px] sm:w-[430px] bg-surface-container-lowest/95 backdrop-blur-2xl rounded-3xl shadow-[0_20px_45px_-12px_rgba(0,97,148,0.22)] border border-slate-200/80 p-space-md z-50 transition-all flex flex-col gap-space-sm">
+            <div class="flex items-center justify-between pb-space-xs border-b border-slate-100">
+              <div class="flex items-center gap-2">
+                <h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">Notifikasi</h3>
+                <span id="dropdownUnreadBadge" class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-bold shadow-sm">3 Baru</span>
+              </div>
+              <div class="flex items-center gap-1">
+                <button onclick="markAllNotificationsRead()" class="text-primary hover:underline font-label-sm text-label-sm font-bold transition-colors px-2 py-1 rounded-full hover:bg-surface-container-low cursor-pointer">Tandai Dibaca</button>
+                <button onclick="toggleNotifDropdown()" class="p-1 text-on-surface-variant hover:text-on-surface rounded-full hover:bg-surface-container-low transition-colors cursor-pointer">
+                  <span class="material-symbols-outlined text-[18px]">close</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Dynamic Dropdown Notif List -->
+            <div id="notifDropdownList" class="flex flex-col gap-2 max-h-[340px] overflow-y-auto pr-1">
+              <!-- Rendered dynamically by app.js -->
+            </div>
+
+            <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+              <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-primary inline-block"></span>
+                <span class="font-label-sm text-label-sm text-on-surface-variant font-semibold">Notif WA Prioritas: Aktif</span>
+              </div>
+              <a href="./notifications.html" class="font-label-sm text-label-sm text-primary font-bold hover:underline flex items-center gap-1">
+                <span>Lihat Semua Riwayat</span>
+                <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- User Profile Pill -->
+        <div class="flex items-center gap-space-xs pl-space-xs cursor-pointer" onclick="openEditDataModal()" title="Klik untuk edit data pemesan">
+          <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-sm">
+            <span class="material-symbols-outlined text-on-primary text-[18px]">person</span>
+          </div>
+          <div class="hidden lg:flex flex-col text-left">
+            <span class="font-label-md text-label-md text-on-surface font-semibold leading-tight js-user-name">Dimas Pratama</span>
+            <span class="font-label-sm text-label-sm text-primary font-bold leading-tight flex items-center gap-1">
+              Pelanggan VIP <span class="material-symbols-outlined text-[12px]">edit</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Body Content -->
+  <main class="w-full pt-24 bg-background min-h-[calc(100vh-280px)]">
+    <div class="flex flex-col w-full" id="notificationsPageContainer">
+      <div class="max-w-[1280px] w-full mx-auto px-margin py-space-lg flex flex-col gap-space-lg">
+        
+        <!-- Breadcrumb & Page Title Bar -->
+        <div class="flex flex-col gap-space-md">
+          <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-body-sm font-body-sm text-on-surface-variant">
+            <a class="hover:text-primary transition-colors flex items-center gap-1" href="./index.html">
+              <span class="material-symbols-outlined text-[16px]">home</span>
+              Beranda
+            </a>
+            <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+            <span class="text-on-surface-variant font-medium">Akun Pelanggan</span>
+            <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+            <span class="text-on-surface font-semibold">Pusat Notifikasi &amp; Log Sistem</span>
+          </nav>
+
+          <!-- Main Headline & Global Actions Header Slab -->
+          <div class="bg-surface-container-lowest/80 backdrop-blur-2xl rounded-2xl p-space-lg shadow-[0_20px_40px_-15px_rgba(2,132,199,0.08)] flex flex-col lg:flex-row items-start lg:items-center justify-between gap-space-md border border-slate-100">
+            <div class="flex flex-col gap-1 max-w-2xl">
+              <div class="flex items-center gap-2.5 flex-wrap">
+                <h1 class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">Pusat &amp; Arsip Notifikasi Sistem</h1>
+                <span id="unreadHeaderBadge" class="px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-extrabold shadow-sm transition-all">
+                  3 Belum Dibaca
+                </span>
+              </div>
+              <p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                Arsip lengkap seluruh aktivitas pemesanan, pergerakan armada live tracking, transaksi QRIS, promosi VIP, dan pembaruan sistem keamanan akun SHIFT Anda.
+              </p>
+            </div>
+
+            <!-- Global Action Controls -->
+            <div class="flex flex-wrap items-center gap-2 shrink-0">
+              <button id="markAllReadBtn" onclick="markAllNotificationsRead()" class="px-space-md py-2.5 rounded-full bg-primary-fixed/60 text-primary hover:bg-primary-fixed transition-all font-label-md text-label-md font-bold flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer">
+                <span class="material-symbols-outlined text-[18px]">done_all</span>
+                <span>Tandai Semua Dibaca</span>
+              </button>
+              <button id="clearReadBtn" onclick="clearReadNotifications()" class="px-space-md py-2.5 rounded-full bg-surface-container-high/70 text-on-surface-variant hover:text-error hover:bg-error-container/40 transition-all font-label-md text-label-md font-semibold flex items-center gap-1.5 active:scale-95 cursor-pointer">
+                <span class="material-symbols-outlined text-[18px]">delete_sweep</span>
+                <span>Bersihkan Terbaca</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Search Bar & Multi-Category Filter Section -->
+        <div class="flex flex-col gap-space-sm">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-sm items-center">
+            
+            <!-- Search Field -->
+            <div class="lg:col-span-6 relative">
+              <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+              <input id="searchInput" oninput="handleNotifSearch(event)" type="text" class="w-full pl-11 pr-4 py-3 rounded-2xl bg-surface-container-lowest/90 text-on-surface placeholder:text-outline font-body-md text-body-md shadow-sm outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/40 border border-slate-200 transition-all" placeholder="Cari riwayat notifikasi, nomor tiket (#SHF-...), atau nama mitra...">
+            </div>
+
+            <!-- Status Filter Dropdown -->
+            <div class="lg:col-span-3">
+              <div class="relative">
+                <select id="statusFilter" onchange="handleNotifStatusFilter(event)" class="w-full appearance-none px-4 py-3 pr-10 rounded-2xl bg-surface-container-lowest/90 font-label-md text-label-md text-on-surface shadow-sm outline-none focus:ring-2 focus:ring-primary/40 border border-slate-200 transition-all cursor-pointer">
+                  <option value="all">Semua Status Notifikasi</option>
+                  <option value="unread" selected>Hanya Belum Dibaca</option>
+                  <option value="read">Sudah Dibaca</option>
+                </select>
+                <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-[18px]">expand_more</span>
+              </div>
+            </div>
+
+            <!-- Time Filter Dropdown -->
+            <div class="lg:col-span-3">
+              <div class="relative">
+                <select id="timeFilter" onchange="handleNotifTimeFilter(event)" class="w-full appearance-none px-4 py-3 pr-10 rounded-2xl bg-surface-container-lowest/90 font-label-md text-label-md text-on-surface shadow-sm outline-none focus:ring-2 focus:ring-primary/40 border border-slate-200 transition-all cursor-pointer">
+                  <option value="all">Semua Periode Waktu</option>
+                  <option value="feb-2025" selected>Bulan Ini (Februari 2025)</option>
+                  <option value="this-week">Minggu Ini &amp; Kemarin</option>
+                  <option value="past-month">Arsip Bulan Lalu</option>
+                </select>
+                <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-[18px]">calendar_today</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Category Filter Pills -->
+          <div id="categoryFilterContainer" class="flex items-center gap-2 overflow-x-auto pb-1 pt-1 scrollbar-none">
+            <button onclick="handleNotifCategoryFilter('all')" data-cat="all" class="js-cat-pill shrink-0 px-4 py-2 rounded-full font-label-md text-label-md bg-primary-container text-on-primary-container font-bold shadow-sm flex items-center gap-1.5 transition-all cursor-pointer">
+              <span>Semua Notifikasi</span>
+              <span class="js-pill-count px-1.5 py-0.2 rounded-full bg-surface-container-lowest/20 text-on-primary-container text-[11px]">9</span>
+            </button>
+            <button onclick="handleNotifCategoryFilter('fleet')" data-cat="fleet" class="js-cat-pill shrink-0 px-4 py-2 rounded-full font-label-md text-label-md bg-surface-container-lowest/80 hover:bg-surface-container-high text-on-surface font-semibold shadow-sm flex items-center gap-1.5 transition-all cursor-pointer">
+              <span class="material-symbols-outlined text-[16px] text-primary">local_shipping</span>
+              <span>Pesanan &amp; Pengiriman</span>
+              <span class="js-pill-count px-1.5 py-0.2 rounded-full bg-surface-container-high text-on-surface-variant text-[11px]">2</span>
+            </button>
+            <button onclick="handleNotifCategoryFilter('payment')" data-cat="payment" class="js-cat-pill shrink-0 px-4 py-2 rounded-full font-label-md text-label-md bg-surface-container-lowest/80 hover:bg-surface-container-high text-on-surface font-semibold shadow-sm flex items-center gap-1.5 transition-all cursor-pointer">
+              <span class="material-symbols-outlined text-[16px] text-tertiary">account_balance_wallet</span>
+              <span>Pembayaran &amp; Tagihan</span>
+              <span class="js-pill-count px-1.5 py-0.2 rounded-full bg-surface-container-high text-on-surface-variant text-[11px]">2</span>
+            </button>
+            <button onclick="handleNotifCategoryFilter('promo')" data-cat="promo" class="js-cat-pill shrink-0 px-4 py-2 rounded-full font-label-md text-label-md bg-surface-container-lowest/80 hover:bg-surface-container-high text-on-surface font-semibold shadow-sm flex items-center gap-1.5 transition-all cursor-pointer">
+              <span class="material-symbols-outlined text-[16px] text-secondary">stars</span>
+              <span>Promo VIP</span>
+              <span class="js-pill-count px-1.5 py-0.2 rounded-full bg-surface-container-high text-on-surface-variant text-[11px]">2</span>
+            </button>
+            <button onclick="handleNotifCategoryFilter('security')" data-cat="security" class="js-cat-pill shrink-0 px-4 py-2 rounded-full font-label-md text-label-md bg-surface-container-lowest/80 hover:bg-surface-container-high text-on-surface font-semibold shadow-sm flex items-center gap-1.5 transition-all cursor-pointer">
+              <span class="material-symbols-outlined text-[16px] text-on-surface-variant">security</span>
+              <span>Keamanan Akun</span>
+              <span class="js-pill-count px-1.5 py-0.2 rounded-full bg-surface-container-high text-on-surface-variant text-[11px]">2</span>
+            </button>
+            <button onclick="handleNotifCategoryFilter('cleaning')" data-cat="cleaning" class="js-cat-pill shrink-0 px-4 py-2 rounded-full font-label-md text-label-md bg-surface-container-lowest/80 hover:bg-surface-container-high text-on-surface font-semibold shadow-sm flex items-center gap-1.5 transition-all cursor-pointer">
+              <span class="material-symbols-outlined text-[16px] text-tertiary-container">clean_hands</span>
+              <span>Deep Clean</span>
+              <span class="js-pill-count px-1.5 py-0.2 rounded-full bg-surface-container-high text-on-surface-variant text-[11px]">1</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Master 2 Column Layout: Timeline (8 Cols) vs Sidebar (4 Cols) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+          
+          <!-- LEFT COLUMN: Timeline Notifications Stream (8 Cols) -->
+          <div id="timelineList" class="lg:col-span-8 flex flex-col gap-space-lg">
+            <!-- Dynamically populated by renderNotificationCenter() in app.js -->
+          </div>
+
+          <!-- RIGHT COLUMN: User Identity, Preferences & Safety Hotline (4 Cols) -->
+          <div class="lg:col-span-4 flex flex-col gap-space-md sticky top-24">
+            
+            <!-- VIP Member Quick Identity Pod -->
+            <div class="bg-surface-container-lowest/90 backdrop-blur-2xl rounded-2xl p-space-md shadow-[0_20px_40px_-15px_rgba(2,132,199,0.08)] flex items-center gap-space-sm border border-slate-100">
+              <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-primary to-primary-container text-on-primary flex items-center justify-center shadow-md">
+                <span class="material-symbols-outlined text-[24px]">verified</span>
+              </div>
+              <div class="flex flex-col">
+                <div class="flex items-center gap-1.5">
+                  <span class="font-headline-sm text-headline-sm text-on-surface font-bold js-user-name">Dimas Pratama</span>
+                  <span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-bold">VIP</span>
+                </div>
+                <span class="font-body-sm text-body-sm text-on-surface-variant">ID Pelanggan: #SHF-VIP-9921</span>
+              </div>
+            </div>
+
+            <!-- Notification Channels Configuration Widget -->
+            <div class="bg-surface-container-lowest/90 backdrop-blur-2xl rounded-2xl p-space-lg shadow-[0_20px_40px_-15px_rgba(2,132,199,0.08)] flex flex-col gap-space-md border border-slate-100">
+              <div class="flex items-center justify-between pb-space-xs border-b border-slate-100">
+                <div class="flex items-center gap-2">
+                  <span class="material-symbols-outlined text-primary text-[20px]">tune</span>
+                  <h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">Preferensi Saluran Siaga</h3>
+                </div>
+                <span class="font-label-sm text-label-sm text-primary font-bold bg-primary-fixed/40 px-2 py-0.5 rounded-full">Realtime</span>
+              </div>
+
+              <p class="font-body-sm text-body-sm text-on-surface-variant">
+                Atur saluran pengiriman notifikasi otomatis untuk pembaruan live armada, kuitansi bayar, dan instruksi driver.
+              </p>
+
+              <!-- Preference Toggles List -->
+              <div class="flex flex-col gap-3 pt-1">
+                <!-- Toggle 1: WhatsApp -->
+                <div class="flex items-center justify-between p-3 rounded-2xl bg-surface-container-low/70 border border-slate-100">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
+                      <span class="material-symbols-outlined text-[18px]">chat</span>
+                    </div>
+                    <div class="flex flex-col">
+                      <span class="font-label-md text-label-md text-on-surface font-bold">WhatsApp Hotline</span>
+                      <span class="font-body-sm text-body-sm text-on-surface-variant text-[11px]">+62 812-3456-7890</span>
+                    </div>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input id="toggleWaNotif" type="checkbox" checked onchange="toggleChannelPreference('whatsapp')" class="sr-only peer">
+                    <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                  </label>
+                </div>
+
+                <!-- Toggle 2: Browser Push -->
+                <div class="flex items-center justify-between p-3 rounded-2xl bg-surface-container-low/70 border border-slate-100">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-primary-fixed text-primary flex items-center justify-center font-bold">
+                      <span class="material-symbols-outlined text-[18px]">notifications_active</span>
+                    </div>
+                    <div class="flex flex-col">
+                      <span class="font-label-md text-label-md text-on-surface font-bold">Browser Push Notif</span>
+                      <span class="font-body-sm text-body-sm text-on-surface-variant text-[11px]">Chrome Desktop / Mobile</span>
+                    </div>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input id="togglePushNotif" type="checkbox" checked onchange="toggleChannelPreference('push')" class="sr-only peer">
+                    <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                  </label>
+                </div>
+
+                <!-- Toggle 3: Email -->
+                <div class="flex items-center justify-between p-3 rounded-2xl bg-surface-container-low/70 border border-slate-100">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-surface-container-high text-on-surface-variant flex items-center justify-center font-bold">
+                      <span class="material-symbols-outlined text-[18px]">mail</span>
+                    </div>
+                    <div class="flex flex-col">
+                      <span class="font-label-md text-label-md text-on-surface font-bold">Surel e-Receipt</span>
+                      <span class="font-body-sm text-body-sm text-on-surface-variant text-[11px]">dimas.pratama@email.com</span>
+                    </div>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input id="toggleEmailNotif" type="checkbox" onchange="toggleChannelPreference('email')" class="sr-only peer">
+                    <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                  </label>
+                </div>
+
+                <!-- Toggle 4: SMS Backup -->
+                <div class="flex items-center justify-between p-3 rounded-2xl bg-surface-container-low/70 border border-slate-100">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-surface-container-high text-on-surface-variant flex items-center justify-center font-bold">
+                      <span class="material-symbols-outlined text-[18px]">sms</span>
+                    </div>
+                    <div class="flex flex-col">
+                      <span class="font-label-md text-label-md text-on-surface font-bold">SMS Darurat</span>
+                      <span class="font-body-sm text-body-sm text-on-surface-variant text-[11px]">Backup Tanpa Internet</span>
+                    </div>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input id="toggleSmsNotif" type="checkbox" onchange="toggleChannelPreference('sms')" class="sr-only peer">
+                    <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Customer Safety Hotline Card -->
+            <div class="bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-2xl p-space-lg shadow-xl flex flex-col gap-3 relative overflow-hidden">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-[24px] text-secondary-container">security</span>
+                <h3 class="font-headline-sm text-headline-sm font-bold">Layanan Pengaduan 24/7</h3>
+              </div>
+              <p class="font-body-sm text-body-sm opacity-90 leading-relaxed">
+                Menemukan ketidaksesuaian laporan armada atau butuh percepatan bantuan darurat? Tim CS VIP SHIFT siap membantu dalam 60 detik.
+              </p>
+              <a href="https://wa.me/6281234567890" target="_blank" class="w-full py-3 px-4 rounded-xl bg-secondary-container hover:bg-secondary-fixed text-on-secondary-container font-label-md text-label-md font-extrabold flex items-center justify-center gap-2 shadow-md transition-all mt-1">
+                <span class="material-symbols-outlined text-[18px]">support_agent</span>
+                <span>Hubungi CS Hotline VIP</span>
+              </a>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Notification Detail Modal Container -->
+  <div id="notifDetailModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-on-surface/50 backdrop-blur-md p-4 overflow-y-auto">
+    <div class="relative w-full max-w-lg bg-white rounded-3xl p-space-lg shadow-2xl space-y-4 border border-slate-100 transition-all">
+      <div class="flex items-center justify-between border-b pb-3 border-slate-100">
+        <div class="flex items-center gap-2">
+          <div id="modalIconBox" class="w-9 h-9 rounded-xl bg-primary-fixed text-primary flex items-center justify-center font-bold">
+            <span id="modalIcon" class="material-symbols-outlined text-[20px]">notifications</span>
+          </div>
+          <div>
+            <span id="modalCategory" class="font-label-sm text-label-sm text-primary font-bold uppercase tracking-wider block">Kategori Notifikasi</span>
+            <h3 id="modalTitle" class="font-headline-sm text-headline-sm text-slate-900 font-bold truncate max-w-xs">Detail Notifikasi</h3>
+          </div>
+        </div>
+        <button onclick="closeNotifDetailModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center cursor-pointer transition-colors">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <div class="flex items-center justify-between text-xs text-slate-500 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+          <span id="modalTime" class="font-medium">Waktu Transaksi</span>
+          <span id="modalTicket" class="font-mono font-bold text-primary">#SHF-90214</span>
+        </div>
+
+        <p id="modalMessage" class="font-body-md text-body-md text-slate-700 leading-relaxed p-1">
+          Pesan lengkap notifikasi sistem.
+        </p>
+
+        <div id="modalMetadataBox" class="hidden p-3 bg-surface-container-low rounded-xl text-xs space-y-1 border border-slate-200">
+          <!-- Metadata details dynamically inserted here -->
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-2 border-t border-slate-100" id="modalActions">
+        <button onclick="closeNotifDetailModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-3 rounded-2xl font-bold text-sm transition-all cursor-pointer">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="w-full bg-surface-container-low/80 mt-space-xl py-space-xl">
+    <div class="max-w-[1280px] mx-auto px-margin">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-space-md pb-space-lg">
+        <div class="bg-surface-container-lowest/90 p-space-md rounded-2xl flex items-center gap-space-md shadow-[0_10px_25px_-10px_rgba(2,132,199,0.06)] border border-slate-100">
+          <div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-primary">
+            <span class="material-symbols-outlined text-[24px]">verified_user</span>
+          </div>
+          <div>
+            <h4 class="font-label-lg text-label-lg text-on-surface font-bold">Garansi Barang Utuh 100%</h4>
+            <p class="font-body-sm text-body-sm text-on-surface-variant">Proteksi ganti rugi menyeluruh tanpa syarat berbelit</p>
+          </div>
+        </div>
+
+        <div class="bg-surface-container-lowest/90 p-space-md rounded-2xl flex items-center gap-space-md shadow-[0_10px_25px_-10px_rgba(2,132,199,0.06)] border border-slate-100">
+          <div class="w-12 h-12 rounded-full bg-tertiary-fixed flex items-center justify-center text-tertiary">
+            <span class="material-symbols-outlined text-[24px]">sanitizer</span>
+          </div>
+          <div>
+            <h4 class="font-label-lg text-label-lg text-on-surface font-bold">Higienitas Tersertifikasi</h4>
+            <p class="font-body-sm text-body-sm text-on-surface-variant">Standar pembersihan klinis untuk hunian steril</p>
+          </div>
+        </div>
+
+        <div class="bg-surface-container-lowest/90 p-space-md rounded-2xl flex items-center gap-space-md shadow-[0_10px_25px_-10px_rgba(2,132,199,0.06)] border border-slate-100">
+          <div class="w-12 h-12 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary">
+            <span class="material-symbols-outlined text-[24px]">local_shipping</span>
+          </div>
+          <div>
+            <h4 class="font-label-lg text-label-lg text-on-surface font-bold">Armada &amp; Tim Terverifikasi</h4>
+            <p class="font-body-sm text-body-sm text-on-surface-variant">Kru terdidik, berlatar belakang aman &amp; teruji</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col md:flex-row items-center justify-between pt-space-lg gap-space-md border-t border-slate-200/60">
+        <div class="flex items-center gap-space-sm">
+          <span class="font-headline-sm text-headline-sm text-primary font-bold tracking-tight">SHIFT</span>
+          <span class="font-body-sm text-body-sm text-on-surface-variant">© 2025 PT Siap Hadir Fleksibel Tuntas. Seluruh hak cipta dilindungi.</span>
+        </div>
+        <div class="flex items-center gap-space-lg">
+          <a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Syarat &amp; Ketentuan</a>
+          <a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Kebijakan Privasi</a>
+          <a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors" href="https://wa.me/6281234567890" target="_blank">Pusat Bantuan</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Supabase JS SDK CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- App Script -->
+  <script src="./src/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <meta content="web_standard" name="shell-type"/>
+  <title>SHIFT - Live Tracker Deep Cleaning &amp; Sanitasi</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+  <!-- Leaflet.js Interactive Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+  <style>
+    @layer base {
+      html, body { margin: 0; padding: 0; }
+      body { overscroll-behavior: none; }
+      main > :first-child { margin-top: 0 !important; }
+      main > :last-child { margin-bottom: 0 !important; }
+    }
+    ::-webkit-scrollbar { display: none; }
+  </style>
+
+  <!-- Tailwind CSS CDN & Exact Stitch Configuration -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      "darkMode": "class",
+      "theme": {
+        "extend": {
+          "colors": {
+            "surface-container-highest": "#dae2fd",
+            "on-primary-fixed": "#001d31",
+            "on-secondary-fixed": "#231b00",
+            "tertiary-fixed-dim": "#7bd0ff",
+            "surface-container": "#eaedff",
+            "outline-variant": "#bfc7d2",
+            "error-container": "#ffdad6",
+            "surface-tint": "#006398",
+            "secondary": "#735c00",
+            "outline": "#707881",
+            "surface-variant": "#dae2fd",
+            "on-error": "#ffffff",
+            "error": "#ba1a1a",
+            "secondary-fixed-dim": "#eec200",
+            "primary-fixed-dim": "#93ccff",
+            "on-error-container": "#93000a",
+            "on-surface": "#131b2e",
+            "secondary-fixed": "#ffe083",
+            "tertiary-fixed": "#c4e7ff",
+            "on-tertiary-container": "#fcfcff",
+            "primary": "#006194",
+            "surface-bright": "#faf8ff",
+            "tertiary-container": "#007da9",
+            "tertiary": "#006387",
+            "surface-container-lowest": "#ffffff",
+            "inverse-on-surface": "#eef0ff",
+            "on-tertiary": "#ffffff",
+            "surface-container-low": "#f2f3ff",
+            "on-background": "#131b2e",
+            "on-surface-variant": "#3f4850",
+            "on-secondary-fixed-variant": "#574500",
+            "primary-fixed": "#cce5ff",
+            "on-tertiary-fixed-variant": "#004c69",
+            "secondary-container": "#fed01b",
+            "inverse-primary": "#93ccff",
+            "on-secondary-container": "#6f5900",
+            "surface-container-high": "#e2e7ff",
+            "primary-container": "#007bb9",
+            "surface-dim": "#d2d9f4",
+            "on-primary": "#ffffff",
+            "background": "#faf8ff",
+            "on-secondary": "#ffffff",
+            "on-tertiary-fixed": "#001e2c",
+            "surface": "#faf8ff",
+            "on-primary-fixed-variant": "#004b73",
+            "on-primary-container": "#fdfcff",
+            "inverse-surface": "#283044"
+          },
+          "borderRadius": {
+            "DEFAULT": "1rem",
+            "lg": "2rem",
+            "xl": "3rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-xl": "2.5rem",
+            "margin-mobile": "1rem",
+            "gutter": "1.5rem",
+            "gutter-mobile": "1rem",
+            "space-md": "1rem",
+            "space-lg": "1.5rem",
+            "margin": "2rem",
+            "space-sm": "0.5rem",
+            "space-xs": "0.25rem"
+          },
+          "fontFamily": {
+            "body-sm": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"],
+            "headline-lg": ["Plus Jakarta Sans"],
+            "headline-sm": ["Plus Jakarta Sans"],
+            "body-md": ["Plus Jakarta Sans"],
+            "label-sm": ["Plus Jakarta Sans"],
+            "display-mobile": ["Plus Jakarta Sans"],
+            "headline-xl": ["Plus Jakarta Sans"],
+            "label-lg": ["Plus Jakarta Sans"],
+            "display": ["Plus Jakarta Sans"],
+            "body-lg": ["Plus Jakarta Sans"],
+            "label-md": ["Plus Jakarta Sans"],
+            "headline-xl-mobile": ["Plus Jakarta Sans"]
+          },
+          "fontSize": {
+            "body-sm": ["12px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "400" }],
+            "headline-md": ["22px", { "lineHeight": "30px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.015em", "fontWeight": "700" }],
+            "headline-sm": ["18px", { "lineHeight": "26px", "letterSpacing": "0", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "22px", "letterSpacing": "0", "fontWeight": "400" }],
+            "label-sm": ["10px", { "lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+            "display-mobile": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "800" }],
+            "headline-xl": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+            "display": ["56px", { "lineHeight": "64px", "letterSpacing": "-0.03em", "fontWeight": "800" }],
+            "body-lg": ["16px", { "lineHeight": "26px", "letterSpacing": "0", "fontWeight": "400" }],
+            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }],
+            "headline-xl-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-background font-body-md text-body-md text-on-surface antialiased">
+  
+  <!-- Header Navbar -->
+  <header class="fixed top-0 left-0 right-0 z-50 px-margin py-space-sm">
+    <div class="max-w-[1280px] mx-auto h-20 bg-surface-container-lowest/80 backdrop-blur-2xl rounded-2xl shadow-[0_20px_40px_-15px_rgba(2,132,199,0.08),0_0_1px_rgba(2,132,199,0.05)] px-space-lg flex items-center justify-between gap-space-md border border-slate-100">
+      
+      <div class="flex items-center gap-space-sm cursor-pointer" onclick="window.location.href='./index.html'">
+        <img alt="Brand Logo SHIFT" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1V4-AKvjApTZir1tWpoRbOjlMUugVvCZpxtOzGcwFdpp2Rh6EmLtYbR7GWCf5g_Ev5KURZ2Rr4ErMp_oYXMzw7o7sXV36aiEN6G6MZGr1Qynx4pdRW3Yx2NjItYFhMYgGzLRWnxUocc3bNyt0c3cVwnbn7CyKqPxfqd2vPmG2LDz9jB3h-gkebU18cH-4Wlw2hRmYDtvAPpyhxGjXHb5JcpeqYJvZFobwORAeIkicoGdd6n2RXhSwT-K5E"/>
+        <div class="flex flex-col">
+          <span class="font-headline-sm text-headline-sm text-primary tracking-tight font-bold">SHIFT</span>
+          <span class="font-label-sm text-label-sm text-on-surface-variant">Pindahan &amp; Bersih-bersih</span>
+        </div>
+      </div>
+
+      <nav class="hidden xl:flex items-center gap-space-xs bg-surface-container-low/70 p-1.5 rounded-full" data-active-classes="bg-primary-container text-on-primary-container font-label-lg text-label-lg rounded-full px-space-md py-space-xs shadow-sm">
+        <a class="px-space-md py-space-xs rounded-full font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest/60 transition-all" data-path="beranda" href="./index.html">Beranda</a>
+        <a class="px-space-md py-space-xs rounded-full font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest/60 transition-all" data-path="pesan-layanan" href="./cleaning.html">Pesan Layanan</a>
+        <a class="px-space-md py-space-xs rounded-full font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest/60 transition-all" data-path="pembayaran" href="./payment.html">Pembayaran</a>
+        <a aria-current="page" class="transition-all flex items-center gap-1.5 bg-primary-container text-on-primary-container font-label-lg text-label-lg rounded-full px-space-md py-space-xs shadow-sm" data-path="lacak-pesanan" href="./tracking-cleaning.html">
+          Lacak Pesanan
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-tertiary opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-primary-container"></span>
+          </span>
+        </a>
+        <a class="px-space-md py-space-xs rounded-full font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest/60 transition-all" data-path="riwayat-bantuan" href="./history.html">Riwayat &amp; Bantuan</a>
+      </nav>
+
+      <div class="flex items-center gap-space-sm">
+        <button onclick="openWhatsAppCS()" class="hidden md:flex items-center gap-1.5 bg-secondary-container text-on-secondary-container px-space-md py-space-xs rounded-full font-label-md text-label-md shadow-[0_4px_14px_rgba(254,208,27,0.35)] hover:bg-secondary-fixed transition-all cursor-pointer">
+          <span class="material-symbols-outlined text-[16px]">support_agent</span>
+          <span class="font-bold">CS 24 Jam: 0812-3456-7890</span>
+        </button>
+        <button class="relative p-2 rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors">
+          <span class="material-symbols-outlined text-[20px]">notifications</span>
+          <span class="absolute top-1 right-1 w-4 h-4 bg-error text-on-error rounded-full font-label-sm text-label-sm flex items-center justify-center font-bold">1</span>
+        </button>
+        <!-- User Profile & Dynamic Auth Status Nav -->
+        <div id="authHeaderNav" class="flex items-center gap-space-xs pl-space-xs">
+          <!-- Rendered dynamically by app.js renderAuthHeaderNav() -->
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="w-full pt-20 bg-background min-h-[calc(100vh-280px)]">
+    <div class="flex flex-col w-full">
+      <!-- Ambient Glow Orbs -->
+      <div class="relative w-full max-w-[1280px] mx-auto px-margin-mobile md:px-margin py-space-md">
+        <div class="absolute -top-12 -left-20 w-96 h-96 bg-primary-fixed/30 rounded-full blur-3xl pointer-events-none -z-10"></div>
+        <div class="absolute top-48 -right-20 w-80 h-80 bg-secondary-container/20 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+        <!-- 1. Top Step Progress Bar -->
+        <section class="w-full mb-space-lg">
+          <div class="bg-surface-container-lowest/80 backdrop-blur-xl p-space-sm md:p-space-md rounded-2xl shadow-[0_10px_30px_-10px_rgba(2,132,199,0.08)] border border-slate-100">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-space-xs md:gap-space-sm items-center">
+              
+              <!-- Step 1: Done -->
+              <div onclick="window.location.href='./index.html'" class="flex items-center gap-space-xs p-space-xs md:px-space-sm md:py-space-xs rounded-xl bg-surface-container-low/60 cursor-pointer">
+                <div class="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-[18px]">check</span>
+                </div>
+                <div class="flex flex-col min-w-0">
+                  <span class="font-label-sm text-label-sm text-on-surface-variant truncate">Tahap 1</span>
+                  <span class="font-label-md text-label-md text-on-surface font-semibold truncate">Pilih Layanan</span>
+                </div>
+              </div>
+
+              <!-- Step 2: Done -->
+              <div onclick="window.location.href='./cleaning.html'" class="flex items-center gap-space-xs p-space-xs md:px-space-sm md:py-space-xs rounded-xl bg-surface-container-low/60 cursor-pointer">
+                <div class="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-[18px]">check</span>
+                </div>
+                <div class="flex flex-col min-w-0">
+                  <span class="font-label-sm text-label-sm text-on-surface-variant truncate">Tahap 2</span>
+                  <span class="font-label-md text-label-md text-on-surface font-semibold truncate">Detail &amp; Tarif</span>
+                </div>
+              </div>
+
+              <!-- Step 3: Done -->
+              <div onclick="window.location.href='./payment.html'" class="flex items-center gap-space-xs p-space-xs md:px-space-sm md:py-space-xs rounded-xl bg-surface-container-low/60 cursor-pointer">
+                <div class="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-[18px]">check</span>
+                </div>
+                <div class="flex flex-col min-w-0">
+                  <span class="font-label-sm text-label-sm text-on-surface-variant truncate">Tahap 3</span>
+                  <span class="font-label-md text-label-md text-on-surface font-semibold truncate">Lunas QRIS Rp160k</span>
+                </div>
+              </div>
+
+              <!-- Step 4: Active Tracker -->
+              <div class="flex items-center gap-space-xs p-space-xs md:px-space-sm md:py-space-xs rounded-xl bg-primary-container text-on-primary-container shadow-md">
+                <div class="relative flex items-center justify-center shrink-0 w-7 h-7">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary-container opacity-60"></span>
+                  <div class="w-7 h-7 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold text-label-sm">
+                    <span class="material-symbols-outlined text-[18px]">near_me</span>
+                  </div>
+                </div>
+                <div class="flex flex-col min-w-0">
+                  <div class="flex items-center gap-1.5">
+                    <span class="inline-block w-2 h-2 rounded-full bg-secondary-container animate-pulse"></span>
+                    <span class="font-label-sm text-label-sm text-on-primary-container/80 tracking-wide uppercase font-bold">Live Tracker</span>
+                  </div>
+                  <span class="font-label-md text-label-md text-on-primary-container font-bold truncate">Lacak Petugas</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. Header Status Tiket -->
+        <section class="w-full mb-space-lg">
+          <div class="bg-surface-container-lowest/90 backdrop-blur-2xl p-space-lg rounded-2xl shadow-[0_15px_35px_-10px_rgba(2,132,199,0.08)] flex flex-col lg:flex-row lg:items-center justify-between gap-space-md border border-slate-100">
+            <div class="flex flex-col gap-space-xs">
+              <div class="flex flex-wrap items-center gap-space-xs">
+                <span class="bg-primary-fixed text-on-primary-fixed font-label-md text-label-md px-3 py-1 rounded-full font-bold">
+                  TIKET #SHF-CLN-90215
+                </span>
+                <span class="bg-surface-container text-on-surface-variant font-label-md text-label-md px-3 py-1 rounded-full flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[16px]">cleaning_services</span> Deep Clean &amp; Sanitasi Kost
+                </span>
+                <span class="bg-surface-container text-on-surface-variant font-label-md text-label-md px-3 py-1 rounded-full flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[16px]">location_on</span> Sleman, DI Yogyakarta
+                </span>
+              </div>
+              <h1 id="orderStatusTitle" class="font-headline-lg text-headline-lg text-on-surface font-extrabold tracking-tight js-order-status-title">
+                Mitra Bersih Sedang OTW ke Kost Melati
+              </h1>
+              <p class="font-body-md text-body-md text-on-surface-variant flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-primary text-[18px]">verified</span>
+                Pesanan terkonfirmasi untuk <strong class="text-on-surface">Dimas Pratama</strong> • Kost Melati Residence No. 14, Caturtunggal
+              </p>
+            </div>
+
+            <!-- Perkiraan Tiba Pill Card -->
+            <div class="flex items-center gap-space-md shrink-0 bg-surface-container-low/70 p-space-sm rounded-2xl border border-slate-100 flex-wrap">
+              <div class="flex flex-col text-right">
+                <span class="font-label-sm text-label-sm text-on-surface-variant tracking-wider uppercase font-bold">Perkiraan Tiba</span>
+                <div class="flex items-baseline gap-1 justify-end">
+                  <span id="etaBadge" class="font-headline-lg text-headline-lg text-primary font-black js-eta-badge">~8 Menit (1.4 km)</span>
+                </div>
+              </div>
+              <button onclick="triggerGpsSync()" class="w-12 h-12 rounded-full bg-secondary-container hover:bg-secondary-fixed text-on-secondary-container flex items-center justify-center shadow-[0_8px_20px_rgba(254,208,27,0.35)] transition-all cursor-pointer border border-yellow-300" id="refreshBtn" title="Perbarui Lokasi GPS">
+                <span class="material-symbols-outlined text-[24px]">sync</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. Master 2 Column Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+          
+          <!-- LEFT COLUMN: Peta GPS (7 Cols) -->
+          <div class="lg:col-span-7 flex flex-col gap-space-md">
+            
+            <!-- Map Card -->
+            <div class="bg-surface-container-lowest/90 backdrop-blur-2xl p-space-md rounded-2xl shadow-[0_20px_45px_-12px_rgba(2,132,199,0.1)] relative overflow-hidden border border-slate-100">
+              
+              <!-- Top Floating GPS Bar -->
+              <div class="flex items-center justify-between gap-space-sm mb-space-sm bg-surface-container-lowest/90 backdrop-blur-md px-space-md py-space-xs rounded-xl shadow-sm border border-slate-100">
+                <div class="flex items-center gap-2">
+                  <span class="relative flex h-3 w-3">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-container opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+                  </span>
+                  <span class="font-label-md text-label-md text-on-surface font-bold">GPS Akurasi Tinggi (±3m)</span>
+                  <span id="lastUpdatedText" class="font-label-sm text-label-sm text-on-surface-variant js-last-updated-text">• Update: Baru saja</span>
+                </div>
+                <button onclick="openGoogleMaps()" class="flex items-center gap-1 font-label-sm text-label-sm text-primary hover:text-primary-container font-bold transition-colors cursor-pointer" type="button">
+                  <span>Buka Google Maps</span>
+                  <span class="material-symbols-outlined text-[16px]">open_in_new</span>
+                </button>
+              </div>
+
+              <!-- Stylized Map Vector Canvas -->
+              <div id="mapCanvasContainer" class="relative w-full h-[380px] rounded-xl overflow-hidden bg-[#e6effa] shadow-inner">
+                <div id="liveCleaningMapContainer" class="absolute inset-0 w-full h-full z-0"></div>
+                <svg class="w-full h-full object-cover" fill="none" viewBox="0 0 700 400" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <pattern height="40" id="grid-pattern-clean" patternUnits="userSpaceOnUse" width="40">
+                      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#d5e3f4" stroke-width="1"></path>
+                    </pattern>
+                    <linearGradient id="routeGradClean" x1="120" x2="560" y1="290" y2="100" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stop-color="#007bb9"></stop>
+                      <stop offset="50%" stop-color="#006194"></stop>
+                      <stop offset="100%" stop-color="#fed01b"></stop>
+                    </linearGradient>
+                  </defs>
+
+                  <!-- Map Grid & Parks -->
+                  <rect fill="#edf3fc" height="100%" width="100%"></rect>
+                  <rect fill="url(#grid-pattern-clean)" height="100%" opacity="0.6" width="100%"></rect>
+
+                  <path d="M30 40 Q 90 20 160 50 T 210 130 T 140 180 T 40 140 Z" fill="#d9f3e5" opacity="0.8"></path>
+                  <path d="M480 240 Q 560 210 640 260 T 670 360 T 560 380 T 460 330 Z" fill="#d9f3e5" opacity="0.8"></path>
+                  <text fill="#2d6a4f" font-size="11" font-weight="600" opacity="0.7" x="70" y="100">Taman Lembah UGM</text>
+                  <text fill="#2d6a4f" font-size="11" font-weight="600" opacity="0.7" x="510" y="320">Ruang Terbuka Hijau</text>
+
+                  <!-- Water Feature -->
+                  <path d="M-10 180 C 120 190, 200 230, 280 280 C 360 330, 480 340, 710 320" fill="none" opacity="0.7" stroke="#c0e2f8" stroke-linecap="round" stroke-width="26"></path>
+
+                  <!-- Major Roads -->
+                  <path d="M-20 280 L 720 270" stroke="#ffffff" stroke-linecap="round" stroke-width="18"></path>
+                  <path d="M120 -20 L 140 420" stroke="#ffffff" stroke-linecap="round" stroke-width="16"></path>
+                  <path d="M380 -20 L 410 420" stroke="#ffffff" stroke-linecap="round" stroke-width="18"></path>
+                  <path d="M-10 110 L 720 100" stroke="#ffffff" stroke-linecap="round" stroke-width="20"></path>
+
+                  <!-- Road Names -->
+                  <text fill="#707881" font-size="10" font-weight="600" letter-spacing="1" x="180" y="106">JL. KALIURANG KM 5</text>
+                  <text fill="#707881" font-size="10" font-weight="600" letter-spacing="1" x="360" y="390">JL. COLOMBO</text>
+                  <text fill="#707881" font-size="10" font-weight="600" letter-spacing="1" x="20" y="275">JL. GAMBIR SELATAN</text>
+
+                  <!-- Route Path -->
+                  <path d="M 130 280 L 220 280 Q 250 280 270 260 L 330 190 Q 350 170 380 170 L 460 170 Q 490 170 510 145 L 540 110 L 560 105" fill="none" stroke="url(#routeGradClean)" stroke-linecap="round" stroke-linejoin="round" stroke-width="7"></path>
+
+                  <!-- Animated Dash Line -->
+                  <path class="animate-[dash_15s_linear_infinite]" d="M 130 280 L 220 280 Q 250 280 270 260 L 330 190 Q 350 170 380 170 L 460 170 Q 490 170 510 145 L 540 110 L 560 105" fill="none" opacity="0.9" stroke="#ffffff" stroke-dasharray="10 14" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"></path>
+
+                  <!-- DESTINATION PIN: Kost Melati Residence -->
+                  <g transform="translate(560, 105)">
+                    <circle class="animate-ping" cx="0" cy="0" fill="#fed01b" opacity="0.25" r="28" style="transform-origin: 0 0; animation-duration: 2.5s;"></circle>
+                    <circle cx="0" cy="0" fill="#fed01b" opacity="0.6" r="16"></circle>
+                    <circle cx="0" cy="0" fill="#6f5900" r="9"></circle>
+
+                    <g transform="translate(-80, -68)">
+                      <rect fill="#ffffff" filter="drop-shadow(0 8px 16px rgba(0,0,0,0.12))" height="52" rx="14" width="160"></rect>
+                      <rect fill="#eaedff" height="46" opacity="0.5" rx="11" width="154" x="3" y="3"></rect>
+                      <circle cx="26" cy="26" fill="#fed01b" r="14"></circle>
+                      <text fill="#6f5900" font-family="Plus Jakarta Sans" font-size="14" font-weight="900" x="21" y="31">🏠</text>
+                      <text class="js-pickup-loc-text" fill="#131b2e" font-family="Plus Jakarta Sans" font-size="11" font-weight="800" x="48" y="21">Kost Melati Res.</text>
+                      <text fill="#707881" font-family="Plus Jakarta Sans" font-size="9.5" font-weight="500" x="48" y="36">Kamar No. 14 (Dimas)</text>
+                    </g>
+                  </g>
+                </svg>
+
+                <!-- LIVE MOVING AGENT PIN: Siti Maryam -->
+                <div id="cleanerMarker" class="pointer-events-auto flex flex-col items-center group z-20" style="position: absolute; left: 46%; top: 48%; transform: translate(-50%, -50%); transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);">
+                  <div class="bg-primary text-on-primary px-3 py-1 rounded-full shadow-lg flex items-center gap-1.5 mb-1.5">
+                    <span class="material-symbols-outlined text-[14px]">two_wheeler</span>
+                    <span class="font-label-sm text-label-sm font-bold tracking-tight js-marker-label">Siti Maryam • 25 km/j</span>
+                  </div>
+                  <div class="relative flex items-center justify-center">
+                    <div class="absolute w-14 h-14 rounded-full bg-primary/20 animate-ping"></div>
+                    <div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-lg">
+                      <span class="material-symbols-outlined text-[18px]">cleaning_services</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Speed Overlay -->
+                <div class="absolute bottom-3 left-3 bg-surface-container-lowest/90 backdrop-blur-xl px-space-md py-space-xs rounded-xl shadow-md flex items-center gap-space-sm border border-slate-100 z-10">
+                  <div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center text-primary">
+                    <span class="material-symbols-outlined text-[18px]">speed</span>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="font-label-sm text-label-sm text-on-surface-variant font-semibold">Kecepatan Saat Ini</span>
+                    <span id="speedText" class="font-label-md text-label-md text-on-surface font-extrabold js-speed-text">25 km/jam • <span class="text-tertiary">Melaju Lancar</span></span>
+                  </div>
+                </div>
+
+                <!-- Zoom Controls -->
+                <div class="absolute bottom-3 right-3 bg-surface-container-lowest/90 backdrop-blur-xl p-1 rounded-full shadow-md flex flex-col gap-1 border border-slate-100 z-10">
+                  <button onclick="zoomMap(1.1)" class="w-8 h-8 rounded-full hover:bg-surface-container flex items-center justify-center text-on-surface transition-colors cursor-pointer" title="Zoom In">
+                    <span class="material-symbols-outlined text-[18px]">add</span>
+                  </button>
+                  <button onclick="zoomMap(0.9)" class="w-8 h-8 rounded-full hover:bg-surface-container flex items-center justify-center text-on-surface transition-colors cursor-pointer" title="Zoom Out">
+                    <span class="material-symbols-outlined text-[18px]">remove</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Rute Bawah Peta -->
+              <div class="mt-space-md pt-space-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-space-sm bg-surface-container-low/50 p-space-sm rounded-xl border border-slate-100">
+                <div class="flex items-center gap-space-xs">
+                  <span class="material-symbols-outlined text-primary text-[20px]">alt_route</span>
+                  <div class="flex flex-col">
+                    <span class="font-label-sm text-label-sm text-on-surface-variant">Rute Pilihan Mitra</span>
+                    <span id="currentRouteText" class="font-label-md text-label-md text-on-surface font-semibold js-current-route">Via Jl. Kaliurang &amp; Jl. Gambir (Bebas Hambatan)</span>
+                  </div>
+                </div>
+                <div class="flex items-center gap-space-xs text-right">
+                  <span class="material-symbols-outlined text-secondary text-[20px]">schedule</span>
+                  <div class="flex flex-col text-left md:text-right">
+                    <span class="font-label-sm text-label-sm text-on-surface-variant">Estimasi Waktu Tiba</span>
+                    <span id="etaClockText" class="font-label-md text-label-md text-on-surface font-bold js-eta-clock">Pukul 13:08 WIB</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- 3 Quality Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-space-sm">
+              <div class="bg-surface-container-lowest/80 backdrop-blur-md p-space-md rounded-2xl shadow-sm flex flex-col gap-space-xs border border-slate-100">
+                <div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-primary">
+                  <span class="material-symbols-outlined text-[20px]">inventory_2</span>
+                </div>
+                <span class="font-label-md text-label-md text-on-surface font-bold">Peralatan Lengkap</span>
+                <p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+                  Box higienis berisi mesin hydro-vacuum, steamer, dan lap tersegol steril.
+                </p>
+              </div>
+
+              <div class="bg-surface-container-lowest/80 backdrop-blur-md p-space-md rounded-2xl shadow-sm flex flex-col gap-space-xs border border-slate-100">
+                <div class="w-10 h-10 rounded-full bg-tertiary-fixed flex items-center justify-center text-tertiary">
+                  <span class="material-symbols-outlined text-[20px]">eco</span>
+                </div>
+                <span class="font-label-md text-label-md text-on-surface font-bold">Eco &amp; Food Grade</span>
+                <p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+                  Cairan pembersih ramah lingkungan, tidak berbau tajam, aman untuk pernapasan.
+                </p>
+              </div>
+
+              <div class="bg-surface-container-lowest/80 backdrop-blur-md p-space-md rounded-2xl shadow-sm flex flex-col gap-space-xs border border-slate-100">
+                <div class="w-10 h-10 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary">
+                  <span class="material-symbols-outlined text-[20px]">sanitizer</span>
+                </div>
+                <span class="font-label-md text-label-md text-on-surface font-bold">Sterilisasi UV-C</span>
+                <p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+                  Eliminasi tungau kasur 99.9% dan penyemprotan fogging disinfektan tuntas.
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- RIGHT COLUMN: Profile & Timeline (5 Cols) -->
+          <div class="lg:col-span-5 flex flex-col gap-space-md">
+            
+            <!-- Profile Card -->
+            <div class="bg-surface-container-lowest/90 backdrop-blur-2xl p-space-lg rounded-2xl shadow-[0_20px_45px_-12px_rgba(2,132,199,0.1)] flex flex-col gap-space-md border border-slate-100">
+              <div class="flex items-start justify-between">
+                <span class="bg-surface-container text-primary font-label-sm text-label-sm px-3 py-1 rounded-full uppercase tracking-wider font-extrabold flex items-center gap-1">
+                  <span class="inline-block w-2 h-2 rounded-full bg-primary animate-ping"></span>
+                  Mitra Kebersihan Bertugas
+                </span>
+                <span class="font-label-sm text-label-sm text-on-surface-variant bg-surface-container-low px-2.5 py-1 rounded-full">
+                  ID: MITRA-YGY-042
+                </span>
+              </div>
+
+              <div class="flex items-center gap-space-md">
+                <div class="relative shrink-0">
+                  <img class="w-20 h-20 rounded-2xl object-cover shadow-md ring-2 ring-primary/20" alt="Siti Maryam - Spesialis Kebersihan SHIFT" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBi_WbqloxLrVDu3XUIn0uc7hkoFFQSS_LgwNFxLMNDfKqjgwu4x0yRoVA4C13k_wj7Uh5CLZFdl47gPa-DG9X9lEJvLwEzwOQV5f2z-hEDHTox44Iaqr-sY4AA1tGGGX3hb95nNSLcO2wvYlu8vBtXW9vPMWGHQ3gBZyuDXJwGFzV40QhRzjoy9FhD012SoCTS1jB-9iMdMS5JdtvNwiJzj7UWLOuP8kbfNMsCtKYO8bQoAwja2Hcq"/>
+                  <div class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center shadow-sm" title="Mitra Terverifikasi &amp; Berlisensi">
+                    <span class="material-symbols-outlined text-[14px]">verified</span>
+                  </div>
+                </div>
+                <div class="flex flex-col min-w-0">
+                  <div class="flex items-center gap-1.5">
+                    <h3 class="font-headline-md text-headline-md text-on-surface font-extrabold truncate">Siti Maryam</h3>
+                    <span class="text-tertiary material-symbols-outlined text-[18px]" title="Sertifikat Medis Higienis">check_circle</span>
+                  </div>
+                  <p class="font-body-sm text-body-sm text-on-surface-variant font-medium">Spesialis Deep Clean &amp; Kasur UV-C</p>
+                  
+                  <div class="flex items-center gap-space-xs mt-1">
+                    <div class="flex items-center gap-0.5 bg-secondary-fixed/50 text-on-secondary-fixed px-2 py-0.5 rounded-full font-label-sm text-label-sm font-bold">
+                      <span class="material-symbols-outlined text-[14px] text-secondary">star</span>
+                      <span>4.9</span>
+                    </div>
+                    <span class="font-label-sm text-label-sm text-on-surface-variant">• 420+ Hunian Tuntas</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Pendamping -->
+              <div class="bg-surface-container-low/70 p-space-sm rounded-xl flex items-center justify-between gap-space-sm border border-slate-100">
+                <div class="flex items-center gap-space-xs">
+                  <div class="w-8 h-8 rounded-full bg-primary-fixed text-primary flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[18px]">group</span>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="font-label-sm text-label-sm text-on-surface-variant">Rekan Pendamping Lapangan</span>
+                    <span class="font-label-md text-label-md text-on-surface font-bold">Rahmat (Asisten Sanitasi &amp; Fogger)</span>
+                  </div>
+                </div>
+                <span class="font-label-sm text-label-sm bg-surface-container text-on-surface-variant px-2 py-0.5 rounded-md font-semibold">2 Orang Kru</span>
+              </div>
+
+              <!-- Toolkit -->
+              <div class="flex flex-col gap-1.5">
+                <span class="font-label-sm text-label-sm text-on-surface-variant font-bold uppercase tracking-wider">Perlengkapan Yang Dibawa:</span>
+                <div class="flex flex-wrap gap-1.5">
+                  <span class="bg-surface-container text-on-surface-variant text-label-sm px-2.5 py-1 rounded-full flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[13px]">cleaning_services</span> Hydro-Vacuum UV-C
+                  </span>
+                  <span class="bg-surface-container text-on-surface-variant text-label-sm px-2.5 py-1 rounded-full flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[13px]">shower</span> Mesin Steamer Uap Panas
+                  </span>
+                  <span class="bg-surface-container text-on-surface-variant text-label-sm px-2.5 py-1 rounded-full flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[13px]">soap</span> Formula Penghilang Kerak
+                  </span>
+                  <span class="bg-surface-container text-on-surface-variant text-label-sm px-2.5 py-1 rounded-full flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[13px]">air</span> Cold Fogger Aerosol
+                  </span>
+                </div>
+              </div>
+
+              <!-- Contact Buttons -->
+              <div class="grid grid-cols-2 gap-space-sm pt-space-xs">
+                <a class="w-full py-3 px-space-md rounded-full bg-secondary-container hover:bg-secondary-fixed text-on-secondary-container font-label-lg text-label-lg font-bold flex items-center justify-center gap-2 shadow-[0_8px_20px_-4px_rgba(254,208,27,0.4)] transition-all cursor-pointer" href="https://wa.me/6281234567890?text=Halo%20Ibu%20Siti%20Maryam,%20saya%20Dimas%20pemesan%20Kost%20Melati%20Residence%20No%2014" target="_blank">
+                  <span class="material-symbols-outlined text-[20px]">chat</span>
+                  <span>Chat WhatsApp</span>
+                </a>
+                <a class="w-full py-3 px-space-md rounded-full bg-surface-container-low hover:bg-surface-container text-primary font-label-lg text-label-lg font-bold flex items-center justify-center gap-2 transition-all border border-slate-100" href="tel:+6281234567890">
+                  <span class="material-symbols-outlined text-[20px]">call</span>
+                  <span>Telepon Mitra</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Timeline Card -->
+            <div class="bg-surface-container-lowest/90 backdrop-blur-2xl p-space-lg rounded-2xl shadow-[0_20px_45px_-12px_rgba(2,132,199,0.1)] flex flex-col gap-space-md border border-slate-100">
+              <div class="flex items-center justify-between pb-space-xs border-b border-slate-100">
+                <h3 class="font-headline-sm text-headline-sm text-on-surface font-bold flex items-center gap-2">
+                  <span class="material-symbols-outlined text-primary text-[22px]">route</span>
+                  Tahapan Layanan Hari Ini
+                </h3>
+                <span class="font-label-sm text-label-sm text-primary font-extrabold bg-primary-fixed/50 px-2.5 py-1 rounded-full">
+                  Pengerjaan #3 Sedang Berjalan
+                </span>
+              </div>
+
+              <!-- Vertical Timeline Stack -->
+              <div id="milestoneContainer" class="relative pl-6 flex flex-col space-y-6 before:content-[''] before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-surface-container-highest">
+                <!-- Dynamically rendered by src/app.js -->
+              </div>
+
+              </div>
+
+              <!-- Action Pills -->
+              <div class="pt-space-xs flex items-center justify-between border-t border-slate-100">
+                <button onclick="showToast('Catatan akses disiapkan untuk mitra', 'info')" class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary flex items-center gap-1 font-semibold transition-colors cursor-pointer">
+                  <span class="material-symbols-outlined text-[16px]">edit_note</span>
+                  <span>Ubah Catatan Akses Kamar</span>
+                </button>
+                <button onclick="openWhatsAppCS()" class="font-label-sm text-label-sm text-primary hover:underline flex items-center gap-1 font-bold cursor-pointer">
+                  <span class="material-symbols-outlined text-[16px]">help</span>
+                  <span>Butuh Bantuan CS SHIFT</span>
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 4. Quality Commitment Banner -->
+        <section class="mt-space-xl w-full">
+          <div class="bg-gradient-to-r from-primary-container via-primary to-tertiary text-on-primary-container p-space-lg rounded-2xl shadow-[0_20px_40px_-15px_rgba(0,123,185,0.4)] flex flex-col md:flex-row items-center justify-between gap-space-md">
+            <div class="flex items-center gap-space-md">
+              <div class="w-14 h-14 rounded-2xl bg-secondary-container text-on-secondary-container flex items-center justify-center shrink-0 shadow-md">
+                <span class="material-symbols-outlined text-[32px]">thumb_up</span>
+              </div>
+              <div class="flex flex-col">
+                <h4 class="font-headline-sm text-headline-sm font-extrabold text-on-primary-container">
+                  Garansi Kinclong 100% atau Dibersihkan Ulang Gratis
+                </h4>
+                <p class="font-body-md text-body-md text-on-primary-container/85">
+                  Jika ada kerak atau noda kasur yang terlewat, lapor dalam 24 jam dan tim mitra akan datang kembali tanpa tambahan biaya sepeser pun.
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-space-xs shrink-0">
+              <span class="bg-surface-container-lowest/20 backdrop-blur-md px-space-md py-space-xs rounded-full font-label-md text-label-md text-on-primary-container font-semibold">
+                SOP Medis &amp; Sertifikat Higienis
+              </span>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="w-full bg-surface-container-low/80 mt-space-xl py-space-xl">
+    <div class="max-w-[1280px] mx-auto px-margin">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-space-md pb-space-lg">
+        <div class="bg-surface-container-lowest/90 p-space-md rounded-2xl flex items-center gap-space-md shadow-[0_10px_25px_-10px_rgba(2,132,199,0.06)]">
+          <div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-primary"><span class="material-symbols-outlined text-[24px]">verified_user</span></div>
+          <div><h4 class="font-label-lg text-label-lg text-on-surface font-bold">Garansi Barang Utuh 100%</h4><p class="font-body-sm text-body-sm text-on-surface-variant">Proteksi ganti rugi menyeluruh tanpa syarat berbelit</p></div>
+        </div>
+        <div class="bg-surface-container-lowest/90 p-space-md rounded-2xl flex items-center gap-space-md shadow-[0_10px_25px_-10px_rgba(2,132,199,0.06)]">
+          <div class="w-12 h-12 rounded-full bg-tertiary-fixed flex items-center justify-center text-tertiary"><span class="material-symbols-outlined text-[24px]">sanitizer</span></div>
+          <div><h4 class="font-label-lg text-label-lg text-on-surface font-bold">Higienitas Tersertifikasi</h4><p class="font-body-sm text-body-sm text-on-surface-variant">Standar pembersihan klinis untuk hunian steril</p></div>
+        </div>
+        <div class="bg-surface-container-lowest/90 p-space-md rounded-2xl flex items-center gap-space-md shadow-[0_10px_25px_-10px_rgba(2,132,199,0.06)]">
+          <div class="w-12 h-12 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary"><span class="material-symbols-outlined text-[24px]">local_shipping</span></div>
+          <div><h4 class="font-label-lg text-label-lg text-on-surface font-bold">Armada &amp; Tim Terverifikasi</h4><p class="font-body-sm text-body-sm text-on-surface-variant">Kru terdidik, berlatar belakang aman &amp; teruji</p></div>
+        </div>
+      </div>
+      <div class="flex flex-col md:flex-row items-center justify-between pt-space-lg gap-space-md">
+        <div class="flex items-center gap-space-sm">
+          <span class="font-headline-sm text-headline-sm text-primary font-bold tracking-tight">SHIFT</span>
+          <span class="font-body-sm text-body-sm text-on-surface-variant">© 2025 PT Siap Hadir Fleksibel Tuntas. Seluruh hak cipta dilindungi.</span>
+        </div>
+        <div class="flex items-center gap-space-lg">
+          <a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Syarat &amp; Ketentuan</a>
+          <a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Kebijakan Privasi</a>
+          <a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors" href="#" onclick="openWhatsAppCS()">Pusat Bantuan</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Footers & Scripts -->
+
+  <!-- GPS Interactive Telemetry Script -->
+  <script>
+    function refreshCleaningGpsTelemetry() {
+      const refreshBtn = document.getElementById('refreshBtn');
+      if (refreshBtn) {
+        refreshBtn.classList.add('rotate-180');
+        setTimeout(() => refreshBtn.classList.remove('rotate-180'), 600);
+      }
+      
+      const cleanerMarker = document.getElementById('cleanerMarker');
+      if (cleanerMarker) {
+        cleanerMarker.style.transition = 'transform 0.5s ease-out';
+        cleanerMarker.setAttribute('transform', 'translate(310, 218)');
+        setTimeout(() => {
+          cleanerMarker.setAttribute('transform', 'translate(295, 228)');
+        }, 1000);
+      }
+
+      if (typeof showToast === 'function') {
+        showToast('Telemetry GPS Siti Maryam diperbarui (Jarak: 1.4 km, ±3m)', 'success');
+      }
+    }
+
+    let mapScale = 1;
+    function zoomMap(factor) {
+      mapScale *= factor;
+      if (mapScale < 0.8) mapScale = 0.8;
+      if (mapScale > 1.5) mapScale = 1.5;
+      const canvas = document.getElementById('mapCanvasContainer');
+      if (canvas) {
+        const svg = canvas.querySelector('svg');
+        if (svg) svg.style.transform = `scale(${mapScale})`;
+        if (svg) svg.style.transition = 'transform 0.3s ease';
+      }
+    }
+  </script>
+  <!-- Leaflet.js Interactive Map Engine -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Supabase JS SDK CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- App Logic Engine -->
+  <script src="./src/app.js"></script>
+</body>
+</html>
