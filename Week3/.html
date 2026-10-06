@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHIFT - Jasa Pindahan & Bersih-Bersih</title>
+
+    <!-- CDN Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<!-- Ditambahkan class bg-slate-50 dan text-gray-800 di body -->
+
+<body class="bg-slate-50 text-gray-800 font-sans">
+
+    <!-- Header / Menu Atas -->
+    <header class="bg-white px-8 py-4 flex justify-between items-center border-b border-gray-200 shadow-sm">
+        <div class="text-xl font-bold text-blue-600">SHIFT</div>
+        <a href="#"
+            class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition">
+            Masuk / Login
+        </a>
+    </header>
+
+    <!-- Banner Penjelasan Singkat -->
+    <div class="text-center py-10 px-5 bg-white border-b border-gray-200">
+        <h1 class="text-3xl font-bold mb-2 text-gray-800">Jasa Pindahan & Bersih-Bersih Rumah/Kos</h1>
+        <p class="text-gray-600">Harga jelas otomatis sesuai jarak & lantai, tanpa perlu tawar-menawar ribet.</p>
+    </div>
+
+    <!-- Container Utama -->
+    <div class="max-w-3xl mx-auto my-8 px-5">
+        <h2 class="text-center text-xl font-bold mb-5 text-gray-800">Layanan Kami</h2>
+        <div class="flex gap-5 mb-8 flex-col sm:flex-row">
+            <div class="bg-white p-5 border border-gray-200 rounded-lg flex-1 shadow-sm hover:shadow-md transition">
+                <h3 class="text-lg font-bold text-blue-600 mb-2">1. Jasa Angkut / Pindahan</h3>
+                <p class="text-gray-600 text-sm">Bantuan angkut barang naik-turun tangga dari lokasi asal ke tujuan.</p>
+            </div>
+            <div class="bg-white p-5 border border-gray-200 rounded-lg flex-1 shadow-sm hover:shadow-md transition">
+                <h3 class="text-lg font-bold text-blue-600 mb-2">2. Bersih-Bersih Ruangan</h3>
+                <p class="text-gray-600 text-sm">Layanan pembersihan tempat tinggal dengan estimasi biaya sesuai
+                    kebutuhan.</p>
+            </div>
+        </div>
+
+        <!-- Cek Biaya Cepat -->
+        <div class="bg-white p-6 border border-gray-200 rounded-lg shadow-sm">
+            <h3 class="text-lg font-bold mb-4 text-gray-800">Cek Estimasi Biaya Cepat</h3>
+            <form>
+                <div class="mb-4">
+                    <label class="block mb-1 text-sm text-gray-700 font-medium">Alamat Asal</label>
+                    <input type="text" placeholder="Contoh: Jl. Soekarno Hatta No. 10"
+                        class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-1 text-sm text-gray-700 font-medium">Alamat Tujuan</label>
+                    <input type="text" placeholder="Contoh: Jl. Bandung No. 5"
+                        class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-1 text-sm text-gray-700 font-medium">Jumlah Lantai / Tangga</label>
+                    <input type="number" value="1"
+                        class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-1 text-sm text-gray-700 font-medium">Deskripsi Ruangan (opsional)</label>
+                    <textarea rows="2" placeholder="Contoh: Kamar kos 3x4 meter"
+                        class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+                <button type="button"
+                    class="btn-hitung w-full bg-green-600 hover:bg-green-700 text-white p-3 rounded font-medium transition cursor-pointer">
+                    Hitung Biaya Sekarang
+                </button>
+            </form>
+        </div>
+
+        <!-- Simulasi Hasil (akan diisi via JavaScript) -->
+        <div id="hasil-perhitungan" class="hidden bg-white p-6 mt-4 border border-green-200 rounded-lg shadow-sm">
+            <!-- Hasil akan muncul di sini -->
+        </div>
+    </div> <!-- Penutup Container Utama di sini -->
+
+    <!-- Footer ditaruh terpisah di luar container -->
+    <footer class="text-center py-6 text-gray-500 text-xs border-t border-gray-200 mt-10">
+        &copy; 2026 SHIFT - Siap Hadir, Instan, Fleksibel, Tuntas.
+    </footer>
+
+    <!-- File JavaScript di paling bawah sebelum </body> -->
+    <script src="script.js"></script>
+</body>
+
+</html>
