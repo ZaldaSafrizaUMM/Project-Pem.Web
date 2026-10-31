@@ -797,12 +797,12 @@
               <!-- Total Price Callout Card -->
               <div class="mt-space-md pt-space-md bg-surface-container-low/70 p-space-md rounded-2xl flex flex-col gap-1 border border-slate-100">
                 <div class="flex items-center justify-between">
-                  <span class="font-label-md text-label-md text-on-surface-variant line-through">Total Normal: <span class="js-subtotal-price">Rp 215.000</span></span>
-                  <span class="font-label-sm text-label-sm bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded-full font-bold js-savings-amount">Hemat Rp 32.250</span>
+                  <span class="font-label-md text-label-md text-on-surface-variant line-through">Total Normal: <span class="js-subtotal-price">-</span></span>
+                  <span class="font-label-sm text-label-sm bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded-full font-bold js-savings-amount">Hemat VIP</span>
                 </div>
                 <div class="flex items-baseline justify-between">
                   <span class="font-headline-sm text-headline-sm text-on-surface font-bold">Total Pembayaran:</span>
-                  <span class="font-headline-xl text-headline-xl text-primary font-extrabold tracking-tight js-total-price">Rp 182.750</span>
+                  <span class="font-headline-xl text-headline-xl text-primary font-extrabold tracking-tight js-total-price">Kalkulasi Otomatis</span>
                 </div>
                 <span class="font-body-sm text-body-sm text-on-surface-variant text-[11px] mt-0.5">Sudah termasuk PPN 11% &amp; kompensasi kru lengkap.</span>
               </div>
@@ -893,11 +893,11 @@
         </div>
         <div class="flex justify-between text-xs text-slate-500">
           <span>Nomor Pesanan</span>
-          <span class="font-bold text-slate-800 js-payment-order-id">#SHF-90214</span>
+          <span class="font-bold text-slate-800 js-payment-order-id">#SHF-...</span>
         </div>
         <div class="border-t pt-2 flex justify-between text-sm font-bold text-slate-900">
           <span>Total Pembayaran</span>
-          <span class="font-mono text-primary text-base js-total-price">Rp 182.750</span>
+          <span class="font-mono text-primary text-base js-total-price">Kalkulasi Otomatis</span>
         </div>
       </div>
 
@@ -1100,6 +1100,8 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <!-- Supabase JS SDK CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Central Shift Core Data Handler -->
+  <script src="./src/shift-core.js"></script>
   <!-- Calculator & State Engine -->
   <script src="./src/app.js"></script>
 </body>

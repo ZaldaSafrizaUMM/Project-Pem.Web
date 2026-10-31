@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>SHIFT Mitra — Portal Tugas Operasional Pegawai</title>
+  
+  <!-- Google Fonts & Material Symbols -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  
+  <!-- Tailwind CSS & Custom SHIFT Config -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#006194",
+            "primary-container": "#007bb9",
+            "primary-fixed": "#cce5ff",
+            "on-primary": "#ffffff",
+            "secondary": "#735c00",
+            "secondary-container": "#fed01b",
+            "secondary-fixed": "#ffe083",
+            "on-secondary-fixed": "#231b00",
+            "tertiary": "#006387",
+            "tertiary-fixed": "#c4e7ff",
+            "surface": "#faf8ff",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-low": "#f2f3ff",
+            "surface-container": "#eaedff",
+            "surface-container-high": "#e2e7ff",
+            "surface-container-highest": "#dae2fd",
+            "on-surface": "#131b2e",
+            "on-surface-variant": "#3f4850",
+            "outline-variant": "#bfc7d2",
+            "outline": "#707881",
+            "error": "#ba1a1a",
+            "error-container": "#ffdad6"
+          },
+          fontFamily: {
+            sans: ["Plus Jakarta Sans", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Supabase SDK & Shift Core -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./src/shift-core.js"></script>
+
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; overscroll-behavior: none; }
+    ::-webkit-scrollbar { display: none; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-surface text-on-surface antialiased min-h-screen flex flex-col">
+
+  <!-- HEADER PORTAL MITRA (HANYA MENAMPILKAN DATA AKUN LOGIN RESMI) -->
+  <header class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest/90 backdrop-blur-xl border-b border-outline-variant/25 shadow-sm">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-3 sm:gap-4">
+      
+      <!-- Identitas Pegawai yang Login (Strict User-Scoped) -->
+      <div class="flex items-center gap-3">
+        <a href="./index.html" title="Ke Beranda Pelanggan" class="hidden md:flex items-center justify-center w-10 h-10 rounded-2xl bg-surface-container hover:bg-surface-container-high text-primary transition-all shadow-sm">
+          <span class="material-symbols-outlined text-[20px]">home</span>
+        </a>
+
+        <div id="avatarInitials" class="w-11 h-11 rounded-2xl bg-primary flex items-center justify-center text-on-primary font-extrabold text-base shadow-md select-none shrink-0">
+          --
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span id="staffNameHeader" class="font-extrabold text-sm sm:text-lg text-on-surface tracking-tight truncate max-w-[180px] sm:max-w-[280px]">Memuat Akun...</span>
+            <span id="roleBadgeHeader" class="px-2.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed text-[10px] sm:text-[11px] font-bold uppercase tracking-wider whitespace-nowrap">
+              Verifikasi...
+            </span>
+          </div>
+          <p class="text-[11px] sm:text-xs text-on-surface-variant font-medium truncate" id="staffSubInfo">Memeriksa sesi login pegawai...</p>
+        </div>
+      </div>
+
+      <!-- Status Online / Offline & Tombol Logout -->
+      <div class="flex items-center gap-2 sm:gap-2.5 shrink-0">
+        <!-- Status Online / Offline -->
+        <button id="btnToggleOnline" onclick="toggleOnlineStatus()" class="flex items-center gap-2 px-3.5 py-2 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs shadow-sm transition-all cursor-pointer">
+          <span id="onlineDot" class="w-2.5 h-2.5 rounded-full bg-emerald-600 animate-ping"></span>
+          <span id="onlineStatusText" class="hidden sm:inline">ONLINE</span>
+        </button>
+
+        <!-- Tombol Logout -->
+        <button onclick="handleStaffLogout()" title="Keluar Akun" class="p-2.5 rounded-full bg-surface-container-low hover:bg-error-container text-on-surface-variant hover:text-error transition-all cursor-pointer">
+          <span class="material-symbols-outlined text-[18px]">logout</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 pt-28 pb-16 flex flex-col gap-6">
+
+    <!-- 1. RINGKASAN KINERJA PRIBADI PEGAWAI YANG LOGIN -->
+    <section class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+      <div class="p-4 rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant/20 flex flex-col justify-between">
+        <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Tugas Saya Hari Ini</span>
+        <div class="flex items-baseline gap-1.5 mt-2">
+          <span id="metricActiveCount" class="text-2xl font-extrabold text-primary">0</span>
+          <span class="text-xs font-semibold text-on-surface-variant">Penugasan</span>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant/20 flex flex-col justify-between">
+        <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Telah Saya Selesaikan</span>
+        <div class="flex items-baseline gap-1.5 mt-2">
+          <span id="metricDoneCount" class="text-2xl font-extrabold text-emerald-600">0</span>
+          <span class="text-xs font-semibold text-on-surface-variant">Tugas Tuntas</span>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant/20 flex flex-col justify-between">
+        <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Pendapatan Saya</span>
+        <div class="flex items-baseline gap-1.5 mt-2">
+          <span id="metricEarnings" class="text-xl font-extrabold text-on-surface">Rp 0</span>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant/20 flex flex-col justify-between">
+        <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Rating Performa Saya</span>
+        <div class="flex items-center gap-1 mt-2">
+          <span class="material-symbols-outlined text-secondary-container text-[20px]" style="font-variation-settings:'FILL' 1">star</span>
+          <span id="metricRating" class="text-xl font-extrabold text-on-surface">-</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. FILTER TAB TUGAS PRIBADI -->
+    <div class="flex items-center justify-between flex-wrap gap-3">
+      <div class="flex items-center gap-1.5 p-1 bg-surface-container-low rounded-full">
+        <button onclick="filterAssignments('active')" id="tabActiveBtn" class="px-4 py-2 rounded-full text-xs font-bold bg-primary text-on-primary shadow-sm transition-all cursor-pointer">
+          Tugas Aktif Saya (<span id="badgeActiveTab">0</span>)
+        </button>
+        <button onclick="filterAssignments('completed')" id="tabCompletedBtn" class="px-4 py-2 rounded-full text-xs font-bold text-on-surface-variant hover:text-on-surface transition-all cursor-pointer">
+          Riwayat Selesai Saya (<span id="badgeCompletedTab">0</span>)
+        </button>
+      </div>
+
+      <button onclick="fetchMyAssignedOrders(true)" id="btnSyncOrders" class="flex items-center gap-1.5 px-4 py-2 rounded-full bg-surface-container-lowest border border-outline-variant/30 text-xs font-bold text-primary hover:bg-surface-container-low transition-all shadow-sm cursor-pointer">
+        <span id="syncIcon" class="material-symbols-outlined text-[16px]">refresh</span>
+        <span>Sinkronkan Penugasan Saya</span>
+      </button>
+    </div>
+
+    <!-- 3. KONTAINER DAFTAR PENUGASAN KHUSUS AKUN INI -->
+    <div id="assignmentsContainer" class="flex flex-col gap-5">
+      <div class="rounded-3xl bg-surface-container-lowest border border-outline-variant/25 p-12 text-center flex flex-col items-center justify-center gap-3 shadow-sm">
+        <div class="w-12 h-12 rounded-full bg-primary-fixed/50 text-primary flex items-center justify-center animate-spin">
+          <span class="material-symbols-outlined text-[24px]">progress_activity</span>
+        </div>
+        <p class="text-xs font-bold text-on-surface-variant">Memuat daftar penugasan operasional resmi...</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL KONFIRMASI SELESAI & BUKTI FOTO PEKERJAAN -->
+  <div id="modalCompleteJob" class="fixed inset-0 z-50 bg-on-surface/50 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="w-full max-w-md bg-surface-container-lowest rounded-3xl p-6 shadow-2xl flex flex-col gap-4 border border-outline-variant/30 animate-in fade-in zoom-in duration-200">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-9 h-9 rounded-full bg-primary-fixed text-primary flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-[20px]">task_alt</span>
+          </div>
+          <h3 class="font-extrabold text-base text-on-surface">Konfirmasi Tugas Selesai</h3>
+        </div>
+        <button onclick="closeCompleteModal()" class="w-8 h-8 rounded-full bg-surface-container-low hover:bg-surface-container flex items-center justify-center text-on-surface-variant cursor-pointer">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+
+      <p class="text-xs text-on-surface-variant leading-relaxed">
+        Pastikan seluruh barang/ruangan pada tiket <strong id="modalTicketLabel" class="text-primary font-mono font-extrabold">#SHF-000</strong> telah diperiksa bersama pelanggan sebelum menutup tugas ini.
+      </p>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-bold text-on-surface">Unggah Foto Bukti Pekerjaan Tuntas</label>
+        <input id="proofFileInput" onchange="previewProofImage(event)" type="file" accept="image/*" class="w-full text-xs file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-primary-fixed file:text-primary hover:file:bg-primary-fixed/80 bg-surface-container-low rounded-2xl p-2 cursor-pointer" />
+        <div id="proofImagePreviewContainer" class="hidden relative w-full h-36 rounded-2xl overflow-hidden border border-outline-variant/30 mt-1">
+          <img id="proofImagePreview" src="" alt="Pratinjau Foto Bukti" class="w-full h-full object-cover" />
+          <button onclick="clearProofPreview()" type="button" class="absolute top-2 right-2 p-1 rounded-full bg-on-surface/70 text-surface hover:bg-on-surface">
+            <span class="material-symbols-outlined text-[16px]">close</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-bold text-on-surface">Catatan Serah Terima Kru</label>
+        <textarea id="completionNotes" rows="2" placeholder="Catatan serah terima pekerjaan bersama pelanggan..." class="w-full px-3.5 py-2.5 rounded-2xl bg-surface-container-low text-xs focus:outline-none focus:ring-2 focus:ring-primary border border-outline-variant/20"></textarea>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2 border-t border-outline-variant/20">
+        <button onclick="closeCompleteModal()" class="px-4 py-2.5 rounded-full bg-surface-container-low hover:bg-surface-container text-xs font-bold text-on-surface-variant cursor-pointer">
+          Batal
+        </button>
+        <button id="btnSubmitCompletion" onclick="submitJobCompletion()" class="px-6 py-2.5 rounded-full bg-secondary-container hover:bg-secondary-fixed text-on-secondary-fixed text-xs font-extrabold shadow-md flex items-center gap-1.5 transition-all cursor-pointer">
+          <span class="material-symbols-outlined text-[16px]">check_circle</span>
+          Tandai Selesai Sekarang
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="staffToast" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2.5 px-5 py-3.5 rounded-full bg-on-surface text-surface shadow-2xl">
+    <span class="material-symbols-outlined text-secondary-container text-[20px]" id="toastIcon">check_circle</span>
+    <span id="staffToastMsg" class="text-xs font-bold">Status diperbarui!</span>
+  </div>
+
+  <!-- LOGIKA JAVASCRIPT: STRICT USER-SCOPED DATA ACCESS -->
+  <script>
+    /*
+     * IMPLEMENTASI WEEK 4 - REST API & FETCH API (SINGLE PAGE / DYNAMIC APPLICATION - SHIFT)
+     * - Week 4 Task 01: Connect to API (fetch API & parsing JSON)
+     * - Week 4 Task 02: Display API Data (DOM manipulation dinamis dari API ke interface SHIFT)
+     * - Week 4 Task 03: Handle API State (feedback loading spinner, success data, error handling & tombol Coba Lagi)
+     */
+    const SUPABASE_URL = "https://ihyramlohtmngbuzmvgs.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImloeXJhbWxvaHRtbmdidXptdmdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwNjQxNTgsImV4cCI6MjEwNjY0MDE1OH0.DgTvZ555kpoRVXegx-MYJN8tzDyLs3w8TKYO61MtQFQ";
+    
+    let supabaseClient = null;
+    try {
+      if (window.supabase && typeof window.supabase.createClient === 'function') {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      }
+    } catch (e) {
+      console.warn('Inisialisasi Supabase JS SDK warning:', e);
+    }
+    if (!supabaseClient && window.ShiftCore && typeof window.ShiftCore.getSupabaseClient === 'function') {
+      supabaseClient = window.ShiftCore.getSupabaseClient();
+    }
+
+    // State Identitas Pegawai yang Login (MURNI dari sesi login aktif)
+    let loggedInStaff = {
+      id: null,
+      email: null,
+      nama_lengkap: null,
+      nomor_hp: null,
+      role: null
+    };
+    let isOnline = true;
+    let activeTab = 'active';
+    let myAssignedOrders = [];
+    let selectedOrderForCompletion = null;
+
+    const ROLE_CONFIG = {
+      'mitra_driver': {
+        label: 'Driver Armada',
+        categoryFilter: 'moving',
+        steps: [
+          { status: 'ditugaskan', btnText: 'Mulai Meluncur ke Titik Jemput (OTW)', nextStatus: 'otw', icon: 'local_shipping' },
+          { status: 'otw', btnText: 'Tiba & Mulai Muat Barang (Loading)', nextStatus: 'loading_barang', icon: 'inventory_2' },
+          { status: 'loading_barang', btnText: 'Mulai Pengantaran ke Lokasi Tujuan', nextStatus: 'pengantaran', icon: 'route' },
+          { status: 'pengantaran', btnText: 'Tiba di Tujuan & Bongkar Muatan (Unloading)', nextStatus: 'unloading', icon: 'move_to_inbox' },
+          { status: 'unloading', btnText: 'Konfirmasi Tugas Pindahan Selesai', nextStatus: 'selesai', icon: 'task_alt', isFinal: true }
+        ]
+      },
+      'mitra_helper': {
+        label: 'Kru Angkut',
+        categoryFilter: 'moving',
+        steps: [
+          { status: 'ditugaskan', btnText: 'Berangkat Menuju Lokasi Pelanggan (OTW)', nextStatus: 'otw', icon: 'directions_run' },
+          { status: 'otw', btnText: 'Tiba & Mulai Angkat/Packing Barang', nextStatus: 'loading_barang', icon: 'handyman' },
+          { status: 'loading_barang', btnText: 'Barang Masuk Armada — Menuju Tujuan', nextStatus: 'pengantaran', icon: 'local_shipping' },
+          { status: 'pengantaran', btnText: 'Tiba & Bongkar/Susun Barang Pelanggan', nextStatus: 'unloading', icon: 'weekend' },
+          { status: 'unloading', btnText: 'Konfirmasi Tugas Angkut Selesai', nextStatus: 'selesai', icon: 'task_alt', isFinal: true }
+        ]
+      },
+      'mitra_cleaner': {
+        label: 'Spesialis Bersih-Bersih',
+        categoryFilter: 'cleaning',
+        steps: [
+          { status: 'ditugaskan', btnText: 'Meluncur ke Lokasi Pelanggan (OTW)', nextStatus: 'otw', icon: 'directions_bike' },
+          { status: 'otw', btnText: 'Tiba di Lokasi & Siapkan Alat Sanitasi', nextStatus: 'loading_barang', icon: 'cleaning_services' },
+          { status: 'loading_barang', btnText: 'Mulai Pengerjaan Deep Cleaning & Sanitasi', nextStatus: 'pengantaran', icon: 'sanitizer' },
+          { status: 'pengantaran', btnText: 'Inspeksi Akhir Bersama Pelanggan', nextStatus: 'unloading', icon: 'fact_check' },
+          { status: 'unloading', btnText: 'Konfirmasi Deep Cleaning Selesai', nextStatus: 'selesai', icon: 'task_alt', isFinal: true }
+        ]
+      }
+    };
+
+    function normalizeRole(role) {
+      if (!role) return 'mitra_driver';
+      const r = String(role).toLowerCase();
+      if (r.includes('clean') || r.includes('bersih')) return 'mitra_cleaner';
+      if (r.includes('help') || r.includes('angkut')) return 'mitra_helper';
+      return 'mitra_driver';
+    }
+
+    // 1. Verifikasi Sesi Login Ketat saat Halaman Dibuka
+    document.addEventListener('DOMContentLoaded', async () => {
+      const isAuthenticated = await verifyAndLoadLoggedInStaff();
+      if (!isAuthenticated) return; // Mengalihkan ke auth.html jika tidak ada sesi
+
+      await fetchMyAssignedOrders();
+      subscribeMyRealtimeOrders();
+    });
+
+    async function verifyAndLoadLoggedInStaff() {
+      try {
+        let profileData = null;
+
+        // A. Cek Supabase Auth Session
+        if (supabaseClient && supabaseClient.auth) {
+          try {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session && session.user) {
+              const { data } = await supabaseClient
+                .from('profiles')
+                .select('*')
+                .or(`id.eq.${session.user.id},email.eq.${session.user.email}`)
+                .maybeSingle();
+
+              profileData = data || {
+                id: session.user.id,
+                email: session.user.email,
+                nama_lengkap: session.user.user_metadata?.nama_lengkap || session.user.email.split('@')[0],
+                nomor_hp: session.user.user_metadata?.nomor_hp || '-',
+                role: session.user.user_metadata?.role || 'mitra_driver'
+              };
+            }
+          } catch(e){}
+        }
+
+        // B. Cek Sesi Storage shift_logged_in_user / shift_user
+        if (!profileData) {
+          const savedProfileJson = sessionStorage.getItem('shift_logged_in_user') || 
+                                   localStorage.getItem('shift_logged_in_user') ||
+                                   sessionStorage.getItem('shift_user') ||
+                                   localStorage.getItem('shift_user');
+          if (savedProfileJson) {
+            try {
+              const parsed = JSON.parse(savedProfileJson);
+              if (parsed && (parsed.id || parsed.nomor_hp || parsed.email)) {
+                profileData = parsed;
+              }
+            } catch(e){}
+          }
+        }
+
+        // C. JIKA TIDAK ADA SESI SAMA SEKALI -> REDIRECT KE auth.html
+        if (!profileData || !profileData.id) {
+          alert('Sesi Anda belum aktif. Silakan masuk (Sign In) menggunakan akun Mitra SHIFT Anda terlebih dahulu.');
+          window.location.replace('./auth.html?path=login-mitra');
+          return false;
+        }
+
+        // D. JIKA ROLE ADALAH CUSTOMER -> ARAHKAN KE PORTAL PELANGGAN
+        const rawRole = profileData.role || '';
+        if (rawRole === 'customer') {
+          window.location.replace('./index.html');
+          return false;
+        }
+
+        // E. Simpan profil resmi pegawai
+        const staffRole = normalizeRole(rawRole);
+        loggedInStaff = {
+          id: profileData.id,
+          email: profileData.email || '',
+          nama_lengkap: profileData.nama_lengkap || profileData.full_name || 'Mitra SHIFT',
+          nomor_hp: profileData.nomor_hp || profileData.phone || '',
+          role: staffRole
+        };
+
+        // Render data murni dari profil ke header
+        const initials = loggedInStaff.nama_lengkap
+          .split(' ')
+          .map(n => n[0])
+          .join('')
+          .substring(0, 2)
+          .toUpperCase();
+
+        const avatarEl = document.getElementById('avatarInitials');
+        const nameEl = document.getElementById('staffNameHeader');
+        const badgeEl = document.getElementById('roleBadgeHeader');
+        const subInfoEl = document.getElementById('staffSubInfo');
+
+        if (avatarEl) avatarEl.textContent = initials || 'MT';
+        if (nameEl) nameEl.textContent = loggedInStaff.nama_lengkap;
+        if (badgeEl) badgeEl.textContent = (ROLE_CONFIG[loggedInStaff.role] || ROLE_CONFIG['mitra_driver']).label;
+        if (subInfoEl) subInfoEl.textContent = `ID Mitra: ${String(loggedInStaff.id).substring(0, 10)} • ${loggedInStaff.nomor_hp || loggedInStaff.email}`;
+
+        return true;
+      } catch (err) {
+        console.error('Gagal memverifikasi sesi login pegawai:', err.message);
+        window.location.replace('./auth.html?path=login-mitra');
+        return false;
+      }
+    }
+
+    // =========================================================================
+    // WEEK 4 - TASK 01: Connect to API (Fetch API & Parsing JSON)
+    // Menghubungkan aplikasi SHIFT ke endpoint REST API & mem-parsing data JSON
+    // =========================================================================
+    // 2. Strict User-Scoped: WAJIB filter .eq('mitra_id', loggedInStaff.id)
+    async function fetchMyAssignedOrders(showNotification = false) {
+      if (!loggedInStaff.id) return;
+
+      const syncIcon = document.getElementById('syncIcon');
+      if (syncIcon) syncIcon.classList.add('animate-spin');
+
+      // =========================================================================
+      // WEEK 4 - TASK 03: Handle API State (Loading Spinner, Success Data, Error Handling & Tombol Coba Lagi)
+      // Mengelola feedback visual saat loading, data berhasil dimuat, dan tombol retry saat error
+      // =========================================================================
+      const container = document.getElementById('assignmentsContainer');
+      if (container && (!myAssignedOrders || myAssignedOrders.length === 0)) {
+        container.innerHTML = `
+          <div class="col-span-full py-16 flex flex-col items-center justify-center text-center gap-4 bg-surface-container-lowest rounded-3xl border border-outline-variant/25 p-8 shadow-sm">
+            <div class="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+            <p class="text-sm font-semibold text-on-surface-variant">Menghubungkan ke REST API Supabase & memuat data tugas...</p>
+          </div>
+        `;
+      }
+
+      try {
+        let orders = [];
+
+        // STRICT FILTER: Hanya ambil data yang ditugaskan kepada ID pegawai ini
+        if (supabaseClient) {
+          const { data, error } = await supabaseClient
+            .from('orders')
+            .select('*')
+            .eq('mitra_id', loggedInStaff.id)
+            .order('updated_at', { ascending: false });
+
+          if (!error && Array.isArray(data)) {
+            orders = data;
+          } else if (error) {
+            console.warn('Supabase query orders error:', error.message);
+          }
+        }
+
+        myAssignedOrders = orders;
+        renderMyAssignments();
+
+        if (showNotification) {
+          showToast(`Sinkronisasi selesai: ${myAssignedOrders.length} tugas resmi akun Anda.`);
+        }
+      } catch (err) {
+        // =========================================================================
+        // WEEK 4 - TASK 03: Handle API State (Loading Spinner, Success Data, Error Handling & Tombol Coba Lagi)
+        // Mengelola feedback visual saat loading, data berhasil dimuat, dan tombol retry saat error
+        // =========================================================================
+        console.error('Error memuat tugas khusus pegawai:', err.message);
+        myAssignedOrders = [];
+        if (container) {
+          container.innerHTML = `
+            <div class="rounded-3xl bg-surface-container-lowest border border-error/30 p-8 sm:p-12 text-center flex flex-col items-center justify-center gap-4 shadow-sm">
+              <div class="w-16 h-16 rounded-full bg-error-container text-error flex items-center justify-center">
+                <span class="material-symbols-outlined text-[32px]">cloud_off</span>
+              </div>
+              <div class="max-w-md flex flex-col gap-1.5">
+                <h3 class="font-extrabold text-base sm:text-lg text-on-surface">Gagal Memuat Tugas dari API</h3>
+                <p class="text-xs text-on-surface-variant leading-relaxed">Terjadi kesalahan saat mem-parsing data dari Supabase REST API: ${err.message || 'Koneksi terputus'}.</p>
+              </div>
+              <button onclick="fetchMyAssignedOrders(true)" class="px-6 py-2.5 rounded-full bg-primary hover:bg-primary-container text-on-primary font-bold text-xs shadow-md transition-all cursor-pointer flex items-center gap-2">
+                <span class="material-symbols-outlined text-[16px]">refresh</span>
+                <span>Coba Lagi</span>
+              </button>
+            </div>
+          `;
+        } else {
+          renderMyAssignments();
+        }
+      } finally {
+        if (syncIcon) syncIcon.classList.remove('animate-spin');
+      }
+    }
+
+    // =========================================================================
+    // WEEK 4 - TASK 02: Display API Data (DOM Manipulation Dinamis ke Interface SHIFT)
+    // Merender data hasil API secara dinamis ke elemen DOM antarmuka aplikasi
+    // =========================================================================
+    // 3. Render Kartu Tugas Hanya Milik Pegawai yang Login
+    function renderMyAssignments() {
+      const container = document.getElementById('assignmentsContainer');
+      const cfg = ROLE_CONFIG[loggedInStaff.role] || ROLE_CONFIG['mitra_driver'];
+
+      const activeList = myAssignedOrders.filter(o => o.status_pesanan !== 'selesai' && o.status_pesanan !== 'dibatalkan');
+      const completedList = myAssignedOrders.filter(o => o.status_pesanan === 'selesai');
+
+      // Update Metrik Pribadi di Layar
+      document.getElementById('metricActiveCount').textContent = activeList.length;
+      document.getElementById('metricDoneCount').textContent = completedList.length;
+      document.getElementById('badgeActiveTab').textContent = activeList.length;
+      document.getElementById('badgeCompletedTab').textContent = completedList.length;
+
+      // Hitung penghasilan mitra (estimasi bagi hasil 80%)
+      const totalEarned = completedList.reduce((acc, item) => acc + (Number(item.total_biaya || 0) * 0.8), 0);
+      document.getElementById('metricEarnings').textContent = totalEarned > 0 ? ('Rp ' + Math.round(totalEarned).toLocaleString('id-ID')) : 'Rp 0';
+
+      // Hitung rata-rata rating
+      const ratedOrders = completedList.filter(o => o.rating_kru || o.rating || o.customer_rating);
+      if (ratedOrders.length > 0) {
+        const avg = ratedOrders.reduce((sum, o) => sum + Number(o.rating_kru || o.rating || o.customer_rating), 0) / ratedOrders.length;
+        document.getElementById('metricRating').textContent = avg.toFixed(1);
+      } else {
+        document.getElementById('metricRating').textContent = '-';
+      }
+
+      const listToShow = activeTab === 'active' ? activeList : completedList;
+
+      // =========================================================================
+      // WEEK 4 - TASK 03: Handle API State (Loading Spinner, Success Data, Error Handling & Tombol Coba Lagi)
+      // Mengelola feedback visual saat loading, data berhasil dimuat, dan tombol retry saat error
+      // =========================================================================
+      // Empty State Bersih Sesuai Nama Pegawai yang Login (Strict Empty State)
+      if (listToShow.length === 0) {
+        container.innerHTML = `
+          <div class="rounded-3xl bg-surface-container-lowest border border-outline-variant/25 p-8 sm:p-12 text-center flex flex-col items-center justify-center gap-4 shadow-sm">
+            <div class="w-16 h-16 rounded-full bg-surface-container-low text-primary flex items-center justify-center shadow-inner">
+              <span class="material-symbols-outlined text-[32px]">assignment_ind</span>
+            </div>
+            <div class="max-w-md flex flex-col gap-1.5">
+              <h3 class="font-extrabold text-base sm:text-lg text-on-surface">
+                ${activeTab === 'active' 
+                  ? `Halo ${loggedInStaff.nama_lengkap}, Belum Ada Tugas Baru untuk Akun Anda` 
+                  : `Belum Ada Riwayat Pekerjaan Selesai pada Akun Anda`}
+              </h3>
+              <p class="text-xs text-on-surface-variant leading-relaxed">
+                ${activeTab === 'active' 
+                  ? `Layar ini hanya menampilkan penugasan resmi untuk akun <strong>${loggedInStaff.nama_lengkap} (${cfg.label})</strong>. Saat Admin menugaskan pesanan kepada Anda, detail penugasan pelanggan akan langsung muncul di sini.`
+                  : 'Setiap tugas yang telah Anda selesaikan akan otomatis tersimpan di riwayat pribadi akun Anda beserta bukti foto serah terima.'}
+              </p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = listToShow.map(order => buildOrderCardHTML(order, cfg)).join('');
+    }
+
+    function buildOrderCardHTML(order, cfg) {
+      const rawTicket = order.nomor_tiket || order.orderId || `#SHF-${order.id}`;
+      const ticket = rawTicket.startsWith('#') ? rawTicket : `#${rawTicket}`;
+      
+      let status = (order.status_pesanan || order.status || 'ditugaskan').toLowerCase();
+      if (status === 'diproses' || status === 'menunggu_pembayaran') status = 'ditugaskan';
+      if (status === 'menuju_lokasi') status = 'otw';
+      if (status === 'sedang_dikerjakan') status = 'loading_barang';
+
+      const biaya = Number(order.total_biaya || order.totalPrice || 0).toLocaleString('id-ID');
+
+      const alamatJemput = order.alamat_jemput || order.pickup_address || order.pickupAddress || (order.pickup_lat ? `GPS: ${order.pickup_lat}, ${order.pickup_lng}` : 'Alamat titik lokasi sesuai tiket');
+      const alamatTujuan = order.alamat_tujuan || order.dropoff_address || order.dropoffAddress || (order.dropoff_lat ? `GPS: ${order.dropoff_lat}, ${order.dropoff_lng}` : '-');
+      const catatan = order.catatan || order.notes || order.catatan_pelanggan || 'Lakukan konfirmasi kepada pelanggan setibanya di lokasi.';
+      const namaPelanggan = order.nama_pelanggan || order.customer_name || order.customerName || 'Pelanggan SHIFT';
+      const rawPhone = order.nomor_hp_pelanggan || order.customer_phone || order.phone || '08123456789';
+      const cleanPhone = String(rawPhone).replace(/[^0-9]/g, '');
+      const telpPelanggan = cleanPhone.startsWith('0') ? '62' + cleanPhone.slice(1) : cleanPhone;
+
+      let stepIndex = cfg.steps.findIndex(s => s.status === status);
+      if (stepIndex < 0) stepIndex = 0;
+      const stepObj = cfg.steps[stepIndex] || cfg.steps[0];
+      
+      const progressPercent = status === 'selesai' ? 100 : Math.max(20, Math.round(((stepIndex + 1) / (cfg.steps.length + 1)) * 100));
+      const mapsQuery = encodeURIComponent(alamatJemput);
+      const isCleaning = (order.kategori_layanan === 'cleaning' || order.category === 'cleaning');
+
+      return `
+        <div class="rounded-3xl bg-surface-container-lowest p-5 sm:p-6 shadow-[0_16px_36px_rgba(0,97,148,0.08)] border border-outline-variant/25 flex flex-col gap-5 relative overflow-hidden transition-all">
+          <div class="absolute top-0 left-0 right-0 h-1.5 ${status === 'selesai' ? 'bg-emerald-500' : 'bg-gradient-to-r from-primary via-primary-container to-secondary-container'}"></div>
+
+          <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-outline-variant/20">
+            <div class="flex items-center gap-2.5">
+              <span class="px-3 py-1 rounded-full ${status === 'selesai' ? 'bg-emerald-100 text-emerald-800' : 'bg-secondary-fixed text-on-secondary-fixed'} text-xs font-extrabold uppercase tracking-wider flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">${status === 'selesai' ? 'verified' : 'bolt'}</span>
+                ${status.replace('_', ' ').toUpperCase()}
+              </span>
+              <span class="font-extrabold text-base text-on-surface font-mono tracking-tight">${ticket}</span>
+            </div>
+
+            <div class="text-right">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant block">Total Nilai Pesanan</span>
+              <span class="text-base font-extrabold text-primary">Rp ${biaya}</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-stretch">
+            <div class="md:col-span-7 bg-surface-container-low/70 rounded-2xl p-4 flex flex-col justify-between gap-3 border border-outline-variant/15">
+              <div class="flex items-start gap-3">
+                <div class="flex flex-col items-center mt-1">
+                  <div class="w-3.5 h-3.5 rounded-full bg-primary ring-4 ring-primary-fixed"></div>
+                  ${!isCleaning ? `
+                    <div class="w-0.5 h-10 bg-outline-variant/50 my-1"></div>
+                    <div class="w-3.5 h-3.5 rounded-full bg-secondary-container ring-4 ring-secondary-fixed"></div>
+                  ` : ''}
+                </div>
+                <div class="flex flex-col gap-3 flex-1">
+                  <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-primary block">
+                      ${isCleaning ? 'Alamat Pengerjaan Bersih-Bersih' : 'Alamat Penjemputan & Muat Barang'}
+                    </span>
+                    <p class="text-xs sm:text-sm font-bold text-on-surface mt-0.5">${alamatJemput}</p>
+                  </div>
+
+                  ${!isCleaning ? `
+                    <div>
+                      <span class="text-[10px] font-extrabold uppercase tracking-wider text-secondary block">
+                        Alamat Tujuan Pengantaran
+                      </span>
+                      <p class="text-xs sm:text-sm font-bold text-on-surface mt-0.5">${alamatTujuan}</p>
+                    </div>
+                  ` : ''}
+                </div>
+              </div>
+
+              <div class="p-3 rounded-xl bg-surface-container-lowest border border-outline-variant/20 flex items-start gap-2">
+                <span class="material-symbols-outlined text-primary text-[18px] mt-0.5 shrink-0">info</span>
+                <div>
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant block">Instruksi & Catatan Lokasi</span>
+                  <p class="text-xs text-on-surface font-medium mt-0.5">${catatan}</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="md:col-span-5 bg-surface-container-low/40 rounded-2xl p-4 flex flex-col justify-between gap-3 border border-outline-variant/20">
+              <div>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant block mb-2">Informasi Pelanggan</span>
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-primary text-on-primary font-extrabold text-sm flex items-center justify-center shrink-0">
+                    ${namaPelanggan.substring(0, 2).toUpperCase()}
+                  </div>
+                  <div class="min-w-0">
+                    <h4 class="text-sm font-bold text-on-surface truncate">${namaPelanggan}</h4>
+                    <p class="text-xs text-on-surface-variant truncate">Ditugaskan Kepada: <strong class="text-primary font-semibold">${loggedInStaff.nama_lengkap}</strong></p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2 pt-2">
+                <a href="https://www.google.com/maps/search/?api=1&query=${mapsQuery}" target="_blank" class="px-3 py-2.5 rounded-xl bg-surface-container-lowest hover:bg-primary-fixed/40 text-primary border border-primary/20 text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer">
+                  <span class="material-symbols-outlined text-[16px]">map</span>
+                  <span>Buka Maps</span>
+                </a>
+                <a href="https://wa.me/${telpPelanggan}?text=Halo%20kak%2C%20saya%20${encodeURIComponent(loggedInStaff.nama_lengkap)}%20dari%20SHIFT%20untuk%20pesanan%20${encodeURIComponent(ticket)}" target="_blank" class="px-3 py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer">
+                  <span class="material-symbols-outlined text-[16px]">chat</span>
+                  <span>WA Pelanggan</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Progress Bar Progres Kerja -->
+          <div class="flex flex-col gap-1.5">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-on-surface-variant">Progres Operasional</span>
+              <span class="font-extrabold text-primary">${progressPercent}%</span>
+            </div>
+            <div class="w-full h-2 rounded-full bg-surface-container-high overflow-hidden">
+              <div class="h-full bg-primary transition-all duration-500 rounded-full" style="width: ${progressPercent}%"></div>
+            </div>
+          </div>
+
+          <!-- Tombol Aksi Status Berjenjang -->
+          ${status !== 'selesai' ? `
+            <div class="pt-2 border-t border-outline-variant/20 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <span class="text-xs text-on-surface-variant font-medium">Update status kerja secara berurutan:</span>
+              ${stepObj.isFinal ? `
+                <button onclick="openCompleteModal('${order.id}', '${ticket}')" class="w-full sm:w-auto px-6 py-3 rounded-full bg-secondary-container hover:bg-secondary-fixed text-on-secondary-fixed font-extrabold text-xs shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer">
+                  <span class="material-symbols-outlined text-[18px]">${stepObj.icon}</span>
+                  <span>${stepObj.btnText}</span>
+                </button>
+              ` : `
+                <button onclick="advanceOrderStatus('${order.id}', '${ticket}', '${stepObj.nextStatus}')" class="w-full sm:w-auto px-6 py-3 rounded-full bg-primary hover:bg-primary-container text-on-primary font-extrabold text-xs shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer">
+                  <span class="material-symbols-outlined text-[18px]">${stepObj.icon}</span>
+                  <span>${stepObj.btnText}</span>
+                </button>
+              `}
+            </div>
+          ` : `
+            <div class="pt-2 border-t border-outline-variant/20 flex items-center justify-between text-emerald-800 bg-emerald-50 px-4 py-2.5 rounded-2xl border border-emerald-200">
+              <span class="text-xs font-bold flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[18px] text-emerald-600">check_circle</span>
+                Tugas ini telah Anda selesaikan secara tuntas.
+              </span>
+              <span class="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full">Selesai 100%</span>
+            </div>
+          `}
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // WEEK 4 - TASK 01: Connect to API (Fetch API & Parsing JSON)
+    // Menghubungkan aplikasi SHIFT ke endpoint REST API & mem-parsing data JSON
+    // =========================================================================
+    // 4. Update Status Hanya untuk Pesanan Milik Pegawai yang Login
+    async function advanceOrderStatus(orderId, ticket, nextStatus) {
+      try {
+        const updatePayload = {
+          status_pesanan: nextStatus,
+          updated_at: new Date().toISOString()
+        };
+
+        if (supabaseClient) {
+          await supabaseClient
+            .from('orders')
+            .update(updatePayload)
+            .eq('id', orderId)
+            .eq('mitra_id', loggedInStaff.id);
+        }
+
+        if (window.ShiftCore && typeof window.ShiftCore.updateOrderStatus === 'function') {
+          await window.ShiftCore.updateOrderStatus(orderId || ticket, nextStatus);
+        }
+
+        const targetOrder = myAssignedOrders.find(o => String(o.id) === String(orderId) || o.nomor_tiket === ticket);
+        if (targetOrder) {
+          targetOrder.status_pesanan = nextStatus;
+          targetOrder.updated_at = new Date().toISOString();
+        }
+
+        showToast(`Status tiket ${ticket} diperbarui ke: ${nextStatus.replace('_', ' ').toUpperCase()}`);
+        renderMyAssignments();
+      } catch (err) {
+        showToast('Gagal memperbarui status: ' + err.message);
+      }
+    }
+
+    function openCompleteModal(orderId, ticket) {
+      selectedOrderForCompletion = { id: orderId, ticket: ticket };
+      document.getElementById('modalTicketLabel').textContent = ticket;
+      document.getElementById('proofFileInput').value = '';
+      document.getElementById('completionNotes').value = '';
+      clearProofPreview();
+      const modal = document.getElementById('modalCompleteJob');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeCompleteModal() {
+      const modal = document.getElementById('modalCompleteJob');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      selectedOrderForCompletion = null;
+    }
+
+    function previewProofImage(e) {
+      const file = e.target.files && e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          const previewImg = document.getElementById('proofImagePreview');
+          const previewCont = document.getElementById('proofImagePreviewContainer');
+          if (previewImg && previewCont) {
+            previewImg.src = evt.target.result;
+            previewCont.classList.remove('hidden');
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function clearProofPreview() {
+      const previewImg = document.getElementById('proofImagePreview');
+      const previewCont = document.getElementById('proofImagePreviewContainer');
+      const fileInput = document.getElementById('proofFileInput');
+      if (fileInput) fileInput.value = '';
+      if (previewImg) previewImg.src = '';
+      if (previewCont) previewCont.classList.add('hidden');
+    }
+
+    // =========================================================================
+    // WEEK 4 - TASK 01: Connect to API (Fetch API & Parsing JSON)
+    // Menghubungkan aplikasi SHIFT ke endpoint REST API & mem-parsing data JSON
+    // =========================================================================
+    async function submitJobCompletion() {
+      if (!selectedOrderForCompletion || !loggedInStaff.id) return;
+      // =========================================================================
+      // WEEK 4 - TASK 03: Handle API State (Loading Spinner, Success Data, Error Handling & Tombol Coba Lagi)
+      // Mengelola feedback visual saat loading, data berhasil dimuat, dan tombol retry saat error
+      // =========================================================================
+      const btn = document.getElementById('btnSubmitCompletion');
+      btn.disabled = true;
+      btn.innerHTML = `<span class="material-symbols-outlined text-[16px] animate-spin">progress_activity</span> Menyimpan...`;
+
+      try {
+        const fileInput = document.getElementById('proofFileInput');
+        let uploadedPhotoUrl = null;
+
+        if (fileInput.files && fileInput.files[0]) {
+          const file = fileInput.files[0];
+          const cleanTicket = selectedOrderForCompletion.ticket.replace('#', '');
+          const fileName = `bukti_${loggedInStaff.id}_${cleanTicket}_${Date.now()}`;
+          
+          if (window.ShiftCore && typeof window.ShiftCore.uploadMitraDoc === 'function') {
+            const upRes = await window.ShiftCore.uploadMitraDoc(file, fileName);
+            if (upRes && upRes.publicUrl) uploadedPhotoUrl = upRes.publicUrl;
+          } else if (supabaseClient) {
+            const filePath = `bukti-selesai/${fileName}`;
+            const { data: upData } = await supabaseClient.storage.from('dokumen-mitra').upload(filePath, file);
+            if (upData) {
+              const { data: pubData } = supabaseClient.storage.from('dokumen-mitra').getPublicUrl(filePath);
+              uploadedPhotoUrl = pubData?.publicUrl;
+            }
+          }
+        }
+
+        const notes = document.getElementById('completionNotes')?.value?.trim() || 'Pekerjaan telah diselesaikan oleh kru SHIFT.';
+        const updatePayload = {
+          status_pesanan: 'selesai',
+          completed_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+
+        if (supabaseClient) {
+          await supabaseClient
+            .from('orders')
+            .update(updatePayload)
+            .eq('id', selectedOrderForCompletion.id)
+            .eq('mitra_id', loggedInStaff.id);
+        }
+
+        if (window.ShiftCore && typeof window.ShiftCore.completeOrderAndReview === 'function') {
+          await window.ShiftCore.completeOrderAndReview(selectedOrderForCompletion.id || selectedOrderForCompletion.ticket, {
+            notes,
+            proofUrl: uploadedPhotoUrl
+          });
+        }
+
+        const targetOrder = myAssignedOrders.find(o => String(o.id) === String(selectedOrderForCompletion.id) || o.nomor_tiket === selectedOrderForCompletion.ticket);
+        if (targetOrder) {
+          targetOrder.status_pesanan = 'selesai';
+          targetOrder.completed_at = new Date().toISOString();
+        }
+
+        showToast(`Tugas ${selectedOrderForCompletion.ticket} berhasil diselesaikan!`);
+        closeCompleteModal();
+        renderMyAssignments();
+      } catch (err) {
+        showToast('Gagal menyimpan penyelesaian: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<span class="material-symbols-outlined text-[16px]">check_circle</span> Tandai Selesai Sekarang`;
+      }
+    }
+
+    // 5. Realtime Listener Khusus Akun Pegawai Ini
+    function subscribeMyRealtimeOrders() {
+      if (!loggedInStaff.id || !supabaseClient) return;
+      try {
+        supabaseClient
+          .channel(`mitra-orders-${loggedInStaff.id}`)
+          .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'orders', filter: `mitra_id=eq.${loggedInStaff.id}` },
+            () => {
+              fetchMyAssignedOrders();
+              showToast('Data penugasan Anda baru saja diperbarui!');
+            }
+          )
+          .subscribe();
+      } catch (err) {
+        console.warn('Supabase realtime listener warning:', err);
+      }
+    }
+
+    function filterAssignments(tab) {
+      activeTab = tab;
+      document.getElementById('tabActiveBtn').className = tab === 'active'
+        ? "px-4 py-2 rounded-full text-xs font-bold bg-primary text-on-primary shadow-sm transition-all cursor-pointer"
+        : "px-4 py-2 rounded-full text-xs font-bold text-on-surface-variant hover:text-on-surface transition-all cursor-pointer";
+      document.getElementById('tabCompletedBtn').className = tab === 'completed'
+        ? "px-4 py-2 rounded-full text-xs font-bold bg-primary text-on-primary shadow-sm transition-all cursor-pointer"
+        : "px-4 py-2 rounded-full text-xs font-bold text-on-surface-variant hover:text-on-surface transition-all cursor-pointer";
+      renderMyAssignments();
+    }
+
+    function toggleOnlineStatus() {
+      isOnline = !isOnline;
+      const btn = document.getElementById('btnToggleOnline');
+      const dot = document.getElementById('onlineDot');
+      const txt = document.getElementById('onlineStatusText');
+
+      if (isOnline) {
+        btn.className = "flex items-center gap-2 px-3.5 py-2 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs shadow-sm transition-all cursor-pointer";
+        dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-600 animate-ping";
+        txt.textContent = "ONLINE";
+        showToast("Status diubah ke: SIAP TUGAS (ONLINE)");
+      } else {
+        btn.className = "flex items-center gap-2 px-3.5 py-2 rounded-full bg-surface-container-high text-on-surface-variant font-bold text-xs shadow-sm transition-all cursor-pointer";
+        dot.className = "w-2.5 h-2.5 rounded-full bg-outline";
+        txt.textContent = "OFFLINE";
+        showToast("Status diubah ke: ISTIRAHAT (OFFLINE)");
+      }
+    }
+
+    async function handleStaffLogout() {
+      if (!confirm('Apakah Anda yakin ingin keluar dari portal tugas Mitra SHIFT?')) return;
+      if (supabaseClient && supabaseClient.auth) {
+        try { await supabaseClient.auth.signOut(); } catch(e){}
+      }
+      sessionStorage.removeItem('shift_logged_in_user');
+      localStorage.removeItem('shift_logged_in_user');
+      sessionStorage.removeItem('shift_user');
+      localStorage.removeItem('shift_user');
+      window.location.replace('./auth.html?path=login-mitra');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('staffToast');
+      document.getElementById('staffToastMsg').textContent = msg;
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-24', 'opacity-0');
+      }, 3400);
+    }
+  </script>
+</body>
+</html>

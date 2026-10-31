@@ -243,7 +243,7 @@
             <div class="space-y-1">
               <div class="flex flex-wrap items-center gap-2">
                 <span class="px-space-sm py-0.5 rounded-full bg-primary-fixed text-primary font-label-sm text-label-sm font-bold tracking-wider">KODE BOOKING</span>
-                <span class="font-headline-sm text-headline-sm text-primary font-extrabold tracking-tight js-order-id">#SHF-90214</span>
+                <span class="font-headline-sm text-headline-sm text-primary font-extrabold tracking-tight js-order-id">#SHF-...</span>
                 <span class="px-space-sm py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-bold flex items-center gap-1">
                   <span class="material-symbols-outlined text-[14px]">bolt</span> Prioritas Instan
                 </span>
@@ -251,16 +251,16 @@
 
               <p class="font-body-md text-body-md text-on-surface-variant flex items-center gap-1.5 pt-1">
                 <span class="material-symbols-outlined text-[18px] text-primary">person</span>
-                <strong class="text-on-surface font-semibold js-customer-name">Dimas Pratama</strong>
+                <strong class="text-on-surface font-semibold js-customer-name">Pelanggan SHIFT</strong>
                 <span class="text-outline-variant">•</span>
-                <span class="js-customer-phone">+62 812-3456-7890</span>
+                <span class="js-customer-phone">+62 8...</span>
               </p>
 
               <div class="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm pt-0.5">
                 <span class="material-symbols-outlined text-[16px] text-tertiary">near_me</span>
-                <span class="font-medium text-on-surface js-pickup-loc">Kost Melati Residence</span>
+                <span class="font-medium text-on-surface js-pickup-loc">Titik Jemput</span>
                 <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
-                <span class="font-medium text-on-surface js-dropoff-loc">Apartemen Grand Kamala Lagoon</span>
+                <span class="font-medium text-on-surface js-dropoff-loc">Titik Tujuan</span>
               </div>
             </div>
 
@@ -359,7 +359,7 @@
                   <!-- Amount Details inside Slab -->
                   <div class="flex flex-col items-center md:items-start text-center md:text-left gap-space-sm flex-1">
                     <div class="flex items-center gap-2 mt-1">
-                      <span class="font-headline-xl text-headline-xl text-primary font-extrabold tracking-tight js-total-amount">Rp 182.750</span>
+                      <span class="font-headline-xl text-headline-xl text-primary font-extrabold tracking-tight js-total-amount">Menghitung...</span>
                       <button id="copy-btn" onclick="copyNominalToClipboard()" class="p-2 rounded-full bg-surface-container-highest text-primary hover:bg-primary hover:text-on-primary transition-all shadow-sm cursor-pointer" title="Salin Nominal">
                         <span class="material-symbols-outlined text-[18px]">content_copy</span>
                       </button>
@@ -371,7 +371,7 @@
                         <span class="material-symbols-outlined text-[16px]">info</span> Nominal Pas Hingga 3 Digit
                       </span>
                       <p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
-                        Termasuk 3 angka unik verifikasi sistem (<strong class="text-on-surface">Rp ...750</strong>) agar terdeteksi tanpa upload struk.
+                        Termasuk 3 angka unik verifikasi sistem agar terdeteksi seketika tanpa upload struk transfer.
                       </p>
                     </div>
 
@@ -471,7 +471,7 @@
 
                   <div class="flex items-center justify-between pt-1">
                     <span class="text-xs text-slate-500">Nominal Transfer (Pas):</span>
-                    <span class="font-mono text-lg font-extrabold text-primary js-total-amount">Rp 182.750</span>
+                    <span class="font-mono text-lg font-extrabold text-primary js-total-amount">Menghitung...</span>
                   </div>
                 </div>
 
@@ -597,7 +597,7 @@
                 <div class="flex items-center justify-between">
                   <div>
                     <span class="font-label-sm text-label-sm text-on-surface-variant font-bold uppercase tracking-wider">Total Dibayar</span>
-                    <p class="font-headline-md text-headline-md text-primary font-extrabold js-total-amount">Rp 182.750</p>
+                    <p class="font-headline-md text-headline-md text-primary font-extrabold js-total-amount">Menghitung...</p>
                   </div>
                   <span class="px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-md text-label-md font-bold">
                     Bebas Biaya Admin
@@ -640,7 +640,7 @@
             <span class="px-space-sm py-0.5 rounded-full bg-primary-fixed text-primary font-label-sm text-label-sm font-bold">TRANSAKSI TERVERIFIKASI</span>
             <h3 class="font-headline-md text-headline-md text-on-surface font-extrabold mt-2 mb-1">Pembayaran Sukses!</h3>
             <p class="font-body-md text-body-md text-on-surface-variant mb-space-lg">
-              Dana sebesar <strong class="text-on-surface js-total-amount">Rp 182.750</strong> telah diterima sistem. Mitra driver <strong class="js-driver-name">Budi Santoso</strong> sedang bergerak menuju titik jemput.
+              Dana sebesar <strong class="text-on-surface js-total-amount">...</strong> telah diterima sistem. Mitra petugas <strong class="js-driver-name">Mitra SHIFT</strong> sedang bergerak menuju lokasi pengerjaan.
             </p>
 
             <div class="bg-surface-container-low p-space-md rounded-xl text-left mb-space-lg space-y-2 border border-slate-200">
@@ -744,6 +744,8 @@
 
   <!-- Supabase JS SDK CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Central Shift Core Data Handler -->
+  <script src="./src/shift-core.js"></script>
   <!-- Dynamic App Logic -->
   <script src="./src/app.js"></script>
 </body>

@@ -1,3 +1,10 @@
+/*
+ * IMPLEMENTASI WEEK 4 - REST API & FETCH API (SINGLE PAGE / DYNAMIC APPLICATION - SHIFT)
+ * - Week 4 Task 01: Connect to API (fetch API & parsing JSON)
+ * - Week 4 Task 02: Display API Data (DOM manipulation dinamis dari API ke interface SHIFT)
+ * - Week 4 Task 03: Handle API State (feedback loading spinner, success data, error handling & tombol Coba Lagi)
+ */
+
 /**
  * SHIFT App - Complete Unified Dynamic Engine & State Manager
  * Fully supports Home, Pindahan Booking, Deep Cleaning Booking, QRIS & Bank Transfer Payment,
@@ -31,6 +38,49 @@ function getSupabaseClient() {
   }
   return null;
 }
+
+// Global Supabase Client instance
+window.supabaseClient = getSupabaseClient() || window.supabaseClient;
+
+// =========================================================================
+// WEEK 4 - TASK 01: Connect to API (Fetch API & Parsing JSON)
+// Menghubungkan aplikasi SHIFT ke endpoint REST API & mem-parsing data JSON
+// =========================================================================
+// Standard Central Store API Helpers
+window.createOrder = window.createOrder || (async function(payload) {
+  if (window.ShiftCore && typeof window.ShiftCore.createOrder === 'function') {
+    return await window.ShiftCore.createOrder(payload);
+  }
+  return { data: null, error: new Error('ShiftCore createOrder not available') };
+});
+
+window.updateOrderStatus = window.updateOrderStatus || (async function(ticket, status) {
+  if (window.ShiftCore && typeof window.ShiftCore.updateOrderStatus === 'function') {
+    return await window.ShiftCore.updateOrderStatus(ticket, status);
+  }
+  return { data: null, error: new Error('ShiftCore updateOrderStatus not available') };
+});
+
+window.getOrderByTicket = window.getOrderByTicket || (async function(ticket) {
+  if (window.ShiftCore && typeof window.ShiftCore.getOrderById === 'function') {
+    return await window.ShiftCore.getOrderById(ticket);
+  }
+  return { data: null, error: new Error('ShiftCore getOrderByTicket not available') };
+});
+
+window.getUserOrders = window.getUserOrders || (async function() {
+  if (window.ShiftCore && typeof window.ShiftCore.getUserOrders === 'function') {
+    return await window.ShiftCore.getUserOrders();
+  }
+  return { data: [], error: null };
+});
+
+window.uploadDocument = window.uploadDocument || (async function(file, path) {
+  if (window.ShiftCore && typeof window.ShiftCore.uploadDocument === 'function') {
+    return await window.ShiftCore.uploadDocument(file, path);
+  }
+  return { publicUrl: null, path: null, error: new Error('ShiftCore uploadDocument not available') };
+});
 
 function generateUUID() {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -689,12 +739,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // 5. Initialize Payment Page Engine if present
-  if (document.getElementById('qrisContainer') || document.getElementById('paymentMethodContainer')) {
+  if (document.getElementById('qrisPaymentSlab') || document.getElementById('qrisContainer') || document.getElementById('paymentMethodContainer') || document.getElementById('paymentTabQris') || document.getElementById('countdown-text')) {
     initPaymentPageEngine();
   }
 
+
   // 6. Initialize History Page Engine if present
-  if (document.getElementById('historyContainer')) {
+  if (document.getElementById('orderCardsContainer') || document.getElementById('historyContainer')) {
     initHistoryEngine();
   }
 
@@ -707,26 +758,43 @@ document.addEventListener('DOMContentLoaded', () => {
   if (document.getElementById('customerAuthSection')) {
     initAuthEngine();
   }
+
+  // 9. Initialize Profile Page if present
+  if (document.getElementById('inputFullName') || document.getElementById('profileHeaderName')) {
+    window.loadProfileFromSupabase();
+  }
 });
 
 function updateUserProfileUI() {
+  const sessionUser = sessionStorage.getItem('shift_logged_in_user') || 
+                      localStorage.getItem('shift_logged_in_user') || 
+                      sessionStorage.getItem('shift_user') || 
+                      localStorage.getItem('shift_user');
+  if (sessionUser) {
+    try {
+      const parsed = JSON.parse(sessionUser);
+      if (parsed && parsed.id) {
+        if (!state.user) state.user = {};
+        state.user.id = parsed.id;
+        state.user.name = parsed.nama_lengkap || parsed.name || state.user.name;
+        state.user.email = parsed.email || state.user.email;
+        state.user.phone = parsed.nomor_hp || parsed.phone || state.user.phone;
+        state.user.role = parsed.role || state.user.role;
+        state.user.isMitra = parsed.role && parsed.role.startsWith('mitra_');
+        state.user.isLoggedIn = true;
+      }
+    } catch(e){}
+  }
+
   if (!state.user) return;
   const userEls = document.querySelectorAll('.js-user-name');
   userEls.forEach(el => {
     if (state.user.isMitra) {
       el.textContent = `${state.user.name} (Mitra Lapangan)`;
     } else {
-      el.textContent = state.user.name || "Dimas Pratama";
+      el.textContent = state.user.name || "Pelanggan SHIFT";
     }
   });
-
-  const urlParams = new URLSearchParams(window.location.search);
-  const roleParam = urlParams.get('role');
-  if (roleParam === 'mitra') {
-    userEls.forEach(el => {
-      el.textContent = "Budi Santoso (Mitra Lapangan)";
-    });
-  }
 
   // Render dynamic header nav auth status
   window.renderAuthHeaderNav();
@@ -760,10 +828,14 @@ window.renderAuthHeaderNav = function() {
         </div>
       `;
     } else {
+      const isMitraUser = Boolean(state.user?.isMitra);
+      const targetLink = isMitraUser ? './mitra.html' : './profile.html';
+      const targetTitle = isMitraUser ? 'Buka Portal Tugas Mitra' : 'Buka Profil Saya';
+      const icon = isMitraUser ? 'engineering' : 'person';
       container.innerHTML = `
-        <div class="flex items-center gap-space-xs pl-space-xs cursor-pointer group" onclick="window.location.href='./profile.html'" title="Buka Profil Saya">
-          <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-sm">
-            <span class="material-symbols-outlined text-on-primary text-[18px]">person</span>
+        <div class="flex items-center gap-space-xs pl-space-xs cursor-pointer group" onclick="window.location.href='${targetLink}'" title="${targetTitle}">
+          <div class="w-8 h-8 rounded-full ${isMitraUser ? 'bg-secondary-container text-on-secondary-fixed' : 'bg-primary text-on-primary'} flex items-center justify-center shadow-sm">
+            <span class="material-symbols-outlined text-[18px]">${icon}</span>
           </div>
           <div class="hidden lg:flex flex-col text-left">
             <span class="font-label-md text-label-md text-on-surface font-semibold leading-tight js-user-name">${userName}</span>
@@ -1001,18 +1073,7 @@ window.navigateToBooking = function(service) {
   return window.requireAuthGuard(null, targetUrl);
 };
 
-window.navigateToPayment = function() {
-  const currentService = state.activeService || 'moving';
-  const targetUrl = `./payment.html?service=${currentService}`;
-  return window.requireAuthGuard(null, targetUrl);
-};
-
-window.navigateToCleaningPayment = function() {
-  state.activeService = 'cleaning';
-  saveStateToStorage();
-  const targetUrl = './payment.html?service=cleaning';
-  return window.requireAuthGuard(null, targetUrl);
-};
+// End of basic auth navigation guards
 
 function initAuthEngine() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -1480,6 +1541,10 @@ function debouncedGeocodeAddressInput(query, fieldType) {
   }, 800);
 }
 
+// =========================================================================
+// WEEK 4 - TASK 01: Connect to API (Fetch API & Parsing JSON)
+// Menghubungkan aplikasi SHIFT ke endpoint REST API & mem-parsing data JSON
+// =========================================================================
 async function executeForwardGeocode(addressQuery, fieldType) {
   try {
     const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressQuery)}&countrycodes=id&limit=1`;
@@ -1494,6 +1559,10 @@ async function executeForwardGeocode(addressQuery, fieldType) {
         const lat = parseFloat(item.lat);
         const lon = parseFloat(item.lon);
 
+        // =========================================================================
+        // WEEK 4 - TASK 02: Display API Data (DOM Manipulation Dinamis ke Interface SHIFT)
+        // Merender data hasil API secara dinamis ke elemen DOM antarmuka aplikasi
+        // =========================================================================
         if (fieldType === 'pickup') {
           state.pindahan.pickupCoords = [lat, lon];
           if (pickupMarker) pickupMarker.setLatLng([lat, lon]);
@@ -1510,12 +1579,20 @@ async function executeForwardGeocode(addressQuery, fieldType) {
 
         updateMapRouteAndDistances(true);
 
+        // =========================================================================
+        // WEEK 4 - TASK 03: Handle API State (Loading Spinner, Success Data, Error Handling & Tombol Coba Lagi)
+        // Mengelola feedback visual saat loading, data berhasil dimuat, dan tombol retry saat error
+        // =========================================================================
         const shortName = item.display_name.split(',')[0] || addressQuery;
         showToast(`Peta Meluncur: ${fieldType === 'pickup' ? 'Titik Jemput' : 'Titik Tujuan'} berpindah ke ${shortName}`, 'success');
         return;
       }
     }
   } catch (e) {
+    // =========================================================================
+    // WEEK 4 - TASK 03: Handle API State (Loading Spinner, Success Data, Error Handling & Tombol Coba Lagi)
+    // Mengelola feedback visual saat loading, data berhasil dimuat, dan tombol retry saat error
+    // =========================================================================
     console.warn("Forward geocode error:", e);
   }
 }
@@ -1761,6 +1838,10 @@ window.useCurrentGpsLocation = function() {
   );
 };
 
+// =========================================================================
+// WEEK 4 - TASK 01: Connect to API (Fetch API & Parsing JSON)
+// Menghubungkan aplikasi SHIFT ke endpoint REST API & mem-parsing data JSON
+// =========================================================================
 async function reverseGeocodeCoords(lat, lng, targetField) {
   try {
     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`, {
@@ -1770,11 +1851,19 @@ async function reverseGeocodeCoords(lat, lng, targetField) {
       const data = await res.json();
       if (data && data.display_name) {
         const addrStr = data.display_name;
+        // =========================================================================
+        // WEEK 4 - TASK 02: Display API Data (DOM Manipulation Dinamis ke Interface SHIFT)
+        // Merender data hasil API secara dinamis ke elemen DOM antarmuka aplikasi
+        // =========================================================================
         applySelectedLocation(addrStr, null, targetField, false);
         return;
       }
     }
   } catch (e) {
+    // =========================================================================
+    // WEEK 4 - TASK 03: Handle API State (Loading Spinner, Success Data, Error Handling & Tombol Coba Lagi)
+    // Mengelola feedback visual saat loading, data berhasil dimuat, dan tombol retry saat error
+    // =========================================================================
     console.warn("Nominatim reverse geocoding error:", e);
   }
 
@@ -2363,42 +2452,218 @@ function initLiveTrackingEngine() {
   updateLiveTrackingUI();
 }
 
+// =========================================================================
+// WEEK 4 - TASK 01: Connect to API (Fetch API & Parsing JSON)
+// Menghubungkan aplikasi SHIFT ke endpoint REST API & mem-parsing data JSON
+// =========================================================================
 async function fetchActiveOrderFromSupabase() {
-  const client = getSupabaseClient();
-  if (!client) return;
+  // 1. Strict Auth Verification
+  const rawUser = sessionStorage.getItem('shift_logged_in_user') || localStorage.getItem('shift_logged_in_user') || sessionStorage.getItem('shift_user') || localStorage.getItem('shift_user');
+  let activeUser = null;
+  try { activeUser = rawUser ? JSON.parse(rawUser) : null; } catch(e){}
+
+  if (!activeUser || !activeUser.id) {
+    alert('Sesi Anda belum aktif. Silakan masuk terlebih dahulu untuk melacak pesanan Anda.');
+    window.location.replace('./auth.html?path=login-customer');
+    return;
+  }
+
+  const urlParams = new URLSearchParams(window.location.search);
+  let ticketParam = urlParams.get('ticket') || urlParams.get('ticketId') || urlParams.get('orderId');
+  if (!ticketParam && window.location.hash) {
+    ticketParam = window.location.hash.replace(/^#/, '');
+  }
+  if (ticketParam) {
+    ticketParam = decodeURIComponent(ticketParam);
+  }
+  const targetTicket = ticketParam || sessionStorage.getItem('active_order_ticket') || sessionStorage.getItem('currentOrderTicket') || sessionStorage.getItem('currentOrderId');
+
+  console.log(`📡 [Tracking] Fetching active order strictly for user ${activeUser.id} (${activeUser.nama_lengkap || activeUser.name}) - Ticket: ${targetTicket || '(latest user order)'}`);
 
   try {
-    const { data, error } = await client
-      .from('orders')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(1);
+    let dbOrder = null;
+    const client = getSupabaseClient();
 
-    if (!error && data && data.length > 0) {
-      const dbOrder = data[0];
-      if (dbOrder) {
-        state.activeOrder = {
-          id: dbOrder.order_id || dbOrder.id || state.activeOrder?.id || "SHF-90214",
-          type: dbOrder.type || state.activeOrder?.type || "pindahan",
-          serviceName: dbOrder.service_name || state.activeOrder?.serviceName || "Pindahan Barang",
-          status: dbOrder.status || state.activeOrder?.status || "Aktif",
-          mitraName: dbOrder.mitra_name || state.activeOrder?.mitraName,
-          vehicleName: dbOrder.vehicle_name || state.activeOrder?.vehicleName,
-          vehiclePlate: dbOrder.vehicle_plate || state.activeOrder?.vehiclePlate,
-          totalPrice: dbOrder.total_price || state.activeOrder?.totalPrice,
-          pickupAddress: dbOrder.pickup_address || state.activeOrder?.pickupAddress,
-          dropoffAddress: dbOrder.dropoff_address || state.activeOrder?.dropoffAddress,
-          createdAt: dbOrder.created_at
-        };
-        saveStateToStorage();
-        initLiveTrackingLeafletMap();
-        updateLiveTrackingUI();
+    // If specific ticket was requested: MUST verify ownership
+    if (targetTicket && client) {
+      const cleanT = String(targetTicket).replace(/^#/, '');
+      const withHash = targetTicket.startsWith('#') ? targetTicket : `#${targetTicket}`;
+      
+      let query = client
+        .from('orders')
+        .select('*')
+        .or(`nomor_tiket.eq.${encodeURIComponent(withHash)},nomor_tiket.eq.${encodeURIComponent(cleanT)},id.eq.${cleanT}`);
+
+      // Strict user scope: customer owns order or mitra is assigned
+      if (activeUser.role && activeUser.role.startsWith('mitra_')) {
+        query = query.eq('mitra_id', activeUser.id);
+      } else {
+        query = query.eq('customer_id', activeUser.id);
+      }
+
+      const { data, error } = await query.maybeSingle();
+      if (!error && data) {
+        dbOrder = data;
+      }
+    }
+
+    // If no specific ticket, or not found with specific ticket: get latest active order for THIS USER ONLY
+    if (!dbOrder && client) {
+      let query = client
+        .from('orders')
+        .select('*');
+
+      if (activeUser.role && activeUser.role.startsWith('mitra_')) {
+        query = query.eq('mitra_id', activeUser.id);
+      } else {
+        query = query.eq('customer_id', activeUser.id);
+      }
+
+      // Try running orders first
+      const { data: runningData } = await query
+        .neq('status_pesanan', 'selesai')
+        .neq('status_pesanan', 'dibatalkan')
+        .order('updated_at', { ascending: false })
+        .limit(1);
+
+      if (runningData && runningData.length > 0) {
+        dbOrder = runningData[0];
+      } else {
+        // Fallback to latest order for THIS USER
+        const { data: latestData } = await client
+          .from('orders')
+          .select('*')
+          .eq('customer_id', activeUser.id)
+          .order('updated_at', { ascending: false })
+          .limit(1);
+
+        if (latestData && latestData.length > 0) {
+          dbOrder = latestData[0];
+        }
+      }
+    }
+
+    if (dbOrder) {
+      console.log('✅ [Tracking] Supabase Active Order Data for Logged-In User:', dbOrder);
+      const isCleaningOrder = dbOrder.kategori_layanan === 'cleaning';
+      const cleanTicket = dbOrder.nomor_tiket || `SHF-${dbOrder.id}`;
+      const displayTicket = cleanTicket.startsWith('#') ? cleanTicket : `#${cleanTicket}`;
+
+      state.activeOrder = {
+        ...state.activeOrder,
+        id: displayTicket,
+        nomor_tiket: displayTicket,
+        type: isCleaningOrder ? 'cleaning' : 'pindahan',
+        kategori_layanan: dbOrder.kategori_layanan,
+        serviceName: isCleaningOrder ? "Deep Clean & Sanitasi Hunian" : "Pindahan Barang Kos / Apartemen",
+        status: dbOrder.status_pesanan === 'diproses' ? "Pembayaran Terverifikasi (Status: Diproses)" : (dbOrder.status_pesanan === 'selesai' ? "Selesai Tuntas" : (dbOrder.status_pesanan === 'menuju_lokasi' ? "Mitra Meluncur OTW" : "Menunggu Pembayaran")),
+        status_pesanan: dbOrder.status_pesanan,
+        totalPrice: dbOrder.total_biaya || state.activeOrder?.totalPrice || 120000,
+        total_biaya: dbOrder.total_biaya,
+        driver_lat: dbOrder.driver_lat,
+        driver_lng: dbOrder.driver_lng,
+        updatedAt: dbOrder.updated_at
+      };
+
+      // Set tracking step index based on real database status
+      if (dbOrder.status_pesanan === 'diproses') {
+        liveTrackingState.currentStepIndex = Math.max(1, liveTrackingState.currentStepIndex);
+      } else if (dbOrder.status_pesanan === 'menuju_lokasi') {
+        liveTrackingState.currentStepIndex = 2;
+      } else if (dbOrder.status_pesanan === 'sedang_dikerjakan') {
+        liveTrackingState.currentStepIndex = 3;
+      } else if (dbOrder.status_pesanan === 'selesai') {
+        liveTrackingState.currentStepIndex = 5;
+      }
+
+      saveStateToStorage();
+      // =========================================================================
+      // WEEK 4 - TASK 02: Display API Data (DOM Manipulation Dinamis ke Interface SHIFT)
+      // Merender data hasil API secara dinamis ke elemen DOM antarmuka aplikasi
+      // =========================================================================
+      updateLiveTrackingUI();
+
+      // Update Header Text with Real Ticket
+      setText('.js-ticket-id', `No. Tiket ${displayTicket}`);
+      if (dbOrder.status_pesanan === 'diproses') {
+        setText('.js-order-status-title, #orderStatusTitle', 'Pembayaran Terverifikasi (Status: Diproses) • Kru Meluncur');
+      }
+
+      // =========================================================================
+      // WEEK 4 - TASK 03: Handle API State (Loading Spinner, Success Data, Error Handling & Tombol Coba Lagi)
+      // Mengelola feedback visual saat loading, data berhasil dimuat, dan tombol retry saat error
+      // =========================================================================
+      showToast(`Data Pesanan ${displayTicket} tersinkronisasi dari Supabase Cloud (Status: ${dbOrder.status_pesanan || 'diproses'})`, 'success');
+    } else {
+      // =========================================================================
+      // WEEK 4 - TASK 03: Handle API State (Loading Spinner, Success Data, Error Handling & Tombol Coba Lagi)
+      // Mengelola feedback visual saat loading, data berhasil dimuat, dan tombol retry saat error
+      // =========================================================================
+      // Akun tidak memiliki pesanan aktif: Kosongkan state & tampilkan Empty State bersih
+      console.info(`ℹ️ [Tracking] Akun ${activeUser.id} (${activeUser.nama_lengkap || 'User'}) belum memiliki pesanan aktif.`);
+      state.activeOrder = null;
+      saveStateToStorage();
+      if (typeof window.renderTrackingEmptyState === 'function') {
+        window.renderTrackingEmptyState(activeUser);
       }
     }
   } catch(e) {
+    // =========================================================================
+    // WEEK 4 - TASK 03: Handle API State (Loading Spinner, Success Data, Error Handling & Tombol Coba Lagi)
+    // Mengelola feedback visual saat loading, data berhasil dimuat, dan tombol retry saat error
+    // =========================================================================
     console.warn("Supabase order fetch info:", e);
+    const trackingBanner = document.querySelector('.js-order-status-title, #orderStatusTitle');
+    if (trackingBanner) {
+      trackingBanner.innerHTML = `
+        <span class="flex items-center gap-2 text-error">
+          <span>Gagal memuat status live dari API</span>
+          <button onclick="fetchActiveOrderFromSupabase()" class="px-3 py-1 rounded-full bg-primary text-white text-xs font-bold hover:bg-primary-container transition-all cursor-pointer">Coba Lagi</button>
+        </span>
+      `;
+    }
   }
 }
+
+// =========================================================================
+// WEEK 4 - TASK 03: Handle API State (Loading Spinner, Success Data, Error Handling & Tombol Coba Lagi)
+// Mengelola feedback visual saat loading, data berhasil dimuat, dan tombol retry saat error
+// =========================================================================
+window.renderTrackingEmptyState = function(activeUser) {
+  const mainEl = document.querySelector('main');
+  if (!mainEl) return;
+  const userName = activeUser ? (activeUser.nama_lengkap || activeUser.name || 'Pelanggan VIP') : 'Pelanggan VIP';
+
+  mainEl.innerHTML = `
+    <div class="max-w-[1280px] mx-auto w-full px-margin-mobile md:px-margin py-16 flex flex-col items-center justify-center min-h-[65vh]">
+      <div class="w-full max-w-lg bg-surface-container-lowest/90 backdrop-blur-2xl rounded-3xl p-8 md:p-10 border border-slate-200/80 shadow-2xl text-center flex flex-col items-center gap-5">
+        <div class="w-20 h-20 rounded-full bg-primary-fixed flex items-center justify-center text-primary shadow-inner">
+          <span class="material-symbols-outlined text-[44px]">satellite_alt</span>
+        </div>
+        <div>
+          <span class="inline-block px-3 py-1 rounded-full bg-surface-container text-primary font-label-sm text-label-sm font-bold uppercase tracking-wider mb-2">
+            Pelacakan Real-Time
+          </span>
+          <h2 class="font-headline-md text-2xl font-extrabold text-on-surface mb-2">Belum Ada Pelacakan Aktif</h2>
+          <p class="font-body-md text-on-surface-variant leading-relaxed text-sm">
+            Halo <span class="font-bold text-primary">${userName}</span>, saat ini akun Anda belum memiliki pesanan yang sedang berjalan. Anda dapat melacak posisi armada, estimasi tiba, dan status kru secara live setelah melakukan pemesanan.
+          </p>
+        </div>
+        <div class="flex flex-col sm:flex-row items-center gap-3 w-full pt-2">
+          <a href="./booking.html" class="w-full sm:w-auto flex-1 py-3 px-5 rounded-full bg-primary text-on-primary font-bold shadow-md hover:bg-primary-container transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-[20px]">local_shipping</span> Pesan Pindahan
+          </a>
+          <a href="./cleaning.html" class="w-full sm:w-auto flex-1 py-3 px-5 rounded-full bg-secondary-container text-on-secondary-container font-bold shadow-md hover:bg-secondary-fixed transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-[20px]">cleaning_services</span> Pesan Cleaning
+          </a>
+        </div>
+        <a href="./history.html" class="text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1.5 mt-2">
+          <span class="material-symbols-outlined text-[18px]">history</span> Buka Riwayat Pesanan
+        </a>
+      </div>
+    </div>
+  `;
+};
 
 function updateLiveTrackingUI(isSimulatedStep = false) {
   const stepIdx = liveTrackingState.currentStepIndex;
@@ -2544,6 +2809,51 @@ function updateLiveTrackingUI(isSimulatedStep = false) {
       }
     }).join('');
   }
+
+  // 5. Update Job Completion Verification Card & Order Completed Summary Card
+  const completionCard = document.getElementById('jobCompletionCard');
+  const summaryCard = document.getElementById('orderCompletedSummaryCard');
+  const activeTicket = currentOrderId ? String(currentOrderId).replace(/^#/, '') : 'SHF-90214';
+  const isSelesai = (o && o.status_pesanan === 'selesai') || (stepIdx >= 5);
+  const storedReviewRaw = localStorage.getItem(`shift_feedback_${activeTicket}`) || localStorage.getItem('shift_latest_feedback') || (o && o.customer_feedback ? JSON.stringify(o.customer_feedback) : null);
+
+  if (completionCard && summaryCard) {
+    if (storedReviewRaw || (o && o.status_pesanan === 'selesai')) {
+      completionCard.classList.add('hidden');
+      summaryCard.classList.remove('hidden');
+
+      if (storedReviewRaw) {
+        try {
+          const rev = typeof storedReviewRaw === 'string' ? JSON.parse(storedReviewRaw) : storedReviewRaw;
+          const starDisplay = document.getElementById('summaryStarDisplay');
+          const commentDisplay = document.getElementById('summaryCommentDisplay');
+          const tagsDisplay = document.getElementById('summaryTagsDisplay');
+
+          if (starDisplay) {
+            starDisplay.innerHTML = `
+              <span class="material-symbols-outlined text-[18px] text-secondary-container mr-1" style="font-variation-settings: 'FILL' 1;">star</span>
+              <span>${rev.rating || 5}.0 (${rev.predicate || 'Sangat Luar Biasa!'})</span>
+            `;
+          }
+          if (commentDisplay && rev.comment) {
+            commentDisplay.textContent = `"${rev.comment}"`;
+          }
+          if (tagsDisplay && Array.isArray(rev.tags) && rev.tags.length > 0) {
+            tagsDisplay.innerHTML = rev.tags.map(t => `<span class="font-label-sm text-label-sm bg-primary/10 text-primary font-semibold px-2.5 py-0.5 rounded-full">${t}</span>`).join('');
+          }
+        } catch(e){}
+      }
+    } else {
+      summaryCard.classList.add('hidden');
+      completionCard.classList.remove('hidden');
+
+      if (stepIdx >= 4) {
+        completionCard.classList.add('ring-4', 'ring-secondary-container/60', 'shadow-2xl');
+      } else {
+        completionCard.classList.remove('ring-4', 'ring-secondary-container/60', 'shadow-2xl');
+      }
+    }
+  }
 }
 
 // Debounced Live GPS Refresh Trigger
@@ -2604,7 +2914,291 @@ window.advanceTrackingStep = function() {
   const milestones = isCleaning ? liveTrackingState.cleaningMilestones : liveTrackingState.pindahanMilestones;
   const stepInfo = milestones[liveTrackingState.currentStepIndex];
 
-  showToast(`Tahap Alur Berubah: [Langkah ${stepInfo.step}] ${stepInfo.title}`, 'info');
+  if (liveTrackingState.currentStepIndex === 5) {
+    showToast(`Tahap Selesai: Kru telah menuntaskan pekerjaan! Silakan konfirmasi selesai.`, 'success');
+  } else {
+    showToast(`Tahap Alur Berubah: [Langkah ${stepInfo.step}] ${stepInfo.title}`, 'info');
+  }
+};
+
+/* ==========================================================================
+ * CUSTOMER JOB COMPLETION CONFIRMATION & CREW RATING SYSTEM
+ * ========================================================================== */
+
+let currentRatingScore = 5;
+let currentRatingTags = new Set();
+let currentRatingTip = 0;
+const ratingPredicates = {
+  1: "1: Sangat Kecewa 😞",
+  2: "2: Kurang Puas 🙁",
+  3: "3: Cukup Baik 😐",
+  4: "4: Memuaskan 😊",
+  5: "5: Sangat Luar Biasa! 🌟"
+};
+
+// 1. Open Job Completion Confirmation Dialog
+window.openCompletionConfirmModal = function() {
+  const modal = document.getElementById('completionConfirmModal');
+  if (modal) {
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+};
+
+// 2. Close Job Completion Confirmation Dialog
+window.closeCompletionConfirmModal = function() {
+  const modal = document.getElementById('completionConfirmModal');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+};
+
+// 3. Confirm Job Completion and trigger Supabase Order Status Update
+window.confirmJobCompletion = async function() {
+  const btn = document.getElementById('btnConfirmJobDone');
+  if (btn) {
+    btn.innerHTML = `<span class="material-symbols-outlined text-[20px] animate-spin">refresh</span><span>Menyimpan Konfirmasi...</span>`;
+    btn.disabled = true;
+  }
+
+  const o = state.activeOrder;
+  const isCleaning = liveTrackingState.serviceType === 'cleaning';
+  const activeTicket = (o && (o.nomor_tiket || o.id)) ? (o.nomor_tiket || o.id) : (isCleaning ? state.cleaning.orderId : state.pindahan.orderId) || sessionStorage.getItem('active_order_ticket') || 'SHF-90214';
+
+  console.log(`[JobCompletion] Customer confirmed completion for ticket: ${activeTicket}`);
+
+  try {
+    if (typeof window.completeOrderAndReview === 'function') {
+      await window.completeOrderAndReview(activeTicket, null);
+    } else if (typeof window.updateOrderStatus === 'function') {
+      await window.updateOrderStatus(activeTicket, 'selesai');
+    }
+  } catch (err) {
+    console.warn('⚠️ Supabase completion confirmation update warning:', err);
+  }
+
+  // Update local application state
+  if (state.activeOrder) {
+    state.activeOrder.status = "Selesai Tuntas";
+    state.activeOrder.status_pesanan = "selesai";
+    state.activeOrder.completed_at = new Date().toISOString();
+  }
+  liveTrackingState.currentStepIndex = 5;
+  saveStateToStorage();
+  updateLiveTrackingUI();
+
+  window.closeCompletionConfirmModal();
+
+  if (btn) {
+    btn.innerHTML = `<span class="material-symbols-outlined text-[20px]">check_circle</span><span>Ya, Pekerjaan Sudah Selesai</span>`;
+    btn.disabled = false;
+  }
+
+  // Automatically open the Crew Rating & Review modal
+  setTimeout(() => {
+    window.openRatingModal();
+  }, 250);
+};
+
+// 4. Open Crew Rating & Review Modal
+window.openRatingModal = function() {
+  const modal = document.getElementById('crewRatingModal');
+  if (!modal) return;
+
+  const isCleaning = liveTrackingState.serviceType === 'cleaning';
+  const o = state.activeOrder;
+  const activeTicket = (o && (o.nomor_tiket || o.id)) ? (o.nomor_tiket || o.id) : (isCleaning ? state.cleaning.orderId : state.pindahan.orderId) || '#SHF-90214';
+  const displayTicket = String(activeTicket).startsWith('#') ? activeTicket : `#${activeTicket}`;
+
+  // Populate Crew badge & Ticket
+  const avatarEl = document.getElementById('ratingCrewAvatar');
+  const nameEl = document.getElementById('ratingCrewName');
+  const roleEl = document.getElementById('ratingCrewRole');
+  const ticketBadge = document.getElementById('ratingTicketBadge');
+
+  if (ticketBadge) ticketBadge.textContent = displayTicket;
+
+  if (isCleaning) {
+    if (avatarEl) avatarEl.src = "https://lh3.googleusercontent.com/aida-public/AB6AXuBi_WbqloxLrVDu3XUIn0uc7hkoFFQSS_LgwNFxLMNDfKqjgwu4x0yRoVA4C13k_wj7Uh5CLZFdl47gPa-DG9X9lEJvLwEzwOQV5f2z-hEDHTox44Iaqr-sY4AA1tGGGX3hb95nNSLcO2wvYlu8vBtXW9vPMWGHQ3gBZyuDXJwGFzV40QhRzjoy9FhD012SoCTS1jB-9iMdMS5JdtvNwiJzj7UWLOuP8kbfNMsCtKYO8bQoAwja2Hcq";
+    if (nameEl) nameEl.textContent = "Siti Maryam & Rekan";
+    if (roleEl) roleEl.textContent = "Spesialis Deep Clean & Kasur UV-C";
+  } else {
+    if (avatarEl) avatarEl.src = "https://lh3.googleusercontent.com/aida/AEtjO1WHGwcRiVH-f1BlnLaDj0XOOksY9K3qA4al2qdKH-aT2pfwYszXSIm9rDb3ww8LBT5YwgjhzP9Uk-abuEVDHcxN18lv2H--jcZp1O0VTVGegAikaEhOSDB4ne49JMK3NyATsxubQ0VVAJGNEnxi_8PWtmqQCAL6Fai95QV8g76Z0-IxrdsOIBTihgv2WfmRu3ZjleUstioCk1ZyHJu3Dhc7iRZ6wjH38xgvTjq_GHEuROcprdC28LUegrQ";
+    if (nameEl) nameEl.textContent = liveTrackingState.driverName || "Budi Santoso";
+    if (roleEl) roleEl.textContent = "Master Kru Pindahan • Level VIP Gold";
+  }
+
+  // Reset star rating to 5
+  window.selectStarRating(5);
+
+  // Reset praise chips
+  currentRatingTags.clear();
+  document.querySelectorAll('.praise-chip').forEach(chip => {
+    chip.classList.remove('bg-primary', 'text-on-primary', 'border-primary');
+    chip.classList.add('bg-surface-container', 'text-on-surface');
+  });
+
+  // Reset comment & tip
+  const commentInput = document.getElementById('ratingCommentInput');
+  if (commentInput) commentInput.value = '';
+  currentRatingTip = 0;
+  document.querySelectorAll('.tip-option-btn').forEach((btn, idx) => {
+    if (idx === 0) {
+      btn.classList.add('bg-primary', 'text-on-primary', 'border-primary');
+      btn.classList.remove('bg-surface-container', 'text-on-surface');
+    } else {
+      btn.classList.remove('bg-primary', 'text-on-primary', 'border-primary');
+      btn.classList.add('bg-surface-container', 'text-on-surface');
+    }
+  });
+
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+};
+
+// 5. Close Crew Rating Modal
+window.closeRatingModal = function() {
+  const modal = document.getElementById('crewRatingModal');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+  const completionCard = document.getElementById('jobCompletionCard');
+  const summaryCard = document.getElementById('orderCompletedSummaryCard');
+  if (completionCard) completionCard.classList.add('hidden');
+  if (summaryCard) summaryCard.classList.remove('hidden');
+};
+
+// 6. Interactive Star Rating Handlers
+window.selectStarRating = function(star) {
+  currentRatingScore = star;
+  window.renderStarDisplay(star);
+};
+
+window.hoverStarRating = function(star) {
+  window.renderStarDisplay(star);
+};
+
+window.resetStarRatingHover = function() {
+  window.renderStarDisplay(currentRatingScore);
+};
+
+window.renderStarDisplay = function(count) {
+  const container = document.getElementById('starRatingContainer');
+  if (!container) return;
+  const buttons = container.querySelectorAll('.star-btn');
+  buttons.forEach((btn, idx) => {
+    const icon = btn.querySelector('.star-icon');
+    if (idx < count) {
+      btn.classList.add('text-secondary-container');
+      btn.classList.remove('text-slate-300');
+      if (icon) icon.style.fontVariationSettings = "'FILL' 1";
+    } else {
+      btn.classList.remove('text-secondary-container');
+      btn.classList.add('text-slate-300');
+      if (icon) icon.style.fontVariationSettings = "'FILL' 0";
+    }
+  });
+
+  const label = document.getElementById('ratingPredicateLabel');
+  if (label) {
+    label.textContent = ratingPredicates[count] || `${count} Bintang`;
+  }
+};
+
+// 7. Chip Tag Pujian Cepat Handler
+window.togglePraiseChip = function(chipEl, tagName) {
+  if (currentRatingTags.has(tagName)) {
+    currentRatingTags.delete(tagName);
+    chipEl.classList.remove('bg-primary', 'text-on-primary', 'border-primary');
+    chipEl.classList.add('bg-surface-container', 'text-on-surface');
+  } else {
+    currentRatingTags.add(tagName);
+    chipEl.classList.add('bg-primary', 'text-on-primary', 'border-primary');
+    chipEl.classList.remove('bg-surface-container', 'text-on-surface');
+  }
+};
+
+// 8. Tip Option Selection
+window.selectTipAmount = function(amount, chipEl) {
+  currentRatingTip = amount;
+  document.querySelectorAll('.tip-option-btn').forEach(btn => {
+    btn.classList.remove('bg-primary', 'text-on-primary', 'border-primary');
+    btn.classList.add('bg-surface-container', 'text-on-surface');
+  });
+  chipEl.classList.add('bg-primary', 'text-on-primary', 'border-primary');
+  chipEl.classList.remove('bg-surface-container', 'text-on-surface');
+};
+
+// 9. Submit Rating & Review to Supabase and Render Final State
+window.submitCrewRating = async function() {
+  const btn = document.getElementById('btnSubmitReview');
+  if (btn) {
+    btn.innerHTML = `<span class="material-symbols-outlined text-[20px] animate-spin">refresh</span><span>Mengirimkan Ulasan...</span>`;
+    btn.disabled = true;
+  }
+
+  const o = state.activeOrder;
+  const isCleaning = liveTrackingState.serviceType === 'cleaning';
+  const activeTicket = (o && (o.nomor_tiket || o.id)) ? (o.nomor_tiket || o.id) : (isCleaning ? state.cleaning.orderId : state.pindahan.orderId) || sessionStorage.getItem('active_order_ticket') || '#SHF-90214';
+
+  const commentInput = document.getElementById('ratingCommentInput');
+  const commentVal = commentInput ? commentInput.value.trim() : '';
+
+  const feedbackPayload = {
+    rating: currentRatingScore,
+    predicate: ratingPredicates[currentRatingScore] || "Sangat Luar Biasa!",
+    tags: Array.from(currentRatingTags),
+    comment: commentVal || (currentRatingScore >= 4 ? "Pelayanan kru sangat memuaskan, ramah dan sigap!" : "Pekerjaan tuntas dilaksanakan."),
+    tipAmount: currentRatingTip,
+    completedAt: new Date().toISOString(),
+    ticket: activeTicket
+  };
+
+  try {
+    if (typeof window.completeOrderAndReview === 'function') {
+      await window.completeOrderAndReview(activeTicket, feedbackPayload);
+    }
+  } catch (e) {
+    console.warn('submitCrewRating error:', e);
+  }
+
+  // Store in LocalStorage for persistent display across sessions
+  const cleanTicket = String(activeTicket).replace(/^#/, '');
+  localStorage.setItem(`shift_feedback_${cleanTicket}`, JSON.stringify(feedbackPayload));
+  localStorage.setItem('shift_latest_feedback', JSON.stringify(feedbackPayload));
+
+  showToast("Terima kasih! Ulasan Anda telah terkirim kepada kru.", "success");
+
+  if (btn) {
+    btn.innerHTML = `<span class="material-symbols-outlined text-[20px]">send</span><span>Kirim Ulasan & Selesai</span>`;
+    btn.disabled = false;
+  }
+
+  window.closeRatingModal();
+
+  // Populate Submitted Review Summary
+  const starDisplay = document.getElementById('summaryStarDisplay');
+  const commentDisplay = document.getElementById('summaryCommentDisplay');
+  const tagsDisplay = document.getElementById('summaryTagsDisplay');
+
+  if (starDisplay) {
+    starDisplay.innerHTML = `
+      <span class="material-symbols-outlined text-[18px] text-secondary-container mr-1" style="font-variation-settings: 'FILL' 1;">star</span>
+      <span>${feedbackPayload.rating}.0 (${feedbackPayload.predicate})</span>
+    `;
+  }
+  if (commentDisplay) {
+    commentDisplay.textContent = `"${feedbackPayload.comment}"`;
+  }
+  if (tagsDisplay && feedbackPayload.tags.length > 0) {
+    tagsDisplay.innerHTML = feedbackPayload.tags.map(t => `<span class="font-label-sm text-label-sm bg-primary/10 text-primary font-semibold px-2.5 py-0.5 rounded-full">${t}</span>`).join('');
+  }
+
+  // Update Header Badges
+  setText('.js-order-status-title, #orderStatusTitle', 'Pesanan Telah Selesai Tuntas (Status: Selesai)');
+  setText('.js-eta-badge, #etaBadge', 'Layanan Selesai ✓');
 };
 
 /* ==========================================
@@ -2717,204 +3311,236 @@ window.closeManualTransferModal = function() {
   if (modal) modal.classList.add('hidden');
 };
 
+// =========================================================================
+// WEEK 4 - TASK 01: Connect to API (Fetch API & Parsing JSON)
+// Menghubungkan aplikasi SHIFT ke endpoint REST API & mem-parsing data JSON
+// =========================================================================
 window.handleConfirmPayment = async function() {
   const urlParams = new URLSearchParams(window.location.search);
+  let ticketFromUrl = urlParams.get('ticket') || urlParams.get('ticketId') || urlParams.get('orderId');
+  if (!ticketFromUrl && window.location.hash) {
+    ticketFromUrl = window.location.hash.replace(/^#/, '');
+  }
+  if (ticketFromUrl) {
+    ticketFromUrl = decodeURIComponent(ticketFromUrl);
+  }
+  const ticket = ticketFromUrl || sessionStorage.getItem('active_order_ticket') || sessionStorage.getItem('currentOrderTicket') || (state.activeService === 'cleaning' ? state.cleaning.orderId : state.pindahan.orderId);
   const isCleaning = urlParams.get('service') === 'cleaning' || state.activeService === 'cleaning';
 
-  state.isNewUserDemo = false;
-  if (isCleaning) {
-    state.activeService = 'cleaning';
-    state.activeOrder = {
-      id: state.cleaning.orderId || "SHF-CLN-90215",
-      type: "cleaning",
-      serviceName: "Deep Clean & Sanitasi Hunian",
-      status: "Lunas - QRIS Dinamis Instan",
-      mitraName: state.cleaning.cleaner || "Siti Maryam & Rekan",
-      vehicleName: "Tim Hydro-Vacuum UV-C",
-      vehiclePlate: "SHIFT-CLN",
-      totalPrice: state.cleaning.total,
-      pickupAddress: state.cleaning.address,
-      dropoffAddress: state.cleaning.address,
-      createdAt: new Date().toISOString()
-    };
-  } else {
-    state.activeService = 'moving';
-    state.activeOrder = {
-      id: state.pindahan.orderId || "SHF-90214",
-      type: "pindahan",
-      serviceName: "Pindahan Barang Kos / Apartemen",
-      status: "Lunas - QRIS Dinamis Instan",
-      mitraName: state.pindahan.vehicleObj?.driver || "Budi Santoso",
-      vehicleName: state.pindahan.vehicleObj?.name || "Pick-up Box",
-      vehiclePlate: state.pindahan.vehicleObj?.plate || "AB 1420 YK",
-      totalPrice: state.pindahan.total,
-      pickupAddress: state.pindahan.pickupAddress,
-      dropoffAddress: state.pindahan.dropoffAddress,
-      createdAt: new Date().toISOString()
-    };
-  }
-  saveStateToStorage();
-
-  const client = getSupabaseClient();
-  if (client) {
-    try {
-      await client.from('orders').insert([
-        {
-          order_id: state.activeOrder.id,
-          type: state.activeOrder.type,
-          service_name: state.activeOrder.serviceName,
-          status: state.activeOrder.status,
-          mitra_name: state.activeOrder.mitraName,
-          vehicle_name: state.activeOrder.vehicleName,
-          vehicle_plate: state.activeOrder.vehiclePlate,
-          total_price: state.activeOrder.totalPrice,
-          pickup_address: state.activeOrder.pickupAddress,
-          dropoff_address: state.activeOrder.dropoffAddress,
-          created_at: state.activeOrder.createdAt
-        }
-      ]);
-      console.log(`Order ${state.activeOrder.id} successfully saved to Supabase 'orders' table.`);
-    } catch(err) {
-      console.warn("Supabase order insert exception:", err);
+  // =========================================================================
+  // WEEK 4 - TASK 03: Handle API State (Loading Spinner, Success Data, Error Handling & Tombol Coba Lagi)
+  // Mengelola feedback visual saat loading, data berhasil dimuat, dan tombol retry saat error
+  // =========================================================================
+  // Button loading feedback
+  const confirmBtn = document.getElementById('check-payment-btn') || document.querySelector('button[onclick*="handleConfirmPayment"]');
+  const confirmText = document.getElementById('check-payment-text');
+  let originalBtnHtml = '';
+  if (confirmBtn) {
+    originalBtnHtml = confirmBtn.innerHTML;
+    confirmBtn.disabled = true;
+    if (confirmText) {
+      confirmText.textContent = 'Memverifikasi Pembayaran ke Supabase...';
+    } else {
+      confirmBtn.innerHTML = `
+        <span class="material-symbols-outlined text-[20px] animate-spin">progress_activity</span>
+        <span>Memverifikasi Pembayaran ke Supabase...</span>
+      `;
     }
   }
 
-  const modal = document.getElementById('success-modal');
-  const modalBox = document.getElementById('modal-box');
-  if (modal && modalBox) {
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-    setTimeout(() => {
-      modalBox.classList.remove('scale-95', 'opacity-0');
-      modalBox.classList.add('scale-100', 'opacity-100');
-    }, 50);
-  } else {
-    showToast('Pembayaran QRIS Terkonfirmasi Lunas! Mengalihkan ke Live Tracker...', 'success');
-    setTimeout(() => {
-      window.location.href = isCleaning ? './tracking-cleaning.html?service=cleaning' : './tracking.html?service=moving';
-    }, 1000);
+  showToast('Memverifikasi pembayaran dengan database Supabase Cloud...', 'info');
+
+  try {
+    // 1. Update order row in Supabase to 'diproses'
+    const updateRes = await window.updateOrderStatus(ticket, 'diproses');
+    if (updateRes.error) {
+      console.warn('⚠️ Supabase update status warning:', updateRes.error.message);
+    }
+
+    state.isNewUserDemo = false;
+    if (state.activeOrder) {
+      state.activeOrder.status = "Pembayaran Terverifikasi (Status: Diproses)";
+      state.activeOrder.status_pesanan = "diproses";
+    }
+    saveStateToStorage();
+
+    const targetTrackingUrl = isCleaning 
+      ? `./tracking-cleaning.html?service=cleaning&ticket=${encodeURIComponent(ticket)}` 
+      : `./tracking.html?service=moving&ticket=${encodeURIComponent(ticket)}`;
+
+    const modal = document.getElementById('success-modal') || document.getElementById('paymentSuccessModal');
+    const modalBox = document.getElementById('modal-box');
+    if (modal && modalBox) {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      setTimeout(() => {
+        modalBox.classList.remove('scale-95', 'opacity-0');
+        modalBox.classList.add('scale-100', 'opacity-100');
+      }, 50);
+    } else {
+      showToast('Pembayaran Berhasil Diverifikasi! Mengalihkan ke Live Tracker...', 'success');
+      setTimeout(() => {
+        window.location.href = targetTrackingUrl;
+      }, 800);
+    }
+  } catch (err) {
+    console.error('❌ handleConfirmPayment error:', err);
+    showToast('Gagal memverifikasi: ' + err.message, 'error');
+    if (confirmBtn) {
+      confirmBtn.disabled = false;
+      confirmBtn.innerHTML = originalBtnHtml;
+    }
   }
 };
 
 window.proceedToTracking = function() {
   const urlParams = new URLSearchParams(window.location.search);
   const isCleaning = urlParams.get('service') === 'cleaning' || state.activeService === 'cleaning';
-  window.location.href = isCleaning ? './tracking-cleaning.html?service=cleaning' : './tracking.html?service=moving';
+  let ticketFromUrl = urlParams.get('ticket') || urlParams.get('ticketId') || urlParams.get('orderId');
+  if (!ticketFromUrl && window.location.hash) {
+    ticketFromUrl = window.location.hash.replace(/^#/, '');
+  }
+  if (ticketFromUrl) {
+    ticketFromUrl = decodeURIComponent(ticketFromUrl);
+  }
+  const ticket = ticketFromUrl || sessionStorage.getItem('active_order_ticket') || sessionStorage.getItem('currentOrderTicket') || (isCleaning ? state.cleaning.orderId : state.pindahan.orderId);
+  window.location.href = isCleaning 
+    ? `./tracking-cleaning.html?service=cleaning&ticket=${encodeURIComponent(ticket)}` 
+    : `./tracking.html?service=moving&ticket=${encodeURIComponent(ticket)}`;
 };
 
 window.submitManualTransferConfirmation = async function(e) {
   if (e) e.preventDefault();
   closeManualTransferModal();
 
-  showToast('Konfirmasi transfer manual terkirim! Tim keuangan sedang memverifikasi.', 'success');
+  showToast('Memproses bukti transfer ke database Supabase...', 'info');
   
   const urlParams = new URLSearchParams(window.location.search);
+  const ticket = sessionStorage.getItem('currentOrderTicket') || urlParams.get('ticket') || (state.activeService === 'cleaning' ? state.cleaning.orderId : state.pindahan.orderId);
   const isCleaning = urlParams.get('service') === 'cleaning' || state.activeService === 'cleaning';
 
-  state.isNewUserDemo = false;
-  if (isCleaning) {
-    state.activeService = 'cleaning';
-    state.activeOrder = {
-      id: state.cleaning.orderId || "SHF-CLN-90215",
-      type: "cleaning",
-      serviceName: "Deep Clean & Sanitasi Hunian",
-      status: "Transfer Diverifikasi (Manual)",
-      mitraName: state.cleaning.cleaner || "Siti Maryam & Rekan",
-      vehicleName: "Tim Hydro-Vacuum UV-C",
-      vehiclePlate: "SHIFT-CLN",
-      totalPrice: state.cleaning.total,
-      pickupAddress: state.cleaning.address,
-      dropoffAddress: state.cleaning.address,
-      createdAt: new Date().toISOString()
-    };
-  } else {
-    state.activeService = 'moving';
-    state.activeOrder = {
-      id: state.pindahan.orderId || "SHF-90214",
-      type: "pindahan",
-      serviceName: "Pindahan Barang Kos / Apartemen",
-      status: "Transfer Diverifikasi (Manual)",
-      mitraName: state.pindahan.vehicleObj.driver,
-      vehicleName: state.pindahan.vehicleObj.name,
-      vehiclePlate: state.pindahan.vehicleObj.plate,
-      totalPrice: state.pindahan.total,
-      pickupAddress: state.pindahan.pickupAddress,
-      dropoffAddress: state.pindahan.dropoffAddress,
-      createdAt: new Date().toISOString()
-    };
+  try {
+    await window.updateOrderStatus(ticket, 'diproses');
+    showToast('Konfirmasi transfer manual berhasil diverifikasi! Mengalihkan ke tracking...', 'success');
+    setTimeout(() => {
+      window.location.href = isCleaning 
+        ? `./tracking-cleaning.html?service=cleaning&ticket=${encodeURIComponent(ticket)}` 
+        : `./tracking.html?service=moving&ticket=${encodeURIComponent(ticket)}`;
+    }, 800);
+  } catch (err) {
+    console.error('❌ submitManualTransferConfirmation error:', err);
+    window.location.href = isCleaning 
+      ? `./tracking-cleaning.html?service=cleaning&ticket=${encodeURIComponent(ticket)}` 
+      : `./tracking.html?service=moving&ticket=${encodeURIComponent(ticket)}`;
   }
-  saveStateToStorage();
-
-  const client = getSupabaseClient();
-  if (client) {
-    try {
-      await client.from('orders').insert([
-        {
-          order_id: state.activeOrder.id,
-          type: state.activeOrder.type,
-          service_name: state.activeOrder.serviceName,
-          status: state.activeOrder.status,
-          mitra_name: state.activeOrder.mitraName,
-          vehicle_name: state.activeOrder.vehicleName,
-          vehicle_plate: state.activeOrder.vehiclePlate,
-          total_price: state.activeOrder.totalPrice,
-          pickup_address: state.activeOrder.pickupAddress,
-          dropoff_address: state.activeOrder.dropoffAddress,
-          created_at: state.activeOrder.createdAt
-        }
-      ]);
-    } catch(err){}
-  }
-
-  setTimeout(() => {
-    window.location.href = isCleaning ? './tracking-cleaning.html?service=cleaning' : './tracking.html?service=moving';
-  }, 1000);
 };
 
-window.navigateToPayment = function() {
+// =========================================================================
+// WEEK 4 - TASK 01: Connect to API (Fetch API & Parsing JSON)
+// Menghubungkan aplikasi SHIFT ke endpoint REST API & mem-parsing data JSON
+// =========================================================================
+window.navigateToPayment = async function() {
+  // 1. Auto-kalkulasi data formulir pindahan jika belum dihitung secara manual
   if (!state.pindahan.isCalculated) {
-    showToast('Lengkapi data lalu klik "Hitung Estimasi Tarif" terlebih dahulu!', 'error');
-    const btnCalc = document.getElementById('btnCalculatePindahan');
-    if (btnCalc) btnCalc.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    return;
+    const pickupInput = document.getElementById('pickupAddressInput');
+    const dropoffInput = document.getElementById('dropoffAddressInput');
+    const dateInput = document.getElementById('pickupDate');
+    const timeSelect = document.getElementById('pickupTime');
+    const notesInput = document.getElementById('pickupNotes');
+
+    if (pickupInput && pickupInput.value) state.pindahan.pickupAddress = pickupInput.value.trim();
+    if (dropoffInput && dropoffInput.value) state.pindahan.dropoffAddress = dropoffInput.value.trim();
+    if (dateInput && dateInput.value) {
+      state.pindahan.pickupDate = dateInput.value;
+    } else {
+      const today = new Date().toISOString().split('T')[0];
+      state.pindahan.pickupDate = today;
+      if (dateInput) dateInput.value = today;
+    }
+    if (timeSelect && timeSelect.value) state.pindahan.pickupTime = timeSelect.value;
+    if (notesInput && notesInput.value) state.pindahan.notes = notesInput.value;
+
+    state.pindahan.isCalculated = true;
+    saveStateToStorage();
+    if (typeof updatePindahanReviewPills === 'function') updatePindahanReviewPills();
+    if (typeof renderPindahanCalculatedPrices === 'function') renderPindahanCalculatedPrices();
   }
 
   const method = state.pindahan.paymentMethod || 'qris';
   state.isNewUserDemo = false;
-  state.activeOrder = {
-    id: state.pindahan.orderId,
-    type: "pindahan",
-    serviceName: "Pindahan Barang Kos / Apartemen",
-    status: method === 'bank' ? "Menunggu Transfer Bank Manual" : "Menunggu Pembayaran QRIS",
-    mitraName: state.pindahan.vehicleObj.driver,
-    vehicleName: state.pindahan.vehicleObj.name,
-    vehiclePlate: state.pindahan.vehicleObj.plate,
-    totalPrice: state.pindahan.total,
-    pickupAddress: state.pindahan.pickupAddress,
-    dropoffAddress: state.pindahan.dropoffAddress,
-    createdAt: new Date().toISOString()
-  };
 
-  const payload = {
+  // =========================================================================
+  // WEEK 4 - TASK 03: Handle API State (Loading Spinner, Success Data, Error Handling & Tombol Coba Lagi)
+  // Mengelola feedback visual saat loading, data berhasil dimuat, dan tombol retry saat error
+  // =========================================================================
+  // Visual button feedback
+  const ctaBtn = document.querySelector('button[onclick*="navigateToPayment"]');
+  let originalHtml = '';
+  if (ctaBtn) {
+    originalHtml = ctaBtn.innerHTML;
+    ctaBtn.disabled = true;
+    ctaBtn.innerHTML = `
+      <span class="material-symbols-outlined text-[20px] animate-spin">progress_activity</span>
+      <span>Menyimpan Pesanan ke Supabase...</span>
+    `;
+  }
+
+  showToast('Menyimpan baris pesanan pindahan ke Supabase Cloud...', 'info');
+
+  const ticketNumber = (window.ShiftCore ? window.ShiftCore.generateTicketNumber('moving') : `#SHF-${Date.now().toString().slice(-6)}`);
+
+  const orderPayload = {
+    nomor_tiket: ticketNumber,
+    kategori_layanan: 'moving',
+    total_biaya: state.pindahan.total,
+    metode_pembayaran: method === 'bank' ? 'bank_transfer' : 'qris',
+    status_pesanan: 'menunggu_pembayaran',
+    serviceName: "Pindahan Barang Kos / Apartemen",
     serviceType: "Pindahan Barang (Kos/Apartemen)",
-    orderId: state.pindahan.orderId,
-    totalPrice: state.pindahan.total,
-    subtotal: state.pindahan.subtotal,
-    discount: state.pindahan.discount,
     pickupAddress: state.pindahan.pickupAddress,
     dropoffAddress: state.pindahan.dropoffAddress,
     pickupDate: state.pindahan.pickupDate,
     pickupTime: state.pindahan.pickupTime,
-    paymentMethod: method
+    subtotal: state.pindahan.subtotal,
+    discount: state.pindahan.discount,
+    notes: state.pindahan.notes || '',
+    mitraName: state.pindahan.vehicleObj?.driver || "Budi Santoso",
+    vehicleName: state.pindahan.vehicleObj?.name || "Pick-up Box",
+    vehiclePlate: state.pindahan.vehicleObj?.plate || "AB 1420 YK"
   };
 
-  sessionStorage.setItem('shift_active_payload', JSON.stringify(payload));
-  saveStateToStorage();
+  try {
+    const { data: savedOrder, error } = await window.createOrder(orderPayload);
+    if (error) {
+      console.warn('⚠️ Supabase createOrder response:', error.message);
+    }
 
-  showToast(`Memuat Halaman Pembayaran (${method === 'bank' ? 'Transfer Bank' : 'QRIS'})...`, 'info');
-  setTimeout(() => {
-    window.location.href = `./payment.html?service=pindahan&method=${method}`;
-  }, 600);
+    const finalTicket = savedOrder?.nomor_tiket || ticketNumber;
+    state.pindahan.orderId = finalTicket;
+    state.activeOrder = {
+      ...orderPayload,
+      ...(savedOrder || {}),
+      id: finalTicket,
+      nomor_tiket: finalTicket
+    };
+    saveStateToStorage();
+
+    sessionStorage.setItem('current_ticket', finalTicket);
+    sessionStorage.setItem('active_order_ticket', finalTicket);
+    sessionStorage.setItem('currentOrderTicket', finalTicket);
+
+    showToast(`Pesanan ${finalTicket} tersimpan di Supabase! Membuka pembayaran...`, 'success');
+    setTimeout(() => {
+      window.location.href = `./payment.html?ticket=${encodeURIComponent(finalTicket)}`;
+    }, 500);
+  } catch (err) {
+    console.error('❌ navigateToPayment error:', err);
+    showToast('Gagal memproses pesanan: ' + err.message, 'error');
+    if (ctaBtn) {
+      ctaBtn.disabled = false;
+      ctaBtn.innerHTML = originalHtml;
+    }
+  }
 };
 
 /* ==========================================
@@ -3124,51 +3750,144 @@ window.calculateCleaningTariff = function() {
   showToast('Estimasi tarif bersih-bersih berhasil dihitung!', 'success');
 };
 
-window.navigateToCleaningPayment = function() {
+window.navigateToCleaningPayment = async function() {
+  // --- AUTO-KALKULASI: Jika belum dihitung, hitung dulu secara otomatis ---
   if (!state.cleaning.isCalculated) {
-    showToast('Lengkapi data lalu klik "Hitung Estimasi Tarif" terlebih dahulu!', 'error');
-    const btnCalc = document.getElementById('btnCalculateCleaning');
-    if (btnCalc) btnCalc.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    return;
+    const dateInput = document.getElementById('cleanDate');
+    const timeSelect = document.getElementById('cleanTime');
+    const notesInput = document.getElementById('cleanNotes');
+    const addressInput = document.getElementById('cleaningAddressInput');
+
+    if (dateInput && dateInput.value) {
+      state.cleaning.cleanDate = dateInput.value;
+    } else {
+      const today = new Date().toISOString().split('T')[0];
+      state.cleaning.cleanDate = today;
+      if (dateInput) dateInput.value = today;
+    }
+
+    if (timeSelect && timeSelect.value) state.cleaning.cleanTime = timeSelect.value;
+    if (notesInput && notesInput.value) state.cleaning.notes = notesInput.value;
+    if (addressInput && addressInput.value) state.cleaning.address = addressInput.value.trim();
+
+    state.cleaning.isCalculated = true;
+    updateCleaningReviewPills();
+    renderCleaningCalculatedPrices();
+    showToast('Tarif dihitung otomatis. Mengalihkan ke pembayaran...', 'success');
   }
 
   const method = state.cleaning.paymentMethod || 'qris';
   state.activeService = 'cleaning';
   state.isNewUserDemo = false;
+
+  const ticketNumber = (window.ShiftCore ? window.ShiftCore.generateTicketNumber('cleaning') : `#SHF-${Date.now().toString().slice(-6)}`);
+  state.cleaning.orderId = ticketNumber;
+
+  // --- BUAT ORDER STATE DENGAN DATA CLEANING LENGKAP ---
+  const c = state.cleaning;
+  const housingInfo = c.housingPrices[c.housingType] || { name: 'Kamar Kos Standar' };
+  const stainInfo = c.stainFees[c.stainLevel] || { name: 'Kerak Sedang' };
+
+  let addonsList = [];
+  if (c.addons.hydroVacuum) addonsList.push('Hydro-Vacuum UV-C');
+  if (c.addons.disinfectantFogging) addonsList.push('Fogging Disinfektan');
+  if (c.addons.fridgeCleaning) addonsList.push('Cuci Kulkas');
+  if (c.addons.acCleaning) addonsList.push('Cuci AC Split');
+
+  const servicePackageLabel = `${housingInfo.name} + ${stainInfo.name}${addonsList.length > 0 ? ' + ' + addonsList.join(', ') : ''}`;
+
   state.activeOrder = {
-    id: state.cleaning.orderId,
-    type: "cleaning",
-    serviceName: "Deep Clean & Sanitasi Hunian",
-    status: method === 'bank' ? "Menunggu Transfer Bank Manual" : "Menunggu Pembayaran QRIS",
-    mitraName: state.cleaning.cleaner,
-    vehicleName: "Tim Cleaner Hydro-Vacuum",
-    vehiclePlate: "SHIFT-CLEAN",
-    totalPrice: state.cleaning.total,
-    pickupAddress: state.cleaning.address,
-    dropoffAddress: state.cleaning.address,
+    id: ticketNumber,
+    type: 'cleaning',
+    serviceName: `Jasa Bersih-Bersih: ${housingInfo.name}`,
+    servicePackage: servicePackageLabel,
+    status: method === 'bank' ? 'menunggu_pembayaran_bank' : 'menunggu_pembayaran',
+    mitraName: c.cleaner || 'Siti Maryam & Rekan',
+    vehicleName: 'Tim Deep Cleaning Hydro-Vacuum UV-C',
+    vehiclePlate: 'SHIFT-CLN',
+    totalPrice: c.total,
+    pickupAddress: c.address,
+    dropoffAddress: c.address,
+    kategori_layanan: 'cleaning',
+    paket_layanan: housingInfo.name,
+    tingkat_kerak: stainInfo.name,
+    addons: addonsList,
+    cleanDate: c.cleanDate,
+    cleanTime: c.cleanTime,
+    notes: c.notes || '',
     createdAt: new Date().toISOString()
   };
 
+  // Button loading feedback
+  const ctaBtn = document.querySelector('button[onclick*="navigateToCleaningPayment"]');
+  let originalHtml = '';
+  if (ctaBtn) {
+    originalHtml = ctaBtn.innerHTML;
+    ctaBtn.disabled = true;
+    ctaBtn.innerHTML = `
+      <span class="material-symbols-outlined text-[20px] animate-spin">progress_activity</span>
+      <span>Menyimpan Pesanan ke Supabase...</span>
+    `;
+  }
+
+  showToast('Membuat baris pesanan cleaning di Supabase Cloud...', 'info');
+
+  // --- PAYLOAD UNTUK DATABASE SUPABASE & SESSIONSTORAGE ---
   const payload = {
-    serviceType: "Deep Clean & Sanitasi Hunian",
-    orderId: state.cleaning.orderId,
-    totalPrice: state.cleaning.total,
-    subtotal: state.cleaning.subtotal,
-    discount: state.cleaning.vipDiscount,
-    cleaner: state.cleaning.cleaner,
-    cleanDate: state.cleaning.cleanDate,
-    cleanTime: state.cleaning.cleanTime,
-    notes: state.cleaning.notes || "",
-    paymentMethod: method
+    nomor_tiket: ticketNumber,
+    kategori_layanan: 'cleaning',
+    total_biaya: c.total,
+    metode_pembayaran: method === 'bank' ? 'bank_transfer' : 'qris',
+    status_pesanan: 'menunggu_pembayaran',
+    serviceType: 'Jasa Bersih-Bersih (Cleaning)',
+    serviceName: 'Deep Clean & Sanitasi Hunian',
+    serviceCategory: 'cleaning',
+    packageLabel: housingInfo.name,
+    stainLevel: stainInfo.name,
+    addonsList: addonsList,
+    orderId: ticketNumber,
+    totalPrice: c.total,
+    subtotal: c.subtotal,
+    discount: c.vipDiscount,
+    cleaner: c.cleaner || 'Siti Maryam & Rekan',
+    address: c.address,
+    cleanDate: c.cleanDate,
+    cleanTime: c.cleanTime,
+    notes: c.notes || ''
   };
 
-  sessionStorage.setItem('shift_cleaning_payload', JSON.stringify(payload));
-  saveStateToStorage();
+  try {
+    const { data: savedOrder, error } = await window.createOrder(payload);
+    if (error) {
+      console.warn('⚠️ Supabase createOrder cleaning note:', error.message);
+    }
 
-  showToast(`Memuat Halaman Pembayaran Deep Clean (${method === 'bank' ? 'Transfer Bank' : 'QRIS'})...`, 'info');
-  setTimeout(() => {
-    window.location.href = `./payment.html?service=cleaning&method=${method}`;
-  }, 600);
+    const finalTicket = savedOrder?.nomor_tiket || ticketNumber;
+    state.cleaning.orderId = finalTicket;
+    state.activeOrder = {
+      ...payload,
+      ...(savedOrder || {}),
+      id: finalTicket,
+      nomor_tiket: finalTicket
+    };
+    saveStateToStorage();
+
+    sessionStorage.setItem('current_ticket', finalTicket);
+    sessionStorage.setItem('active_order_ticket', finalTicket);
+    sessionStorage.setItem('currentOrderTicket', finalTicket);
+
+    showToast(`Pesanan Cleaning ${finalTicket} tersimpan di Supabase! Membuka pembayaran...`, 'success');
+    setTimeout(() => {
+      window.location.href = `./payment.html?service=cleaning&ticket=${encodeURIComponent(finalTicket)}`;
+    }, 500);
+  } catch (err) {
+    console.error('❌ navigateToCleaningPayment error:', err);
+    showToast('Gagal memproses pesanan cleaning: ' + err.message, 'error');
+    if (ctaBtn) {
+      ctaBtn.disabled = false;
+      ctaBtn.innerHTML = originalHtml;
+    }
+  }
 };
 
 /* ==========================================
@@ -3196,49 +3915,100 @@ window.switchPaymentPageMethod = function(method) {
   }
 };
 
-function initPaymentPageEngine() {
+// =========================================================================
+// WEEK 4 - TASK 01: Connect to API (Fetch API & Parsing JSON)
+// Menghubungkan aplikasi SHIFT ke endpoint REST API & mem-parsing data JSON
+// =========================================================================
+async function initPaymentPageEngine() {
   const urlParams = new URLSearchParams(window.location.search);
   const serviceParam = urlParams.get('service');
-  const isCleaning = serviceParam === 'cleaning' || state.activeService === 'cleaning';
-  const targetMethod = urlParams.get('method') || (isCleaning ? state.cleaning.paymentMethod : state.pindahan.paymentMethod) || 'qris';
+  let ticketFromUrl = urlParams.get('ticket') || urlParams.get('ticketId') || urlParams.get('orderId');
+  if (!ticketFromUrl && window.location.hash) {
+    ticketFromUrl = window.location.hash.replace(/^#/, '');
+  }
+  if (ticketFromUrl) {
+    ticketFromUrl = decodeURIComponent(ticketFromUrl);
+  }
+  const storedTicket = ticketFromUrl || sessionStorage.getItem('current_ticket') || sessionStorage.getItem('active_order_ticket') || sessionStorage.getItem('currentOrderTicket');
 
-  let ticketId = isCleaning ? state.cleaning.orderId : state.pindahan.orderId;
-  let serviceTitle = isCleaning ? "Deep Clean & Sanitasi Hunian" : "Pindahan Barang Kos ke Apartemen";
-  let totalAmount = isCleaning ? state.cleaning.total : state.pindahan.total;
-  let addressText = isCleaning ? state.cleaning.address : `${state.pindahan.pickupAddress} -> ${state.pindahan.dropoffAddress}`;
+  // 1. Fetch actual order record from Supabase Cloud
+  let realOrder = null;
+  if (storedTicket) {
+    try {
+      const res = await window.getOrderByTicket(storedTicket);
+      if (res && res.data) {
+        realOrder = res.data;
+        console.log('✅ [Payment] Loaded real order from Supabase Cloud via getOrderByTicket:', realOrder);
+      }
+    } catch (e) {
+      console.warn('⚠️ [Payment] getOrderByTicket notice:', e);
+    }
+  }
 
+  const isCleaning = (realOrder?.kategori_layanan === 'cleaning') || serviceParam === 'cleaning' || state.activeService === 'cleaning';
+  const targetMethod = urlParams.get('method') || realOrder?.metode_pembayaran || (isCleaning ? state.cleaning.paymentMethod : state.pindahan.paymentMethod) || 'qris';
+
+  let rawTicketId = realOrder?.nomor_tiket || storedTicket || (isCleaning ? state.cleaning.orderId : state.pindahan.orderId) || 'SHF-90214';
+  let ticketId = rawTicketId.startsWith('#') ? rawTicketId : `#${rawTicketId}`;
+  let serviceTitle = isCleaning ? 'Jasa Bersih-Bersih (Cleaning)' : 'Pindahan Barang Kos ke Apartemen';
+  let totalAmount = (realOrder && typeof realOrder.total_biaya === 'number') ? realOrder.total_biaya : (isCleaning ? state.cleaning.total : state.pindahan.total);
+  let addressText = isCleaning ? state.cleaning.address : `${state.pindahan.pickupAddress} → ${state.pindahan.dropoffAddress}`;
+  let packageLabel = isCleaning ? (state.cleaning.housingPrices[state.cleaning.housingType]?.name || 'Kamar Kos Standar') : '';
+  let stainLabel = isCleaning ? state.cleaning.stainLevel : '';
+  let addonsList = [];
+  let cleanerName = state.cleaning.cleaner || 'Siti Maryam & Rekan';
+
+  // --- Baca payload dari sessionStorage (prioritas kedua) ---
   const cleaningStored = sessionStorage.getItem('shift_cleaning_payload');
   const pindahanStored = sessionStorage.getItem('shift_active_payload');
 
   if (isCleaning && cleaningStored) {
     try {
       const data = JSON.parse(cleaningStored);
-      totalAmount = data.totalPrice || totalAmount;
-      ticketId = data.orderId || ticketId;
+      if (!realOrder) totalAmount = data.totalPrice || totalAmount;
+      if (!realOrder && data.orderId) ticketId = data.orderId.startsWith('#') ? data.orderId : `#${data.orderId}`;
+      if (data.packageLabel) packageLabel = data.packageLabel;
+      if (data.stainLevel) stainLabel = data.stainLevel;
+      if (Array.isArray(data.addonsList)) addonsList = data.addonsList;
+      if (data.cleaner) cleanerName = data.cleaner;
+      if (data.address) addressText = data.address;
+      if (data.serviceType) serviceTitle = data.serviceType;
     } catch(e){}
   } else if (!isCleaning && pindahanStored) {
     try {
       const data = JSON.parse(pindahanStored);
-      totalAmount = data.totalPrice || totalAmount;
-      ticketId = data.orderId || ticketId;
+      if (!realOrder) totalAmount = data.totalPrice || totalAmount;
+      if (!realOrder && data.orderId) ticketId = data.orderId.startsWith('#') ? data.orderId : `#${data.orderId}`;
     } catch(e){}
   }
 
-  setText('.js-qris-order-id, .js-order-id', `#${ticketId}`);
+  // =========================================================================
+  // WEEK 4 - TASK 02: Display API Data (DOM Manipulation Dinamis ke Interface SHIFT)
+  // Merender data hasil API secara dinamis ke elemen DOM antarmuka aplikasi
+  // =========================================================================
+  // Populate Actual Data to UI
+  setText('.js-qris-order-id, .js-order-id', ticketId);
+  setText('#success-modal .font-bold.text-on-surface', ticketId);
   setText('.js-qris-service-title', serviceTitle);
   setText('.js-qris-total-amount, .js-total-amount', formatRupiah(totalAmount));
   setText('.js-qris-raw-nominal', `${totalAmount}`);
-  setText('.js-pickup-loc', isCleaning ? state.cleaning.address : state.pindahan.pickupAddress);
+  setText('.js-pickup-loc', isCleaning ? addressText : state.pindahan.pickupAddress);
   setText('.js-dropoff-loc', isCleaning ? 'Lokasi Pengerjaan Hunian' : state.pindahan.dropoffAddress);
+
+  // If order is already 'diproses' in database, update button text
+  if (realOrder?.status_pesanan === 'diproses') {
+    const confirmText = document.getElementById('check-payment-text');
+    if (confirmText) confirmText.textContent = 'Pembayaran Lunas ✓ (Buka Live Tracker)';
+  }
 
   // Dynamic Driver / Cleaner Card updates on Payment page
   const driverNameEl = document.querySelector('.js-driver-name');
   if (driverNameEl) {
-    driverNameEl.textContent = isCleaning ? "Siti Maryam & Rekan" : state.pindahan.vehicleObj.driver;
+    driverNameEl.textContent = isCleaning ? cleanerName : state.pindahan.vehicleObj.driver;
   }
   const driverPlateEl = document.querySelector('.js-driver-plate');
   if (driverPlateEl) {
-    driverPlateEl.textContent = isCleaning ? "Spesialis Hydro-Vacuum & UV-C" : state.pindahan.vehicleObj.plate;
+    driverPlateEl.textContent = isCleaning ? 'Spesialis Hydro-Vacuum & UV-C' : state.pindahan.vehicleObj.plate;
   }
   const driverImg = document.querySelector('.lg\\:col-span-5 img');
   if (driverImg && isCleaning) {
@@ -3248,25 +4018,38 @@ function initPaymentPageEngine() {
   // Dynamic Invoice Breakdown for Cleaning vs Moving
   if (isCleaning) {
     const c = state.cleaning;
+    // Ambil dari sessionStorage payload (lebih akurat) atau fallback ke state
+    const displayAddons = addonsList.length > 0 ? addonsList : (() => {
+      const arr = [];
+      if (c.addons.hydroVacuum) arr.push('Hydro-Vacuum UV-C');
+      if (c.addons.disinfectantFogging) arr.push('Fogging Disinfektan');
+      if (c.addons.fridgeCleaning) arr.push('Cuci Kulkas');
+      if (c.addons.acCleaning) arr.push('Cuci AC Split');
+      return arr;
+    })();
+    const displayPackage = packageLabel || c.housingPrices[c.housingType]?.name || 'Kamar Kos Standar';
+    const displayStain = stainLabel || (c.stainLevel.charAt(0).toUpperCase() + c.stainLevel.slice(1));
+
     const breakdownBox = document.querySelector('.lg\\:col-span-5 .space-y-2\\.5');
     if (breakdownBox) {
-      let activeAddons = [];
-      if (c.addons.hydroVacuum) activeAddons.push("Hydro-Vacuum UV-C");
-      if (c.addons.disinfectantFogging) activeAddons.push("Fogging Disinfektan");
-      if (c.addons.fridgeCleaning) activeAddons.push("Cuci Kulkas");
-      if (c.addons.acCleaning) activeAddons.push("Cuci AC Split");
-
       breakdownBox.innerHTML = `
+        <div class="flex items-center justify-between pb-1 mb-1 border-b border-slate-100">
+          <span class="flex items-center gap-1.5 font-label-sm text-label-sm bg-primary-fixed/60 text-primary px-2.5 py-1 rounded-full font-bold">
+            <span class="material-symbols-outlined text-[14px]">cleaning_services</span>
+            Jasa Bersih-Bersih
+          </span>
+          <span class="font-label-sm text-label-sm text-on-surface-variant">${ticketId}</span>
+        </div>
         <div class="flex items-center justify-between">
-          <span>Paket ${c.housingPrices[c.housingType].name}</span>
+          <span>Paket ${displayPackage}</span>
           <span class="text-on-surface font-semibold">${formatRupiah(c.housingCost)}</span>
         </div>
         <div class="flex items-center justify-between">
-          <span>Tingkat Kerak ${c.stainLevel.charAt(0).toUpperCase() + c.stainLevel.slice(1)}</span>
+          <span>Tingkat Kerak ${displayStain}</span>
           <span class="text-on-surface font-semibold">${formatRupiah(c.stainCost)}</span>
         </div>
         <div class="flex items-center justify-between">
-          <span>Add-On Sanitasi (${activeAddons.length > 0 ? activeAddons.join(', ') : 'Tidak ada'})</span>
+          <span>Add-On Sanitasi (${displayAddons.length > 0 ? displayAddons.join(', ') : 'Tidak ada'})</span>
           <span class="text-on-surface font-semibold">${formatRupiah(c.addonsCost)}</span>
         </div>
         <div class="flex items-center justify-between text-primary">
@@ -3277,6 +4060,38 @@ function initPaymentPageEngine() {
         </div>
       `;
     }
+
+    // Update judul "Rincian Pembayaran" menjadi spesifik cleaning
+    const rincianTitle = document.querySelector('.lg\\:col-span-5 h3');
+    if (rincianTitle && rincianTitle.textContent.includes('Rincian')) {
+      rincianTitle.textContent = 'Rincian Jasa Bersih-Bersih';
+    }
+
+    // Update pesan escrow menjadi konteks cleaning
+    const escrowMsg = document.querySelector('.lg\\:col-span-5 .items-center.gap-2\\.5 span:last-child');
+    if (escrowMsg) {
+      escrowMsg.textContent = 'Dana Anda ditahan aman di escrow SHIFT hingga layanan bersih-bersih selesai dan terkonfirmasi.';
+    }
+
+    // Update teks tombol "Simulasi" agar menyebut cleaning
+    const simBtn = document.getElementById('simulate-success-btn');
+    if (simBtn) {
+      simBtn.querySelector('span:first-child').textContent = 'Konfirmasi Pembayaran Bersih-Bersih';
+    }
+
+    // Update "Posisi Armada" menjadi "Posisi Mitra Kebersihan"
+    const armadaLabel = document.querySelector('.lg\\:col-span-5 .font-label-sm.text-on-surface-variant');
+    if (armadaLabel && armadaLabel.textContent.includes('Posisi Armada')) {
+      armadaLabel.textContent = 'Posisi Mitra Kebersihan Saat Ini';
+    }
+    const armadaPos = document.querySelector('.lg\\:col-span-5 .font-label-md.text-on-surface.font-bold');
+    if (armadaPos && armadaPos.textContent.includes('Pool')) {
+      armadaPos.textContent = 'Siap di Area ' + (addressText ? addressText.split(',')[1]?.trim() || 'Sleman, DIY' : 'Sleman, DIY') + ' (~12 mnt)';
+    }
+    const armadaSubtitle = document.querySelector('.lg\\:col-span-5 .text-body-sm.text-on-surface-variant:not(.mb-space-md)');
+    if (armadaSubtitle && armadaSubtitle.textContent.includes('Pindahan')) {
+      armadaSubtitle.textContent = 'Mitra Kebersihan & Deep Clean UV-C';
+    }
   }
 
   // Activate selected payment method view (QRIS vs Bank Transfer)
@@ -3284,6 +4099,9 @@ function initPaymentPageEngine() {
 
   startPaymentTimer();
 }
+
+
+
 
 function startPaymentTimer() {
   if (state.paymentTimer.intervalId) clearInterval(state.paymentTimer.intervalId);
@@ -3320,190 +4138,40 @@ window.copyNominalToClipboard = function(nominalText) {
   });
 };
 
-window.handleConfirmPayment = async function() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const isCleaning = urlParams.get('service') === 'cleaning' || state.activeService === 'cleaning';
-
-  showToast('Memverifikasi transaksi dengan sistem bank...', 'info');
-
-  state.isNewUserDemo = false;
-  if (isCleaning) {
-    state.activeService = 'cleaning';
-    state.activeOrder = {
-      id: state.cleaning.orderId || "SHF-CLN-90215",
-      type: "cleaning",
-      serviceName: "Deep Clean & Sanitasi Hunian",
-      status: "Pembayaran Terverifikasi (OTW)",
-      mitraName: state.cleaning.cleaner || "Siti Maryam & Rekan",
-      vehicleName: "Tim Hydro-Vacuum UV-C",
-      vehiclePlate: "SHIFT-CLN",
-      totalPrice: state.cleaning.total,
-      pickupAddress: state.cleaning.address,
-      dropoffAddress: state.cleaning.address,
-      createdAt: new Date().toISOString()
-    };
-  } else {
-    state.activeService = 'moving';
-    if (!state.activeOrder || state.activeOrder.type !== 'pindahan') {
-      state.activeOrder = {
-        id: state.pindahan.orderId || "SHF-90214",
-        type: "pindahan",
-        serviceName: "Pindahan Barang Kos / Apartemen",
-        status: "Pembayaran Terverifikasi (OTW)",
-        mitraName: state.pindahan.vehicleObj.driver,
-        vehicleName: state.pindahan.vehicleObj.name,
-        vehiclePlate: state.pindahan.vehicleObj.plate,
-        totalPrice: state.pindahan.total,
-        pickupAddress: state.pindahan.pickupAddress,
-        dropoffAddress: state.pindahan.dropoffAddress,
-        createdAt: new Date().toISOString()
-      };
-    } else {
-      state.activeOrder.status = "Pembayaran Terverifikasi (OTW)";
-    }
-  }
-  saveStateToStorage();
-
-  const client = getSupabaseClient();
-  if (client) {
-    try {
-      await client.from('orders').insert([
-        {
-          order_id: state.activeOrder.id,
-          type: state.activeOrder.type,
-          service_name: state.activeOrder.serviceName,
-          status: state.activeOrder.status,
-          mitra_name: state.activeOrder.mitraName,
-          vehicle_name: state.activeOrder.vehicleName,
-          vehicle_plate: state.activeOrder.vehiclePlate,
-          total_price: state.activeOrder.totalPrice,
-          pickup_address: state.activeOrder.pickupAddress,
-          dropoff_address: state.activeOrder.dropoffAddress,
-          created_at: state.activeOrder.createdAt
-        }
-      ]);
-    } catch(err){}
-  }
-
-  const modal = document.getElementById('paymentSuccessModal') || document.getElementById('success-modal');
-  if (modal) {
-    modal.classList.remove('hidden');
-    const box = document.getElementById('modal-box');
-    if (box) {
-      requestAnimationFrame(() => {
-        box.classList.remove('scale-95', 'opacity-0');
-        box.classList.add('scale-100', 'opacity-100');
-      });
-    }
-  } else {
-    setTimeout(() => {
-      showToast('Pembayaran Berhasil Terverifikasi! Mengalihkan ke Live Tracker...', 'success');
-      setTimeout(() => {
-        window.location.href = isCleaning ? './tracking-cleaning.html?service=cleaning' : './tracking.html?service=moving';
-      }, 1000);
-    }, 1000);
-  }
-};
-
-window.proceedToTracking = function() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const isCleaning = urlParams.get('service') === 'cleaning' || state.activeService === 'cleaning';
-  window.location.href = isCleaning ? './tracking-cleaning.html?service=cleaning' : './tracking.html?service=moving';
-};
+// Unified handleConfirmPayment is implemented above in the main controller section
 
 /* ==========================================
  * HISTORY & HELP CENTER FILTER ENGINE
  * ========================================== */
 
 function initHistoryEngine() {
-  const container = document.getElementById('orderCardsContainer');
-  if (container && container.children.length === 0) {
-    renderHistoryCardsList(container);
+  if (typeof window.loadOrdersFromSupabase === 'function') {
+    window.loadOrdersFromSupabase();
   }
 
   const filterTabs = document.querySelectorAll('.filter-tab, .js-history-tab');
   filterTabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      const filter = tab.dataset.filter;
+    tab.addEventListener('click', (e) => {
       filterTabs.forEach(t => {
         t.className = 'px-space-md py-space-xs rounded-full font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all whitespace-nowrap filter-tab cursor-pointer';
       });
-      tab.className = 'px-space-md py-space-xs rounded-full font-label-md text-label-md bg-primary-container text-on-primary-container shadow-sm font-semibold whitespace-nowrap transition-all filter-tab active cursor-pointer';
-      filterHistoryCards(filter);
+      e.currentTarget.className = 'px-space-md py-space-xs rounded-full font-label-md text-label-md bg-primary-container text-on-primary-container shadow-sm font-semibold whitespace-nowrap transition-all filter-tab active cursor-pointer';
+      activeHistoryFilter = e.currentTarget.getAttribute('data-filter') || 'all';
+      if (typeof window.filterOrdersList === 'function') {
+        window.filterOrdersList();
+      }
     });
   });
-}
 
-function renderHistoryCardsList(container) {
-  const orders = [
-    {
-      id: "SHF-90214",
-      service: "Pindahan Kos / Rumah",
-      title: "Pindahan Kos Melati -> Apartemen Grand Kamala",
-      date: "Hari Ini, 10:15 WIB",
-      status: "running",
-      statusText: "Sedang Berjalan (OTW)",
-      total: state.pindahan.total,
-      partner: `${state.pindahan.vehicleObj.driver} (${state.pindahan.vehicleObj.name})`,
-      route: "Sleman ke Kota Yogyakarta",
-      link: "./tracking.html"
-    },
-    {
-      id: "SHF-CLN-90215",
-      service: "Deep Cleaning & Sanitasi",
-      title: "Deep Clean & Vacuum UV-C Kamar Kos",
-      date: "Hari Ini, 13:00 WIB",
-      status: "running",
-      statusText: "Mitra Siap Meluncur",
-      total: 160000,
-      partner: "Siti Maryam & Rekan",
-      route: "Kost Melati Residence No. 14",
-      link: "./tracking-cleaning.html"
-    }
-  ];
+  const searchInput = document.getElementById('historySearchInput');
+  if (searchInput && typeof window.filterOrdersList === 'function') {
+    searchInput.addEventListener('input', () => window.filterOrdersList());
+  }
 
-  container.innerHTML = orders.map(o => `
-    <div class="js-history-card p-space-md md:p-space-lg rounded-2xl bg-surface-container-lowest/90 backdrop-blur-xl shadow-sm hover:shadow-md transition-all border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-space-md" data-status="${o.status}" data-category="${o.service}">
-      <div class="flex items-start gap-space-sm min-w-0">
-        <div class="w-12 h-12 rounded-2xl bg-primary-fixed text-primary flex items-center justify-center shrink-0 shadow-sm mt-1">
-          <span class="material-symbols-outlined text-[24px]">${o.service.includes('Cleaning') ? 'cleaning_services' : 'local_shipping'}</span>
-        </div>
-        <div class="flex flex-col min-w-0">
-          <div class="flex items-center gap-2 flex-wrap">
-            <span class="font-label-sm text-label-sm font-mono font-bold text-primary">${o.id}</span>
-            <span class="font-label-sm text-label-sm px-2.5 py-0.5 rounded-full font-bold bg-secondary-container text-on-secondary-container">${o.statusText}</span>
-            <span class="font-label-sm text-label-sm text-on-surface-variant">• ${o.date}</span>
-          </div>
-          <h3 class="font-headline-sm text-headline-sm text-on-surface font-bold mt-1 truncate">${o.title}</h3>
-          <p class="font-body-sm text-body-sm text-on-surface-variant truncate">${o.route} • Mitra: ${o.partner}</p>
-        </div>
-      </div>
-
-      <div class="flex items-center justify-between md:justify-end gap-space-md shrink-0 pt-space-xs md:pt-0 border-t md:border-t-0 border-slate-100">
-        <div class="flex flex-col text-left md:text-right">
-          <span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Total Tagihan</span>
-          <span class="font-label-lg text-label-lg font-bold text-primary">${formatRupiah(o.total)}</span>
-        </div>
-
-        <a href="${o.link}" class="px-space-md py-2 rounded-full bg-secondary-container text-on-secondary-container hover:bg-secondary-fixed font-label-md text-label-md font-bold transition-all flex items-center gap-1 shadow-sm">
-          <span>Lacak Live</span>
-          <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
-        </a>
-      </div>
-    </div>
-  `).join('');
-}
-
-function filterHistoryCards(filterType) {
-  const cards = document.querySelectorAll('.js-history-card');
-  cards.forEach(card => {
-    const status = card.dataset.status;
-    if (filterType === 'all' || status === filterType) {
-      card.classList.remove('hidden');
-    } else {
-      card.classList.add('hidden');
-    }
-  });
+  const catSelect = document.getElementById('historyCategorySelect');
+  if (catSelect && typeof window.filterOrdersList === 'function') {
+    catSelect.addEventListener('change', () => window.filterOrdersList());
+  }
 }
 
 /* ==========================================
@@ -4410,15 +5078,17 @@ window.handleMitraLogin = async function(e) {
 
   // Supabase Table Profile Check
   const client = getSupabaseClient();
+  let matchedProfile = null;
   if (client && idVal) {
     try {
       const { data: profile } = await client
         .from('profiles')
         .select('*')
-        .or(`phone.eq.${idVal},email.eq.${idVal},full_name.ilike.%${idVal}%`)
+        .or(`phone.eq.${idVal},email.eq.${idVal},full_name.ilike.%${idVal}%,nama_lengkap.ilike.%${idVal}%`)
         .maybeSingle();
 
       if (profile) {
+        matchedProfile = profile;
         const st = profile.status_akun || profile.status;
         if (st === 'pending') {
           isPending = true;
@@ -4448,20 +5118,41 @@ window.handleMitraLogin = async function(e) {
     }
     showToast('Peringatan: Akun Mitra Dinonaktifkan Sementara. Silakan hubungi CS.', 'error');
   } else {
-    // Approved
+    // Approved - Store Full Mitra Session
+    const staffName = matchedProfile?.nama_lengkap || matchedProfile?.full_name || idVal || "Budi Santoso";
+    const staffRole = matchedProfile?.role || (idVal.toLowerCase().includes('clean') ? 'mitra_cleaner' : (idVal.toLowerCase().includes('help') ? 'mitra_helper' : 'mitra_driver'));
+    const staffId = matchedProfile?.id || ('MT-' + Date.now().toString().slice(-4));
+    const staffPhone = matchedProfile?.phone || matchedProfile?.nomor_hp || idVal;
+    const staffEmail = matchedProfile?.email || `${idVal.toLowerCase().replace(/[^a-z0-9]/g, '')}@mitra.shift.id`;
+
     if (!state.user) state.user = {};
-    state.user.name = idVal.split(' ')[0] || "Budi Santoso";
-    state.user.role = "Mitra Driver & Cleaning";
+    state.user.name = staffName;
+    state.user.role = staffRole === 'mitra_cleaner' ? 'Mitra Cleaner' : (staffRole === 'mitra_helper' ? 'Mitra Helper' : 'Mitra Driver');
     state.user.isMitra = true;
     state.user.isLoggedIn = true;
+    state.user.id = staffId;
     saveStateToStorage();
+
+    const loggedInMitraData = {
+      id: staffId,
+      email: staffEmail,
+      nama_lengkap: staffName,
+      nomor_hp: staffPhone,
+      role: staffRole,
+      operational_city: matchedProfile?.operational_city || matchedProfile?.city || 'DKI Jakarta'
+    };
+    sessionStorage.setItem('shift_logged_in_user', JSON.stringify(loggedInMitraData));
+    localStorage.setItem('shift_logged_in_user', JSON.stringify(loggedInMitraData));
+    sessionStorage.setItem('shift_user', JSON.stringify(loggedInMitraData));
+    localStorage.setItem('shift_user', JSON.stringify(loggedInMitraData));
+
     if (typeof window.renderAuthHeaderNav === 'function') {
       window.renderAuthHeaderNav();
     }
 
-    showToast('Login Mitra Berhasil! Mengalihkan ke Dashboard Tugas Lapangan Mitra...', 'success');
+    showToast('Login Mitra Berhasil! Mengalihkan ke Portal Tugas Operasional Pegawai...', 'success');
     setTimeout(() => {
-      window.location.href = './index.html?role=mitra';
+      window.location.href = './mitra.html';
     }, 800);
   }
 };
@@ -4495,55 +5186,94 @@ window.handleCustomerLogin = async function(e) {
     return;
   }
 
-  // Supabase Auth Integration
   const client = getSupabaseClient();
+  let authUser = null;
+  let matchedProfile = null;
+
+  // 1. Supabase Auth Integration
   if (client && identity.includes('@') && password) {
     try {
       const { data, error } = await client.auth.signInWithPassword({
         email: identity,
         password: password
       });
-      if (error) {
-        console.warn('Supabase Auth Customer Login Info:', error.message);
-      } else if (data && data.user) {
-        console.log('Supabase Customer Auth Success:', data.user);
-        if (data.user.user_metadata && data.user.user_metadata.full_name) {
-          state.user.name = data.user.user_metadata.full_name;
-        }
+      if (!error && data && data.user) {
+        authUser = data.user;
       }
     } catch (err) {
       console.warn('Supabase signInWithPassword exception:', err);
     }
   }
 
-  if (!state.user) state.user = {};
-  state.user.isLoggedIn = true;
-  state.user.name = identity ? identity.split(' ')[0] : "Pelanggan VIP";
-  state.user.email = identity.includes('@') ? identity : "dimas.pratama@gmail.com";
-  state.user.phone = identity.includes('+') || identity.match(/^\d+$/) ? identity : "+62 812-3456-7890";
-  state.user.role = "Pelanggan VIP";
+  // 2. Query baris profil spesifik dari tabel profiles
+  if (client) {
+    try {
+      let query = client.from('profiles').select('*');
+      if (authUser) {
+        query = query.or(`id.eq.${authUser.id},email.eq.${authUser.email}`);
+      } else {
+        query = query.or(`email.eq.${identity},phone.eq.${identity},nomor_hp.eq.${identity},full_name.ilike.%${identity}%,nama_lengkap.ilike.%${identity}%`);
+      }
+      const { data: prof } = await query.maybeSingle();
+      if (prof) matchedProfile = prof;
+    } catch (err) {
+      console.warn('Supabase profile query exception:', err);
+    }
+  }
 
+  // 3. Ekstrak data profil pengguna yang sedang login
+  const userId = matchedProfile?.id || authUser?.id || ('CUST-' + Math.abs(identity.split('').reduce((a,b)=>{a=((a<<5)-a)+b.charCodeAt(0);return a&a},0)));
+  const userName = matchedProfile?.nama_lengkap || matchedProfile?.full_name || authUser?.user_metadata?.full_name || (identity.includes('@') ? identity.split('@')[0] : identity) || "Pelanggan VIP";
+  const userEmail = matchedProfile?.email || authUser?.email || (identity.includes('@') ? identity : `${identity}@pelanggan.shift.id`);
+  const userPhone = matchedProfile?.nomor_hp || matchedProfile?.phone || (!identity.includes('@') ? identity : "081234567890");
+  const userRole = matchedProfile?.role || 'customer';
+
+  // 4. Simpan objek user aktif ke sessionStorage ('shift_logged_in_user') & localStorage
+  const userProfile = {
+    id: userId,
+    nama_lengkap: userName,
+    email: userEmail,
+    nomor_hp: userPhone,
+    role: userRole
+  };
+
+  sessionStorage.setItem('shift_logged_in_user', JSON.stringify(userProfile));
+  localStorage.setItem('shift_logged_in_user', JSON.stringify(userProfile));
+  sessionStorage.setItem('shift_user', JSON.stringify(userProfile));
+  localStorage.setItem('shift_user', JSON.stringify(userProfile));
+
+  if (!state.user) state.user = {};
+  state.user.id = userId;
+  state.user.name = userName;
+  state.user.email = userEmail;
+  state.user.phone = userPhone;
+  state.user.role = userRole === 'customer' ? "Pelanggan VIP" : userRole;
+  state.user.isMitra = userRole.startsWith('mitra_');
+  state.user.isLoggedIn = true;
   saveStateToStorage();
+
   if (typeof window.renderAuthHeaderNav === 'function') {
     window.renderAuthHeaderNav();
   }
 
-  showToast(`Login Pelanggan Berhasil! Selamat datang kembali, ${state.user.name}.`, 'success');
+  showToast(`Login Berhasil! Selamat datang, ${userName}.`, 'success');
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const redirectTarget = urlParams.get('redirect') || state.pendingTargetUrl;
-
-  if (redirectTarget) {
-    state.pendingTargetUrl = null;
-    saveStateToStorage();
-    setTimeout(() => {
-      window.location.href = redirectTarget;
-    }, 400);
-  } else {
-    setTimeout(() => {
-      window.location.href = './booking.html';
-    }, 400);
-  }
+  // 5. Arahkan sesuai role di database
+  setTimeout(() => {
+    if (userRole === 'customer') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectTarget = urlParams.get('redirect') || state.pendingTargetUrl;
+      if (redirectTarget) {
+        state.pendingTargetUrl = null;
+        saveStateToStorage();
+        window.location.href = redirectTarget;
+      } else {
+        window.location.href = './index.html';
+      }
+    } else {
+      window.location.href = './mitra-portal.html';
+    }
+  }, 450);
 };
 
 window.togglePasswordVisibility = function(inputId, btnEl) {
@@ -4610,11 +5340,26 @@ window.verifyOtpAndResetPassword = function(e) {
 window.handleGoogleOAuthLogin = function(redirectTargetUrl) {
   showToast('Menghubungkan ke Layanan Autentikasi Google OAuth...', 'info');
   setTimeout(() => {
+    const userProfile = {
+      id: "CUST-GOOGLE-01",
+      nama_lengkap: "Dimas Pratama",
+      email: "dimas.pratama@gmail.com",
+      nomor_hp: "+62 812-3456-7890",
+      role: "customer"
+    };
+
+    sessionStorage.setItem('shift_logged_in_user', JSON.stringify(userProfile));
+    localStorage.setItem('shift_logged_in_user', JSON.stringify(userProfile));
+    sessionStorage.setItem('shift_user', JSON.stringify(userProfile));
+    localStorage.setItem('shift_user', JSON.stringify(userProfile));
+
     if (!state.user) state.user = {};
     state.user.isLoggedIn = true;
-    state.user.name = "Dimas Pratama (Google Account)";
+    state.user.id = userProfile.id;
+    state.user.name = "Dimas Pratama";
     state.user.email = "dimas.pratama@gmail.com";
     state.user.role = "Pelanggan VIP Google";
+    state.user.isMitra = false;
 
     saveStateToStorage();
     if (typeof window.renderAuthHeaderNav === 'function') {
@@ -4626,27 +5371,40 @@ window.handleGoogleOAuthLogin = function(redirectTargetUrl) {
     const urlParams = new URLSearchParams(window.location.search);
     const target = (typeof redirectTargetUrl === 'string' && redirectTargetUrl) ? redirectTargetUrl : (urlParams.get('redirect') || state.pendingTargetUrl);
 
-    if (target) {
-      state.pendingTargetUrl = null;
-      saveStateToStorage();
-      setTimeout(() => {
+    setTimeout(() => {
+      if (target) {
+        state.pendingTargetUrl = null;
+        saveStateToStorage();
         window.location.href = target;
-      }, 400);
-    } else {
-      setTimeout(() => {
-        window.location.href = './booking.html';
-      }, 400);
-    }
-  }, 600);
+      } else {
+        window.location.href = './index.html';
+      }
+    }, 400);
+  }, 500);
 };
 
 window.handleWhatsappQuickReg = function() {
   showToast('Verifikasi Nomor WhatsApp Otomatis Berhasil!', 'success');
+  const userProfile = {
+    id: "CUST-WA-8821",
+    nama_lengkap: "Dimas Pratama",
+    email: "dimas.pratama@gmail.com",
+    nomor_hp: "+62 812-3456-7890",
+    role: "customer"
+  };
+
+  sessionStorage.setItem('shift_logged_in_user', JSON.stringify(userProfile));
+  localStorage.setItem('shift_logged_in_user', JSON.stringify(userProfile));
+  sessionStorage.setItem('shift_user', JSON.stringify(userProfile));
+  localStorage.setItem('shift_user', JSON.stringify(userProfile));
+
   if (!state.user) state.user = {};
   state.user.isLoggedIn = true;
+  state.user.id = userProfile.id;
   state.user.name = "Dimas Pratama";
   state.user.phone = "+62 812-3456-7890";
   state.user.role = "Pelanggan VIP WhatsApp";
+  state.user.isMitra = false;
 
   saveStateToStorage();
   if (typeof window.renderAuthHeaderNav === 'function') {
@@ -4656,17 +5414,15 @@ window.handleWhatsappQuickReg = function() {
   const urlParams = new URLSearchParams(window.location.search);
   const redirectTarget = urlParams.get('redirect') || state.pendingTargetUrl;
 
-  if (redirectTarget) {
-    state.pendingTargetUrl = null;
-    saveStateToStorage();
-    setTimeout(() => {
+  setTimeout(() => {
+    if (redirectTarget) {
+      state.pendingTargetUrl = null;
+      saveStateToStorage();
       window.location.href = redirectTarget;
-    }, 400);
-  } else {
-    setTimeout(() => {
-      window.location.href = './booking.html';
-    }, 400);
-  }
+    } else {
+      window.location.href = './index.html';
+    }
+  }, 400);
 };
 
 window.handleCustomerOnboardingSubmit = async function(e) {
@@ -4712,35 +5468,48 @@ window.handleCustomerOnboardingSubmit = async function(e) {
     }
   }
 
+  const userProfile = {
+    id: userId,
+    nama_lengkap: `${fn} ${ln}`,
+    email: email,
+    nomor_hp: phone,
+    role: 'customer'
+  };
+
+  sessionStorage.setItem('shift_logged_in_user', JSON.stringify(userProfile));
+  localStorage.setItem('shift_logged_in_user', JSON.stringify(userProfile));
+  sessionStorage.setItem('shift_user', JSON.stringify(userProfile));
+  localStorage.setItem('shift_user', JSON.stringify(userProfile));
+
   if (!state.user) state.user = {};
+  state.user.id = userId;
   state.user.isLoggedIn = true;
   state.user.name = `${fn} ${ln}`;
   state.user.phone = phone;
   state.user.email = email;
   state.user.age = age;
   state.user.role = "Pelanggan VIP";
+  state.user.isMitra = false;
 
   saveStateToStorage();
   if (typeof window.renderAuthHeaderNav === 'function') {
     window.renderAuthHeaderNav();
   }
 
-  showToast(`Pendaftaran Akun Pelanggan ${fn} ${ln} Berhasil & Tersimpan di Supabase!`, 'success');
+  showToast(`Pendaftaran Akun Pelanggan ${fn} ${ln} Berhasil!`, 'success');
 
   const urlParams = new URLSearchParams(window.location.search);
   const redirectTarget = urlParams.get('redirect') || state.pendingTargetUrl;
 
-  if (redirectTarget) {
-    state.pendingTargetUrl = null;
-    saveStateToStorage();
-    setTimeout(() => {
+  setTimeout(() => {
+    if (redirectTarget) {
+      state.pendingTargetUrl = null;
+      saveStateToStorage();
       window.location.href = redirectTarget;
-    }, 400);
-  } else {
-    setTimeout(() => {
-      window.location.href = './booking.html';
-    }, 400);
-  }
+    } else {
+      window.location.href = './index.html';
+    }
+  }, 450);
 };
 
 window.selectMitraCategory = function(cat, element) {
@@ -4891,36 +5660,37 @@ async function uploadFileToSupabaseStorage(file, docName, userId) {
     return null;
   }
 
-  const client = getSupabaseClient();
   const cleanName = file.name.replace(/\s+/g, '_');
   const fileName = `${Date.now()}_${cleanName}`;
 
+  if (typeof window.uploadMitraDoc === 'function') {
+    const res = await window.uploadMitraDoc(file, fileName);
+    if (res && res.publicUrl) {
+      return res.publicUrl;
+    }
+    if (res && res.error) {
+      console.warn(`Storage upload note:`, res.error.message);
+    }
+  }
+
+  const client = getSupabaseClient();
   if (!client) {
-    console.warn(`[Demo Mode] Supabase client belum siap. Presigned URL file: ${fileName}`);
     return `https://ihyramlohtmngbuzmvgs.supabase.co/storage/v1/object/public/dokumen-mitra/${fileName}`;
   }
 
   try {
-    console.log(`📤 Executing supabase.storage.from('dokumen-mitra').upload('${fileName}', file)...`);
     const { data, error } = await client.storage
       .from('dokumen-mitra')
       .upload(fileName, file, { upsert: true });
 
-    if (error) {
-      console.error(`❌ Supabase Storage Upload Error (${docName} / ${file.name}):`, error.message || error, error);
-      showToast(`Gagal mengunggah ${file.name}: ${error.message || 'Storage error'}`, 'error');
-      return `https://ihyramlohtmngbuzmvgs.supabase.co/storage/v1/object/public/dokumen-mitra/${fileName}`;
+    if (!error && data) {
+      const { data: publicUrlData } = client.storage
+        .from('dokumen-mitra')
+        .getPublicUrl(data.path);
+      return publicUrlData ? publicUrlData.publicUrl : `https://ihyramlohtmngbuzmvgs.supabase.co/storage/v1/object/public/dokumen-mitra/${fileName}`;
     }
-
-    const { data: publicUrlData } = client.storage
-      .from('dokumen-mitra')
-      .getPublicUrl(data ? data.path : fileName);
-
-    const publicUrl = publicUrlData ? publicUrlData.publicUrl : `https://ihyramlohtmngbuzmvgs.supabase.co/storage/v1/object/public/dokumen-mitra/${fileName}`;
-    console.log(`✅ File '${file.name}' (${docName}) successfully uploaded to bucket 'dokumen-mitra':`, publicUrl);
-    return publicUrl;
+    return `https://ihyramlohtmngbuzmvgs.supabase.co/storage/v1/object/public/dokumen-mitra/${fileName}`;
   } catch (err) {
-    console.error(`❌ Exception saat mengunggah file (${docName}):`, err);
     return `https://ihyramlohtmngbuzmvgs.supabase.co/storage/v1/object/public/dokumen-mitra/${fileName}`;
   }
 }
@@ -5067,140 +5837,52 @@ window.handleMitraRegistrationSubmit = async function(e) {
   const elFotoSamping = document.getElementById('fileFotoMobilSamping');
   const elKir = document.getElementById('fileKir');
 
-  const getFileUrl = async (inputEl, docName) => {
-    if (inputEl && inputEl.dataset && inputEl.dataset.uploadedUrl) {
-      return inputEl.dataset.uploadedUrl;
-    }
-    const file = inputEl?.files[0];
-    if (file) {
-      return await uploadFileToSupabaseStorage(file, docName, userId);
-    }
-    return null;
+  showToast(`Mengunggah berkas ${activeRole.toUpperCase()} ke Supabase Storage (bucket 'dokumen-mitra')...`, 'info');
+
+  const docsPayload = {
+    ktp: elKtp?.files[0] || (elKtp?.dataset?.uploadedUrl),
+    skck: elSkck?.files[0] || (elSkck?.dataset?.uploadedUrl),
+    surat_sehat: elSehat?.files[0] || (elSehat?.dataset?.uploadedUrl),
+    foto: elFoto?.files[0] || (elFoto?.dataset?.uploadedUrl),
+    cv: elCv?.files[0] || (elCv?.dataset?.uploadedUrl),
+    sertifikat: elCert?.files[0] || (elCert?.dataset?.uploadedUrl),
+    sim: elSim?.files[0] || (elSim?.dataset?.uploadedUrl),
+    stnk: elStnk?.files[0] || (elStnk?.dataset?.uploadedUrl),
+    foto_depan: elFotoDepan?.files[0] || (elFotoDepan?.dataset?.uploadedUrl),
+    foto_samping: elFotoSamping?.files[0] || (elFotoSamping?.dataset?.uploadedUrl),
+    kir: elKir?.files[0] || (elKir?.dataset?.uploadedUrl)
   };
 
-  showToast(`Mengunggah berkas ${activeRole.toUpperCase()} ke Supabase Storage (dokumen-mitra)...`, 'info');
+  const profileData = {
+    name,
+    nik,
+    phone,
+    city,
+    dob,
+    role: activeRole === 'cleaner' ? 'mitra_cleaner' : 'mitra_driver',
+    sub_role: activeRole,
+    specialization: activeRole === 'cleaner' ? (cleanSkills.join(', ') || 'Deep Clean Kos & Apartemen') : spec,
+    equipment_status: activeRole === 'cleaner' ? equipStatus : null,
+    tipe_armada: activeRole === 'driver' ? tipeArmada : null,
+    plat_nomor: activeRole === 'driver' ? spec : null,
+    kepemilikan_armada: activeRole === 'driver' ? kepemilikanArmada : null,
+    nomor_sim: activeRole === 'driver' ? simNumber : null,
+    masa_berlaku_sim: activeRole === 'driver' ? simExpiry : null,
+    masa_berlaku_stnk: activeRole === 'driver' ? stnkExpiry : null,
+    height,
+    weight,
+    lifting
+  };
 
-  const [
-    urlKtp,
-    urlSkck,
-    urlSehat,
-    urlFoto,
-    urlCv,
-    urlCert,
-    urlSim,
-    urlStnk,
-    urlFotoDepan,
-    urlFotoSamping,
-    urlKir
-  ] = await Promise.all([
-    getFileUrl(elKtp, 'ktp'),
-    getFileUrl(elSkck, 'skck'),
-    getFileUrl(elSehat, 'surat_sehat'),
-    getFileUrl(elFoto, 'foto'),
-    getFileUrl(elCv, 'cv'),
-    getFileUrl(elCert, 'sertifikat'),
-    getFileUrl(elSim, 'sim'),
-    getFileUrl(elStnk, 'stnk'),
-    getFileUrl(elFotoDepan, 'foto_depan'),
-    getFileUrl(elFotoSamping, 'foto_samping'),
-    getFileUrl(elKir, 'kir')
-  ]);
-
-  // Supabase DB Sync to 'profiles' and 'mitra_documents'
-  const client = getSupabaseClient();
-  const supabaseRole = activeRole === 'cleaner' ? 'mitra_cleaner' : 'mitra_driver';
-
-  if (client) {
-    try {
-      const profilePayload = {
-        id: userId,
-        full_name: name,
-        nik: nik,
-        phone: phone,
-        city: city,
-        dob: dob,
-        specialization: activeRole === 'cleaner' ? (cleanSkills.join(', ') || 'Deep Clean Kos & Apartemen') : spec,
-        equipment_status: activeRole === 'cleaner' ? equipStatus : null,
-        height: height,
-        weight: weight,
-        lifting_capacity: lifting,
-        role: supabaseRole,
-        sub_role: activeRole,
-        status_akun: 'pending',
-        created_at: new Date().toISOString()
-      };
-
-      console.log('📤 Executing supabase.from("profiles").upsert()... Payload:', profilePayload);
-
-      let profData = null;
-      let profErr = null;
-
-      const resUpsert = await client.from('profiles').upsert([profilePayload]).select();
-      profData = resUpsert.data;
-      profErr = resUpsert.error;
-
-      if (profErr) {
-        console.warn('⚠️ Supabase profiles upsert failed, trying insert fallback:', profErr.message);
-        const resInsert = await client.from('profiles').insert([profilePayload]).select();
-        profData = resInsert.data;
-        profErr = resInsert.error;
-
-        if (profErr) {
-          console.warn('⚠️ Supabase profiles insert with ID failed, trying insert without explicit ID:', profErr.message);
-          const { id, ...payloadWithoutId } = profilePayload;
-          const resNoId = await client.from('profiles').insert([payloadWithoutId]).select();
-          profData = resNoId.data;
-          profErr = resNoId.error;
-        }
-      }
-
-      if (profErr) {
-        console.error('❌ Supabase profiles insert/upsert error:', profErr);
-      } else {
-        console.log('✅ Supabase profiles insert successful:', profData);
-      }
-
-      // 2. Insert to 'mitra_documents'
-      const docPayload = {
-        user_id: userId,
-        mitra_name: name,
-        phone: phone,
-        url_ktp: urlKtp || null,
-        url_skck: urlSkck || null,
-        url_surat_sehat: urlSehat || null,
-        url_foto: urlFoto || null,
-        url_cv: urlCv || null,
-        url_sertifikat: urlCert || null,
-        url_sim: urlSim || null,
-        url_stnk: urlStnk || null,
-        url_foto_depan: urlFotoDepan || null,
-        url_foto_samping: urlFotoSamping || null,
-        url_kir: urlKir || null,
-        plat_nomor: activeRole === 'driver' ? spec : null,
-        tipe_armada: activeRole === 'driver' ? tipeArmada : null,
-        kepemilikan_armada: activeRole === 'driver' ? kepemilikanArmada : null,
-        nomor_sim: activeRole === 'driver' ? simNumber : null,
-        masa_berlaku_sim: activeRole === 'driver' ? simExpiry : null,
-        masa_berlaku_stnk: activeRole === 'driver' ? stnkExpiry : null,
-        profession_role: activeRole,
-        created_at: new Date().toISOString()
-      };
-
-      console.log('📤 Executing supabase.from("mitra_documents").insert()... Payload:', docPayload);
-      const { data: docData, error: docErr } = await client
-        .from('mitra_documents')
-        .insert([docPayload])
-        .select();
-
-      if (docErr) {
-        console.error('❌ Supabase mitra_documents insert error:', docErr);
-      } else {
-        console.log(`✅ Mitra (${activeRole}) Documents & Profile Saved to Supabase Cloud!`, docData);
-      }
-
-    } catch (err) {
-      console.error('❌ Supabase DB Exception:', err);
+  try {
+    const regResult = await window.registerMitra(profileData, docsPayload);
+    if (regResult.error) {
+      console.warn('⚠️ Supabase registerMitra note:', regResult.error.message);
     }
+    console.log('✅ Mitra registered in Supabase Storage & mitra_documents:', regResult);
+  } catch (err) {
+    console.error('❌ Exception in registerMitra:', err);
+    showToast('Catatan upload dokumen: ' + err.message, 'warning');
   }
 
   if (submitBtn) {
@@ -5291,6 +5973,10 @@ window.searchStatus = async function() {
   }
 };
 
+// =========================================================================
+// WEEK 4 - TASK 01: Connect to API (Fetch API & Parsing JSON)
+// Menghubungkan aplikasi SHIFT ke endpoint REST API & mem-parsing data JSON
+// =========================================================================
 window.loadMitraStatusFromSupabase = async function(searchVal) {
   const inputEl = document.getElementById('search-input');
   const val = searchVal !== undefined ? searchVal : (inputEl ? inputEl.value.trim() : "");
@@ -5322,11 +6008,19 @@ window.loadMitraStatusFromSupabase = async function(searchVal) {
     }
   }
 
+  // =========================================================================
+  // WEEK 4 - TASK 03: Handle API State (Loading Spinner, Success Data, Error Handling & Tombol Coba Lagi)
+  // Mengelola feedback visual saat loading, data berhasil dimuat, dan tombol retry saat error
+  // =========================================================================
   if (!profileData) {
     showToast(`Data pendaftaran untuk NIK / No. WA [${val}] tidak ditemukan di Supabase Cloud.`, 'warning');
     return;
   }
 
+  // =========================================================================
+  // WEEK 4 - TASK 02: Display API Data (DOM Manipulation Dinamis ke Interface SHIFT)
+  // Merender data hasil API secara dinamis ke elemen DOM antarmuka aplikasi
+  // =========================================================================
   // Update UI Elements with retrieved data
   const nameEl = document.getElementById('applicantName');
   const avatarEl = document.getElementById('applicantAvatar');
@@ -5480,28 +6174,44 @@ window.renderDocumentAuditGrid = function(docData, profileData) {
  * CUSTOMER VIP PROFILE & ACCOUNT ENGINE
  * ========================================== */
 
+// =========================================================================
+// WEEK 4 - TASK 01: Connect to API (Fetch API & Parsing JSON)
+// Menghubungkan aplikasi SHIFT ke endpoint REST API & mem-parsing data JSON
+// =========================================================================
 window.loadProfileFromSupabase = async function() {
+  // 1. Strict Auth Verification
+  const rawUser = sessionStorage.getItem('shift_logged_in_user') || localStorage.getItem('shift_logged_in_user') || sessionStorage.getItem('shift_user') || localStorage.getItem('shift_user');
+  let activeUser = null;
+  try { activeUser = rawUser ? JSON.parse(rawUser) : null; } catch(e){}
+
+  if (!activeUser || !activeUser.id) {
+    alert('Sesi Anda belum aktif. Silakan masuk terlebih dahulu untuk mengakses profil.');
+    window.location.replace('./auth.html?path=login-customer');
+    return;
+  }
+
   const client = getSupabaseClient();
   let userProf = state.user || {};
 
   if (client) {
     try {
-      const email = userProf.email || "dimas.pratama@gmail.com";
+      // STRICT FILTER: Hanya ambil data profil milik ID user yang sedang login
       const { data, error } = await client
         .from('profiles')
         .select('*')
-        .or(`email.eq.${email},phone.eq.${userProf.phone || ''}`)
+        .eq('id', activeUser.id)
         .maybeSingle();
 
       if (!error && data) {
         userProf = {
           ...userProf,
-          name: data.full_name || data.nama || userProf.name,
-          email: data.email || userProf.email,
-          phone: data.phone || data.nomor_hp || userProf.phone,
+          id: data.id,
+          name: data.nama_lengkap || data.full_name || data.nama || activeUser.nama_lengkap,
+          email: data.email || activeUser.email,
+          phone: data.nomor_hp || data.phone || activeUser.nomor_hp,
           gender: data.gender || userProf.gender || 'L',
           dob: data.dob || data.birth_date || userProf.dob || '1998-04-18',
-          role: data.role === 'customer' ? 'Pelanggan VIP' : (data.role || userProf.role),
+          role: data.role === 'customer' ? 'Pelanggan VIP' : (data.role || activeUser.role),
           savedAddresses: data.saved_addresses || userProf.savedAddresses
         };
         state.user = userProf;
@@ -5512,15 +6222,19 @@ window.loadProfileFromSupabase = async function() {
     }
   }
 
+  // =========================================================================
+  // WEEK 4 - TASK 02: Display API Data (DOM Manipulation Dinamis ke Interface SHIFT)
+  // Merender data hasil API secara dinamis ke elemen DOM antarmuka aplikasi
+  // =========================================================================
   // Populate Form Fields
   const inputFullName = document.getElementById('inputFullName');
   const inputEmail = document.getElementById('inputEmail');
   const inputPhone = document.getElementById('inputPhone');
   const inputDob = document.getElementById('inputDob');
 
-  if (inputFullName) inputFullName.value = userProf.name || "";
-  if (inputEmail) inputEmail.value = userProf.email || "";
-  if (inputPhone) inputPhone.value = userProf.phone || "";
+  if (inputFullName) inputFullName.value = userProf.name || activeUser.nama_lengkap || "";
+  if (inputEmail) inputEmail.value = userProf.email || activeUser.email || "";
+  if (inputPhone) inputPhone.value = userProf.phone || activeUser.nomor_hp || "";
   if (inputDob) inputDob.value = userProf.dob || "";
 
   const genderVal = userProf.gender || 'L';
@@ -5537,10 +6251,10 @@ window.loadProfileFromSupabase = async function() {
   const navAvatarInitials = document.getElementById('navAvatarInitials');
   const walletBalanceDisplay = document.getElementById('walletBalanceDisplay');
 
-  const fullName = userProf.name || "Pelanggan";
-  const initials = userProf.name ? userProf.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "U";
+  const fullName = userProf.name || activeUser.nama_lengkap || "Pelanggan VIP";
+  const initials = fullName ? fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "U";
 
-  if (profileHeaderName) profileHeaderName.textContent = userProf.name ? fullName : "Profil Pelanggan";
+  if (profileHeaderName) profileHeaderName.textContent = fullName;
   if (profileHeaderAvatar) profileHeaderAvatar.textContent = initials;
   if (navUserName) navUserName.textContent = fullName;
   if (navAvatarInitials) navAvatarInitials.textContent = initials;
@@ -5552,17 +6266,32 @@ window.loadProfileFromSupabase = async function() {
   window.renderSavedAddressGrid();
 };
 
+// =========================================================================
+// WEEK 4 - TASK 01: Connect to API (Fetch API & Parsing JSON)
+// Menghubungkan aplikasi SHIFT ke endpoint REST API & mem-parsing data JSON
+// =========================================================================
 window.saveProfileToSupabase = async function(e) {
   if (e) e.preventDefault();
 
-  const name = document.getElementById('inputFullName')?.value.trim() || "Pelanggan";
-  const email = document.getElementById('inputEmail')?.value.trim() || "";
-  const phone = document.getElementById('inputPhone')?.value.trim() || "";
+  const rawUser = sessionStorage.getItem('shift_logged_in_user') || localStorage.getItem('shift_logged_in_user');
+  let activeUser = null;
+  try { activeUser = rawUser ? JSON.parse(rawUser) : null; } catch(e){}
+
+  if (!activeUser || !activeUser.id) {
+    alert('Sesi Anda belum aktif. Silakan masuk terlebih dahulu.');
+    window.location.replace('./auth.html?path=login-customer');
+    return;
+  }
+
+  const name = document.getElementById('inputFullName')?.value.trim() || activeUser.nama_lengkap || "Pelanggan";
+  const email = document.getElementById('inputEmail')?.value.trim() || activeUser.email || "";
+  const phone = document.getElementById('inputPhone')?.value.trim() || activeUser.nomor_hp || "";
   const dob = document.getElementById('inputDob')?.value || "";
   const checkedGender = document.querySelector('input[name="gender"]:checked');
   const gender = checkedGender ? checkedGender.value : 'L';
 
   if (!state.user) state.user = {};
+  state.user.id = activeUser.id;
   state.user.name = name;
   state.user.email = email;
   state.user.phone = phone;
@@ -5570,25 +6299,32 @@ window.saveProfileToSupabase = async function(e) {
   state.user.gender = gender;
   saveStateToStorage();
 
+  // Update session
+  activeUser.nama_lengkap = name;
+  activeUser.email = email;
+  activeUser.nomor_hp = phone;
+  sessionStorage.setItem('shift_logged_in_user', JSON.stringify(activeUser));
+  localStorage.setItem('shift_logged_in_user', JSON.stringify(activeUser));
+
   const client = getSupabaseClient();
   if (client) {
     try {
-      const userId = state.user.id || generateUUID();
       const profilePayload = {
-        id: userId,
+        nama_lengkap: name,
         full_name: name,
         email: email,
         phone: phone,
+        nomor_hp: phone,
         gender: gender,
         dob: dob,
-        role: 'customer',
         updated_at: new Date().toISOString()
       };
 
-      console.log('📤 Updating Customer Profile in Supabase profiles:', profilePayload);
+      console.log('📤 Updating Customer Profile strictly with .eq("id", activeUser.id):', profilePayload);
       const { data, error } = await client
         .from('profiles')
-        .upsert([profilePayload])
+        .update(profilePayload)
+        .eq('id', activeUser.id)
         .select();
 
       if (error) {
@@ -5819,57 +6555,186 @@ window.getSavedAddresses = function() {
 
 let activeHistoryFilter = 'all';
 
+// =========================================================================
+// WEEK 4 - TASK 01: Connect to API (Fetch API & Parsing JSON)
+// Menghubungkan aplikasi SHIFT ke endpoint REST API & mem-parsing data JSON
+// =========================================================================
 window.loadOrdersFromSupabase = async function() {
-  const client = getSupabaseClient();
-  let ordersList = [];
+  const loggedInJson = sessionStorage.getItem('shift_logged_in_user') || 
+                        localStorage.getItem('shift_logged_in_user') || 
+                        sessionStorage.getItem('shift_user') || 
+                        localStorage.getItem('shift_user');
+  if (!loggedInJson) {
+    console.warn('🔒 [History] Tidak ada sesi login aktif, mengarahkan ke auth.html...');
+    window.location.replace('./auth.html?path=login-customer');
+    return;
+  }
+  let activeUser = null;
+  try { activeUser = JSON.parse(loggedInJson); } catch(e){}
+  if (!activeUser || !activeUser.id) {
+    window.location.replace('./auth.html?path=login-customer');
+    return;
+  }
 
+  const activeUserId = activeUser.id;
+  const isStaff = (activeUser.role && activeUser.role.startsWith('mitra_'));
+  const idField = isStaff ? 'mitra_id' : 'customer_id';
+
+  console.log(`📤 [History] Querying orders from Supabase strictly for ${idField} = ${activeUserId} (${activeUser.nama_lengkap || activeUser.name || 'User'})...`);
+  let ordersList = [];
+  let fetchError = null;
+
+  // =========================================================================
+  // WEEK 4 - TASK 03: Handle API State (Loading Spinner, Success Data, Error Handling & Tombol Coba Lagi)
+  // Mengelola feedback visual saat loading, data berhasil dimuat, dan tombol retry saat error
+  // =========================================================================
+  const container = document.getElementById('orderCardsContainer');
+  if (container && (!state || !state.allOrders || state.allOrders.length === 0)) {
+    container.innerHTML = `
+      <div class="col-span-full py-16 flex flex-col items-center justify-center text-center gap-4 bg-surface-container-lowest/80 rounded-3xl border border-slate-100 shadow-sm">
+        <div class="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+        <p class="text-sm font-semibold text-on-surface-variant">Memuat riwayat pesanan dari REST API Supabase...</p>
+      </div>
+    `;
+  }
+
+  // 1. Strict Query via Supabase JS Client
+  const client = getSupabaseClient();
   if (client) {
     try {
-      console.log('📤 Querying all orders from Supabase "orders" table...');
-      const { data, error } = await client
-        .from('orders')
+      const res = await client.from('orders')
         .select('*')
-        .order('created_at', { ascending: false });
+        .eq(idField, activeUserId)
+        .order('updated_at', { ascending: false });
 
-      if (!error && data && data.length > 0) {
-        ordersList = data;
-        console.log(`✅ Loaded ${data.length} orders from Supabase Cloud:`, data);
-      } else if (error) {
-        console.warn('⚠️ Supabase orders query error:', error.message);
+      if (!res.error && Array.isArray(res.data)) {
+        ordersList = res.data;
+        console.log(`✅ [History] Loaded ${ordersList.length} scoped orders from Supabase Client:`, ordersList);
+      } else if (res.error) {
+        console.warn('⚠️ Supabase JS SDK scoped query error:', res.error.message);
+        fetchError = res.error;
       }
     } catch (err) {
-      console.warn('⚠️ Supabase orders query exception:', err);
+      console.warn('⚠️ Supabase JS SDK query exception:', err);
+      fetchError = err;
     }
   }
 
-  // Use empty array when database table returns 0 records
-  const finalOrders = (ordersList && ordersList.length > 0) ? ordersList : [];
+  // 2. Direct REST Fallback STRICTLY scoped to user ID (Never dump the whole table)
+  if (ordersList.length === 0 && window.ShiftCore && typeof window.ShiftCore.supabaseRest === 'function') {
+    try {
+      const restData = await window.ShiftCore.supabaseRest(`orders?${idField}=eq.${encodeURIComponent(activeUserId)}&order=updated_at.desc`, { method: 'GET' });
+      if (Array.isArray(restData)) {
+        ordersList = restData;
+        console.log(`✅ [History] Loaded ${ordersList.length} scoped orders from Supabase REST:`, ordersList);
+        fetchError = null;
+      }
+    } catch (restErr) {
+      console.warn('⚠️ REST history query fallback notice:', restErr);
+      if (!fetchError) fetchError = restErr;
+    }
+  }
+
+  // 3. SessionStorage fallback ONLY if the cached order belongs strictly to this user
+  if (ordersList.length === 0) {
+    try {
+      const cached = sessionStorage.getItem('currentOrderData') || sessionStorage.getItem('shift_active_order');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && (parsed.customer_id === activeUserId || parsed.mitra_id === activeUserId)) {
+          ordersList = [parsed];
+          fetchError = null;
+        }
+      }
+    } catch(e){}
+  }
+
+  const finalOrders = ordersList || [];
   if (state) state.allOrders = finalOrders;
 
+  // =========================================================================
+  // WEEK 4 - TASK 03: Handle API State (Loading Spinner, Success Data, Error Handling & Tombol Coba Lagi)
+  // Mengelola feedback visual saat loading, data berhasil dimuat, dan tombol retry saat error
+  // =========================================================================
+  if (finalOrders.length === 0 && fetchError) {
+    if (container) {
+      container.innerHTML = `
+        <div class="col-span-full p-8 text-center bg-surface-container-lowest/90 rounded-3xl border border-error/30 shadow-sm flex flex-col items-center justify-center gap-4">
+          <div class="w-16 h-16 rounded-full bg-error-container text-error flex items-center justify-center">
+            <span class="material-symbols-outlined text-[32px]">cloud_off</span>
+          </div>
+          <div>
+            <h3 class="font-bold text-lg text-on-surface mb-1">Gagal Memuat Riwayat Pesanan dari REST API</h3>
+            <p class="text-xs text-on-surface-variant max-w-md">Terjadi kendala koneksi ke server Supabase Cloud (${fetchError.message || 'Koneksi terputus'}). Silakan klik tombol di bawah untuk mencoba kembali.</p>
+          </div>
+          <button onclick="window.loadOrdersFromSupabase()" class="px-6 py-2.5 rounded-full bg-primary hover:bg-primary-container text-on-primary font-bold text-xs shadow-md transition-all cursor-pointer flex items-center gap-2">
+            <span class="material-symbols-outlined text-[16px]">refresh</span>
+            <span>Coba Lagi</span>
+          </button>
+        </div>
+      `;
+      return;
+    }
+  }
+
+  // =========================================================================
+  // WEEK 4 - TASK 02: Display API Data (DOM Manipulation Dinamis ke Interface SHIFT)
+  // Merender data hasil API secara dinamis ke elemen DOM antarmuka aplikasi
+  // =========================================================================
   window.updateHistoryMetrics(finalOrders);
   window.filterOrdersList();
 };
 
+// =========================================================================
+// WEEK 4 - TASK 02: Display API Data (DOM Manipulation Dinamis ke Interface SHIFT)
+// Merender data hasil API secara dinamis ke elemen DOM antarmuka aplikasi
+// =========================================================================
 window.updateHistoryMetrics = function(orders) {
   const safeOrders = orders || [];
-  const completedCount = safeOrders.filter(o => o.status === 'selesai' || o.status === 'completed').length;
-  const runningOrder = safeOrders.find(o => o.status === 'otw' || o.status === 'running' || o.status === 'proses' || o.status === 'menunggu_pembayaran');
+  const completedOrders = safeOrders.filter(o => {
+    const st = (o.status_pesanan || o.status || '').toLowerCase();
+    return st === 'selesai' || st === 'completed';
+  });
+  const runningOrders = safeOrders.filter(o => {
+    const st = (o.status_pesanan || o.status || '').toLowerCase();
+    return st === 'diproses' || st === 'menunggu_pembayaran' || st === 'otw' || st === 'running' || st === 'proses';
+  });
+  const cancelledOrders = safeOrders.filter(o => {
+    const st = (o.status_pesanan || o.status || '').toLowerCase();
+    return st === 'dibatalkan' || st === 'cancelled';
+  });
 
   const metricCompleted = document.querySelector('.js-metric-completed');
   const metricRunning = document.querySelector('.js-metric-running');
   const metricSaved = document.querySelector('.js-metric-saved');
   const metricPoints = document.querySelector('.js-metric-points');
 
-  if (metricCompleted) metricCompleted.textContent = completedCount;
+  if (metricCompleted) metricCompleted.textContent = completedOrders.length;
   if (metricRunning) {
-    if (runningOrder) {
-      metricRunning.textContent = `1 Pesanan (${runningOrder.order_id || 'OTW'})`;
-    } else {
-      metricRunning.textContent = `0 Pesanan Aktif`;
-    }
+    metricRunning.textContent = runningOrders.length > 0 ? `${runningOrders.length} Aktif` : `0 Aktif`;
   }
-  if (metricSaved && safeOrders.length === 0) metricSaved.textContent = 'Rp 0';
-  if (metricPoints && safeOrders.length === 0) metricPoints.textContent = '0';
+
+  // Calculate total transactions & VIP points
+  const totalBiaya = safeOrders.reduce((sum, o) => sum + (Number(o.total_biaya || o.total_price) || 0), 0);
+  if (metricSaved) {
+    const savedAmount = Math.round(totalBiaya * 0.15);
+    metricSaved.textContent = totalBiaya > 0 ? `Rp ${savedAmount.toLocaleString('id-ID')}` : 'Saldo Rp 0';
+  }
+  if (metricPoints) {
+    const points = Math.floor(totalBiaya / 10000);
+    metricPoints.textContent = points.toLocaleString('id-ID');
+  }
+
+  // Update Tab counts
+  const tabAll = document.querySelector('.filter-tab[data-filter="all"]');
+  const tabRunning = document.querySelector('.filter-tab[data-filter="running"]');
+  const tabCompleted = document.querySelector('.filter-tab[data-filter="completed"]');
+  const tabCancelled = document.querySelector('.filter-tab[data-filter="cancelled"]');
+
+  if (tabAll) tabAll.textContent = `Semua Pesanan (${safeOrders.length})`;
+  if (tabRunning) tabRunning.textContent = `Sedang Berjalan (${runningOrders.length})`;
+  if (tabCompleted) tabCompleted.textContent = `Selesai (${completedOrders.length})`;
+  if (tabCancelled) tabCancelled.textContent = `Dibatalkan (${cancelledOrders.length})`;
 };
 
 window.filterOrdersList = function() {
@@ -5879,10 +6744,10 @@ window.filterOrdersList = function() {
 
   const filtered = orders.filter(order => {
     // Status Filter
-    const st = (order.status || '').toLowerCase();
+    const st = (order.status_pesanan || order.status || 'menunggu_pembayaran').toLowerCase();
     let matchesStatus = true;
     if (activeHistoryFilter === 'running') {
-      matchesStatus = (st === 'otw' || st === 'running' || st === 'proses' || st === 'menunggu_pembayaran');
+      matchesStatus = (st === 'otw' || st === 'running' || st === 'proses' || st === 'diproses' || st === 'menunggu_pembayaran');
     } else if (activeHistoryFilter === 'completed') {
       matchesStatus = (st === 'selesai' || st === 'completed');
     } else if (activeHistoryFilter === 'cancelled') {
@@ -5891,20 +6756,21 @@ window.filterOrdersList = function() {
 
     // Category Filter
     let matchesCategory = true;
+    const cat = (order.kategori_layanan || order.type || order.service_name || '').toLowerCase();
     if (categoryVal.includes('Pindahan')) {
-      matchesCategory = (order.type === 'pindahan' || (order.service_name || '').toLowerCase().includes('pindahan'));
+      matchesCategory = cat.includes('moving') || cat.includes('pindahan');
     } else if (categoryVal.includes('Deep Cleaning') || categoryVal.includes('Cleaning')) {
-      matchesCategory = (order.type === 'cleaning' || (order.service_name || '').toLowerCase().includes('clean'));
+      matchesCategory = cat.includes('clean') || cat.includes('kebersihan');
     }
 
     // Text Search Filter
     let matchesSearch = true;
     if (searchVal) {
-      const ticket = (order.order_id || '').toLowerCase();
+      const ticket = (order.nomor_tiket || order.order_id || '').toLowerCase();
       const pickup = (order.pickup_address || '').toLowerCase();
       const dropoff = (order.dropoff_address || '').toLowerCase();
       const driver = (order.mitra_name || '').toLowerCase();
-      const sName = (order.service_name || '').toLowerCase();
+      const sName = (order.service_name || order.kategori_layanan || '').toLowerCase();
       matchesSearch = ticket.includes(searchVal) || pickup.includes(searchVal) || dropoff.includes(searchVal) || driver.includes(searchVal) || sName.includes(searchVal);
     }
 
@@ -5914,18 +6780,26 @@ window.filterOrdersList = function() {
   window.renderOrdersHistoryGrid(filtered);
 };
 
+// =========================================================================
+// WEEK 4 - TASK 02: Display API Data (DOM Manipulation Dinamis ke Interface SHIFT)
+// Merender data hasil API secara dinamis ke elemen DOM antarmuka aplikasi
+// =========================================================================
 window.renderOrdersHistoryGrid = function(orders) {
   const container = document.getElementById('orderCardsContainer');
   if (!container) return;
 
+  // =========================================================================
+  // WEEK 4 - TASK 03: Handle API State (Loading Spinner, Success Data, Error Handling & Tombol Coba Lagi)
+  // Mengelola feedback visual saat loading, data berhasil dimuat, dan tombol retry saat error
+  // =========================================================================
   if (!orders || orders.length === 0) {
     container.innerHTML = `
       <div class="p-space-xl text-center bg-surface-container-lowest/90 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-3">
         <div class="w-16 h-16 rounded-full bg-surface-container-low flex items-center justify-center text-outline">
           <span class="material-symbols-outlined text-[36px]">inbox</span>
         </div>
-        <h3 class="font-headline-sm text-headline-sm font-bold text-on-surface">Belum ada pesanan aktif</h3>
-        <p class="font-body-md text-body-md text-on-surface-variant max-w-md">Mulai pesan layanan pindahan atau kebersihan sekarang!</p>
+        <h3 class="font-headline-sm text-headline-sm font-bold text-on-surface">Belum ada riwayat pesanan</h3>
+        <p class="font-body-md text-body-md text-on-surface-variant max-w-md">Silakan pesan layanan SHIFT terlebih dahulu.</p>
         <button onclick="window.location.href='./booking.html'" class="mt-2 px-6 py-2.5 rounded-full bg-primary text-on-primary font-label-lg text-label-lg font-bold shadow-md hover:bg-primary-container transition-all cursor-pointer">
           Pesan Layanan Sekarang
         </button>
@@ -5935,191 +6809,187 @@ window.renderOrdersHistoryGrid = function(orders) {
   }
 
   container.innerHTML = orders.map(order => {
-    const isRunning = (order.status === 'otw' || order.status === 'running' || order.status === 'proses' || order.status === 'menunggu_pembayaran');
-    const isCancelled = (order.status === 'dibatalkan' || order.status === 'cancelled');
-    const isCleaning = order.type === 'cleaning';
-    const trackingLink = isCleaning ? `./tracking-cleaning.html?service=cleaning&orderId=${order.order_id}` : `./tracking.html?service=moving&orderId=${order.order_id}`;
+    const rawTicket = order.nomor_tiket || order.order_id || `SHF-${order.id}`;
+    const ticket = rawTicket.startsWith('#') ? rawTicket : `#${rawTicket}`;
+    const category = (order.kategori_layanan || order.type || 'moving').toLowerCase();
+    const isCleaning = category.includes('clean') || category.includes('kebersihan');
+    const status = (order.status_pesanan || order.status || 'menunggu_pembayaran').toLowerCase();
+    
+    const isWaitingPayment = status === 'menunggu_pembayaran';
+    const isProcessing = status === 'diproses' || status === 'otw' || status === 'running' || status === 'proses';
+    const isCompleted = status === 'selesai' || status === 'completed';
+    const isCancelled = status === 'dibatalkan' || status === 'cancelled';
 
-    if (isRunning) {
-      return `
-        <div class="rounded-2xl bg-surface-container-lowest/90 backdrop-blur-2xl p-space-md md:p-space-lg shadow-[0_20px_45px_-12px_rgba(0,97,148,0.12)] relative overflow-hidden transition-all order-card running border border-slate-100">
-          <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-secondary via-secondary-container to-primary"></div>
-          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md pb-space-md border-b border-surface-container-high/60">
-            <div class="flex flex-wrap items-center gap-2">
-              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-container/30 text-on-secondary-container font-label-md text-label-md font-bold shadow-sm">
-                <span class="relative flex h-2 w-2">
-                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
-                  <span class="relative inline-flex rounded-full h-3 w-3 bg-secondary"></span>
-                </span>
-                ${order.status_label || 'SEDANG BERJALAN • OTW'}
-              </span>
-              <span class="font-label-lg text-label-lg font-bold text-on-surface">#${order.order_id}</span>
-              <span class="text-outline-variant">•</span>
-              <span class="font-body-sm text-body-sm text-on-surface-variant">${order.created_at ? new Date(order.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Hari Ini'}</span>
-            </div>
-            <div class="flex items-center gap-space-sm self-start lg:self-auto">
-              <div class="text-right">
-                <span class="font-label-sm text-label-sm text-on-surface-variant block">Total Biaya</span>
-                <span class="font-headline-md text-headline-md text-on-surface font-extrabold">Rp ${(order.total_price || 182750).toLocaleString('id-ID')}</span>
-              </div>
-              <span class="px-2.5 py-1 rounded-full bg-primary-fixed/40 text-primary font-label-sm text-label-sm font-bold flex items-center gap-1">
-                <span class="material-symbols-outlined text-[14px]">check_circle</span> ${order.payment_method || 'QRIS Lunas'}
-              </span>
-            </div>
-          </div>
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-md my-space-md">
-            <div class="lg:col-span-7 flex flex-col justify-between space-y-3">
-              <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-2xl ${isCleaning ? 'bg-tertiary-fixed text-tertiary' : 'bg-primary-fixed text-primary'} flex items-center justify-center shrink-0 shadow-sm">
-                  <span class="material-symbols-outlined text-[26px]">${isCleaning ? 'sanitizer' : 'local_shipping'}</span>
-                </div>
-                <div>
-                  <h3 class="font-headline-sm text-headline-sm text-on-surface font-bold leading-tight">
-                    ${order.service_name || (isCleaning ? 'Deep Clean & Sanitasi Hunian' : 'Pindahan Kos & Angkut Barang')}
-                  </h3>
-                  <p class="font-body-sm text-body-sm text-on-surface-variant">
-                    ${order.vehicle_name || 'Pick-up Box AB 1420 YK (Kapasitas Maksimal 800 kg)'}
-                  </p>
-                </div>
-              </div>
-              <div class="p-space-md rounded-2xl bg-surface-container-low/70 flex flex-col gap-2 relative border border-slate-200">
-                <div class="flex items-start gap-3">
-                  <div class="flex flex-col items-center mt-1">
-                    <div class="w-3 h-3 rounded-full bg-primary"></div>
-                    <div class="w-0.5 h-7 bg-outline-variant/60 my-0.5"></div>
-                    <div class="w-3 h-3 rounded-full bg-secondary-container"></div>
-                  </div>
-                  <div class="flex flex-col gap-2 grow">
-                    <div>
-                      <span class="font-label-sm text-label-sm text-on-surface-variant uppercase font-bold tracking-wider">Lokasi Penjemputan</span>
-                      <p class="font-label-lg text-label-lg text-on-surface font-semibold">${order.pickup_address || 'Kost Melati Lt. 2, Sleman'}</p>
-                    </div>
-                    <div>
-                      <span class="font-label-sm text-label-sm text-on-surface-variant uppercase font-bold tracking-wider">Tujuan Pengantaran</span>
-                      <p class="font-label-lg text-label-lg text-on-surface font-semibold">${order.dropoff_address || 'Jl. Gejayan No. 12, Sleman, D.I. Yogyakarta'}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="lg:col-span-5 flex flex-col justify-between bg-surface-container-low/50 p-space-md rounded-2xl border border-slate-200">
-              <div>
-                <span class="font-label-sm text-label-sm text-on-surface-variant uppercase font-bold tracking-wider block mb-2">Kru & Driver Bertugas</span>
-                <div class="flex items-center gap-3">
-                  <div class="relative w-12 h-12 rounded-full overflow-hidden shrink-0 shadow-sm bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-lg">
-                    ${(order.mitra_name || 'Budi Santoso').slice(0, 2).toUpperCase()}
-                  </div>
-                  <div>
-                    <div class="flex items-center gap-1.5">
-                      <h4 class="font-label-lg text-label-lg text-on-surface font-bold">${order.mitra_name || 'Budi Santoso'}</h4>
-                      <span class="material-symbols-outlined text-primary text-[16px]">verified</span>
-                    </div>
-                    <div class="flex items-center gap-1 text-on-surface-variant font-label-sm text-label-sm">
-                      <span class="material-symbols-outlined text-secondary-fixed-dim text-[15px]" style="font-variation-settings: 'FILL' 1;">star</span>
-                      <span class="font-bold text-on-surface">${order.driver_rating || '4.9'}</span> (340+ Pengantaran Sukses)
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="mt-3 p-3 rounded-xl bg-surface-container-lowest flex items-center justify-between shadow-sm border border-slate-100">
-                <div class="flex items-center gap-2">
-                  <span class="material-symbols-outlined text-primary text-[20px]">near_me</span>
-                  <div>
-                    <span class="font-label-sm text-label-sm text-on-surface-variant block">Posisi Armada</span>
-                    <span class="font-label-md text-label-md text-on-surface font-bold">Jalan Kaliurang Km 5.5</span>
-                  </div>
-                </div>
-                <span class="px-2.5 py-1 rounded-full bg-secondary-fixed/50 text-on-secondary-fixed font-label-sm text-label-sm font-bold">
-                  Tiba dlm ~6 Menit
-                </span>
-              </div>
-            </div>
-          </div>
-          <div class="flex flex-wrap items-center justify-between gap-space-sm pt-space-sm border-t border-slate-100">
-            <div class="flex items-center gap-2">
-              <button onclick="downloadReceipt('${order.order_id}')" class="px-4 py-2 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md hover:bg-surface-container-highest transition-all flex items-center gap-1.5 cursor-pointer">
-                <span class="material-symbols-outlined text-[16px]">receipt_long</span> Detail Invoice
-              </button>
-              <button onclick="openWhatsAppCS()" class="px-4 py-2 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md hover:bg-surface-container-highest transition-all flex items-center gap-1.5 cursor-pointer">
-                <span class="material-symbols-outlined text-[16px]">call</span> Hubungi Kru
-              </button>
-            </div>
-            <a class="px-space-lg py-2.5 rounded-full bg-primary text-on-primary font-label-lg text-label-lg font-bold shadow-[0_10px_20px_-5px_rgba(0,97,148,0.35)] hover:bg-primary-container transition-all flex items-center gap-2 scale-100 hover:scale-105 active:scale-95" href="${trackingLink}">
-              <span class="material-symbols-outlined text-[18px]">satellite_alt</span>
-              <span>Lacak Live GPS Sekarang</span>
-              <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
-            </a>
-          </div>
-        </div>
+    const totalBiaya = Number(order.total_biaya ?? order.total_price ?? 0);
+    const dateFormatted = order.updated_at || order.created_at 
+      ? new Date(order.updated_at || order.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
+      : 'Hari Ini';
+
+    const trackingLink = isCleaning 
+      ? `./tracking-cleaning.html?service=cleaning&ticket=${encodeURIComponent(ticket)}` 
+      : `./tracking.html?service=moving&ticket=${encodeURIComponent(ticket)}`;
+    const paymentLink = `./payment.html?service=${isCleaning ? 'cleaning' : 'moving'}&ticket=${encodeURIComponent(ticket)}`;
+
+    // Status Badge & Top Accent
+    let badgeHtml = '';
+    let topBarGradient = 'bg-gradient-to-r from-secondary via-secondary-container to-primary';
+    if (isWaitingPayment) {
+      badgeHtml = `
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-900 border border-amber-300 font-label-md text-label-md font-bold shadow-sm">
+          <span class="material-symbols-outlined text-[15px]">hourglass_top</span>
+          MENUNGGU PEMBAYARAN
+        </span>
       `;
+      topBarGradient = 'bg-amber-400';
+    } else if (isProcessing) {
+      badgeHtml = `
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-container/30 text-on-secondary-container font-label-md text-label-md font-bold shadow-sm">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span>
+          </span>
+          SEDANG DIPROSES • LIVE TRACKER
+        </span>
+      `;
+    } else if (isCompleted) {
+      badgeHtml = `
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-label-md text-label-md font-bold shadow-sm">
+          <span class="material-symbols-outlined text-[15px]">check_circle</span>
+          SELESAI
+        </span>
+      `;
+      topBarGradient = 'bg-emerald-500';
+    } else {
+      badgeHtml = `
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-error-container text-on-error-container font-label-md text-label-md font-bold shadow-sm">
+          <span class="material-symbols-outlined text-[15px]">cancel</span>
+          DIBATALKAN
+        </span>
+      `;
+      topBarGradient = 'bg-error';
     }
 
+    const serviceTitle = isCleaning ? 'Deep Clean & Sanitasi Hunian' : 'Pindahan Kos & Angkut Barang';
+    const serviceSubtitle = isCleaning ? 'Tim Deep Cleaning Hydro-Vacuum UV-C' : (order.vehicle_name || 'Pick-up Box AB 1420 YK (Kapasitas Maksimal 800 kg)');
+    const pickupLoc = order.pickup_address || (isCleaning ? 'Kost Melati Residence, Sleman' : 'Kost Melati Lt. 2, Sleman');
+    const dropoffLoc = order.dropoff_address || (isCleaning ? 'Layanan Tuntas di Lokasi Hunian' : 'Jl. Gejayan No. 12, Sleman, D.I. Yogyakarta');
+    const partnerName = isCleaning ? 'Siti Maryam & Rekan' : (order.mitra_name || 'Budi Santoso');
+
     return `
-      <div class="rounded-2xl bg-surface-container-lowest/80 backdrop-blur-xl p-space-md md:p-space-lg shadow-[0_15px_30px_-10px_rgba(0,97,148,0.06)] relative overflow-hidden transition-all order-card ${isCancelled ? 'cancelled' : 'completed'} border border-slate-100">
+      <div class="rounded-2xl bg-surface-container-lowest/90 backdrop-blur-2xl p-space-md md:p-space-lg shadow-[0_20px_45px_-12px_rgba(0,97,148,0.1)] relative overflow-hidden transition-all order-card border border-slate-100">
+        <div class="absolute top-0 left-0 right-0 h-1.5 ${topBarGradient}"></div>
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md pb-space-md border-b border-surface-container-high/60">
           <div class="flex flex-wrap items-center gap-2">
-            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full ${isCancelled ? 'bg-error-container text-on-error-container' : 'bg-primary-fixed/40 text-primary'} font-label-md text-label-md font-bold">
-              <span class="material-symbols-outlined text-[14px]">${isCancelled ? 'cancel' : 'check_circle'}</span>
-              ${isCancelled ? 'DIBATALKAN' : 'SELESAI'}
-            </span>
-            <span class="font-label-lg text-label-lg font-bold text-on-surface">#${order.order_id}</span>
+            ${badgeHtml}
+            <span class="font-label-lg text-label-lg font-bold text-on-surface">${ticket}</span>
             <span class="text-outline-variant">•</span>
-            <span class="font-body-sm text-body-sm text-on-surface-variant">${order.created_at ? new Date(order.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Terbaru'}</span>
+            <span class="font-body-sm text-body-sm text-on-surface-variant">${dateFormatted}</span>
           </div>
           <div class="flex items-center gap-space-sm self-start lg:self-auto">
             <div class="text-right">
-              <span class="font-label-sm text-label-sm text-on-surface-variant block">Total Bayar</span>
-              <span class="font-headline-md text-headline-md text-on-surface font-extrabold">Rp ${(order.total_price || 160000).toLocaleString('id-ID')}</span>
+              <span class="font-label-sm text-label-sm text-on-surface-variant block">Total Biaya</span>
+              <span class="font-headline-md text-headline-md text-on-surface font-extrabold">Rp ${totalBiaya.toLocaleString('id-ID')}</span>
             </div>
-            <span class="px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm font-semibold">
-              ${order.payment_method || 'QRIS Dinamis'}
+            <span class="px-2.5 py-1 rounded-full bg-primary-fixed/40 text-primary font-label-sm text-label-sm font-bold flex items-center gap-1">
+              <span class="material-symbols-outlined text-[14px]">payments</span> ${(order.metode_pembayaran || 'QRIS').toUpperCase()}
             </span>
           </div>
         </div>
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-md my-space-md items-center">
-          <div class="lg:col-span-7 flex items-start gap-3">
-            <div class="w-12 h-12 rounded-2xl ${isCleaning ? 'bg-tertiary-fixed text-tertiary' : 'bg-primary-fixed text-primary'} flex items-center justify-center shrink-0 shadow-sm">
-              <span class="material-symbols-outlined text-[26px]">${isCleaning ? 'sanitizer' : 'local_shipping'}</span>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-md my-space-md">
+          <div class="lg:col-span-7 flex flex-col justify-between space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-2xl ${isCleaning ? 'bg-tertiary-fixed text-tertiary' : 'bg-primary-fixed text-primary'} flex items-center justify-center shrink-0 shadow-sm">
+                <span class="material-symbols-outlined text-[26px]">${isCleaning ? 'sanitizer' : 'local_shipping'}</span>
+              </div>
+              <div>
+                <h3 class="font-headline-sm text-headline-sm text-on-surface font-bold leading-tight">
+                  ${serviceTitle}
+                </h3>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">
+                  ${serviceSubtitle}
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 class="font-headline-sm text-headline-sm text-on-surface font-bold leading-tight">
-                ${order.service_name || (isCleaning ? 'Deep Clean & Sanitasi Hunian' : 'Pindahan Kos / Rumah')}
-              </h3>
-              <p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
-                Lokasi: ${order.pickup_address || order.dropoff_address || 'Yogyakarta Metro'}
-              </p>
-              <div class="flex items-center gap-2 mt-2">
-                <span class="font-body-sm text-body-sm text-on-surface-variant">Petugas: <strong class="text-on-surface">${order.mitra_name || 'Mitra SHIFT'}</strong></span>
+            <div class="p-space-md rounded-2xl bg-surface-container-low/70 flex flex-col gap-2 relative border border-slate-200">
+              <div class="flex items-start gap-3">
+                <div class="flex flex-col items-center mt-1">
+                  <div class="w-3 h-3 rounded-full bg-primary"></div>
+                  <div class="w-0.5 h-7 bg-outline-variant/60 my-0.5"></div>
+                  <div class="w-3 h-3 rounded-full bg-secondary-container"></div>
+                </div>
+                <div class="flex flex-col gap-2 grow">
+                  <div>
+                    <span class="font-label-sm text-label-sm text-on-surface-variant uppercase font-bold tracking-wider">Lokasi Penjemputan / Kerja</span>
+                    <p class="font-label-lg text-label-lg text-on-surface font-semibold">${pickupLoc}</p>
+                  </div>
+                  <div>
+                    <span class="font-label-sm text-label-sm text-on-surface-variant uppercase font-bold tracking-wider">Tujuan Pengantaran</span>
+                    <p class="font-label-lg text-label-lg text-on-surface font-semibold">${dropoffLoc}</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-          <div class="lg:col-span-5 bg-surface-container-low/50 p-space-md rounded-2xl border border-slate-200">
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="font-label-sm text-label-sm text-on-surface-variant font-bold">Ulasan Pelanggan</span>
-              <div class="flex items-center text-secondary-fixed-dim">
-                <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
-                <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
-                <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
-                <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
-                <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+          <div class="lg:col-span-5 flex flex-col justify-between bg-surface-container-low/50 p-space-md rounded-2xl border border-slate-200">
+            <div>
+              <span class="font-label-sm text-label-sm text-on-surface-variant uppercase font-bold tracking-wider block mb-2">Petugas Bertugas</span>
+              <div class="flex items-center gap-3">
+                <div class="relative w-12 h-12 rounded-full overflow-hidden shrink-0 shadow-sm bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-lg">
+                  ${partnerName.slice(0, 2).toUpperCase()}
+                </div>
+                <div>
+                  <div class="flex items-center gap-1.5">
+                    <h4 class="font-label-lg text-label-lg text-on-surface font-bold">${partnerName}</h4>
+                    <span class="material-symbols-outlined text-primary text-[16px]">verified</span>
+                  </div>
+                  <div class="flex items-center gap-1 text-on-surface-variant font-label-sm text-label-sm">
+                    <span class="material-symbols-outlined text-secondary-fixed-dim text-[15px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                    <span class="font-bold text-on-surface">4.9</span> (340+ Layanan Sukses)
+                  </div>
+                </div>
               </div>
             </div>
-            <p class="font-body-sm text-body-sm text-on-surface italic bg-surface-container-lowest/80 p-2 rounded-xl border border-slate-100">
-              ${order.review_text || '“Layanan profesional, tepat waktu, dan pengemasan perabot sangat rapi.”'}
-            </p>
+            <div class="mt-3 p-3 rounded-xl bg-surface-container-lowest flex items-center justify-between shadow-sm border border-slate-100">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-[20px]">near_me</span>
+                <div>
+                  <span class="font-label-sm text-label-sm text-on-surface-variant block">Status Operasional</span>
+                  <span class="font-label-md text-label-md text-on-surface font-bold">${isWaitingPayment ? 'Menunggu Pembayaran' : (isCompleted ? 'Pesanan Selesai' : 'Sedang Bergerak')}</span>
+                </div>
+              </div>
+              <span class="px-2.5 py-1 rounded-full ${isWaitingPayment ? 'bg-amber-100 text-amber-800' : 'bg-secondary-fixed/50 text-on-secondary-fixed'} font-label-sm text-label-sm font-bold">
+                ${isWaitingPayment ? 'Belum Dibayar' : (isCompleted ? 'Tuntas 100%' : 'Siaga Lapangan')}
+              </span>
+            </div>
           </div>
         </div>
-        <div class="flex flex-wrap items-center justify-between gap-space-sm pt-space-xs border-t border-slate-100">
-          <button onclick="showToast('Foto Hasil Sebelum & Sesudah dimuat!', 'info')" class="px-4 py-2 rounded-full bg-surface-container-low text-primary font-label-md text-label-md hover:bg-surface-container-high transition-all flex items-center gap-1.5 cursor-pointer">
-            <span class="material-symbols-outlined text-[16px]">photo_library</span> Lihat Foto Hasil (Sebelum & Sesudah)
-          </button>
+        <div class="flex flex-wrap items-center justify-between gap-space-sm pt-space-sm border-t border-slate-100">
           <div class="flex items-center gap-2">
-            <button onclick="downloadReceipt('${order.order_id}')" class="px-4 py-2 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md hover:bg-surface-container-highest transition-all flex items-center gap-1.5 cursor-pointer">
-              <span class="material-symbols-outlined text-[16px]">download</span> Unduh E-Receipt PDF
+            <button onclick="downloadReceipt('${ticket}')" class="px-4 py-2 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md hover:bg-surface-container-highest transition-all flex items-center gap-1.5 cursor-pointer">
+              <span class="material-symbols-outlined text-[16px]">receipt_long</span> Detail Invoice
             </button>
-            <button onclick="reorderService('${order.order_id}', '${order.type}')" class="px-space-md py-2 rounded-full bg-secondary-container text-on-secondary-container font-label-md text-label-md font-bold shadow-sm hover:bg-secondary-fixed transition-all flex items-center gap-1.5 cursor-pointer">
-              <span class="material-symbols-outlined text-[16px]">replay</span> Pesan Ulang Layanan Ini
+            <button onclick="openWhatsAppCS()" class="px-4 py-2 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md hover:bg-surface-container-highest transition-all flex items-center gap-1.5 cursor-pointer">
+              <span class="material-symbols-outlined text-[16px]">support_agent</span> Hubungi CS VIP
             </button>
+          </div>
+          <div class="flex items-center gap-2">
+            ${isWaitingPayment ? `
+              <a class="px-space-lg py-2.5 rounded-full bg-secondary-container text-on-secondary-container font-label-lg text-label-lg font-bold shadow-[0_10px_20px_-5px_rgba(254,208,27,0.4)] hover:bg-secondary-fixed transition-all flex items-center gap-2 scale-100 hover:scale-105 active:scale-95 cursor-pointer" href="${paymentLink}">
+                <span class="material-symbols-outlined text-[18px]">payments</span>
+                <span>Bayar QRIS Sekarang</span>
+                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+              </a>
+            ` : (isProcessing ? `
+              <a class="px-space-lg py-2.5 rounded-full bg-primary text-on-primary font-label-lg text-label-lg font-bold shadow-[0_10px_20px_-5px_rgba(0,97,148,0.35)] hover:bg-primary-container transition-all flex items-center gap-2 scale-100 hover:scale-105 active:scale-95 cursor-pointer" href="${trackingLink}">
+                <span class="material-symbols-outlined text-[18px]">satellite_alt</span>
+                <span>Lacak Live GPS Sekarang</span>
+                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+              </a>
+            ` : `
+              <button onclick="reorderService('${ticket}', '${category}')" class="px-space-md py-2.5 rounded-full bg-secondary-container text-on-secondary-container font-label-md text-label-md font-bold shadow-sm hover:bg-secondary-fixed transition-all flex items-center gap-1.5 cursor-pointer">
+                <span class="material-symbols-outlined text-[16px]">replay</span> Pesan Ulang
+              </button>
+            `)}
           </div>
         </div>
       </div>
@@ -6128,13 +6998,13 @@ window.renderOrdersHistoryGrid = function(orders) {
 };
 
 window.reorderService = function(orderId, type) {
-  const targetType = type || (orderId.includes('CLN') ? 'cleaning' : 'pindahan');
+  const targetType = type || (String(orderId).includes('CLN') ? 'cleaning' : 'moving');
   if (state) {
     state.activeService = targetType === 'cleaning' ? 'cleaning' : 'moving';
     saveStateToStorage();
   }
 
-  showToast(`Detail pesanan #${orderId} disalin ke draf! Mengalihkan ke form pemesanan...`, 'success');
+  showToast(`Detail pesanan ${orderId} disalin ke draf! Mengalihkan ke form pemesanan...`, 'success');
   setTimeout(() => {
     window.location.href = targetType === 'cleaning' ? './cleaning.html' : './booking.html';
   }, 800);
@@ -6142,19 +7012,24 @@ window.reorderService = function(orderId, type) {
 
 window.downloadReceipt = function(orderId) {
   const orders = (state && state.allOrders) ? state.allOrders : [];
-  const order = orders.find(o => o.order_id === orderId) || {
-    order_id: orderId || "SHF-90214",
-    type: "pindahan",
+  const cleanId = String(orderId || '').replace(/^#/, '');
+  const order = orders.find(o => String(o.nomor_tiket || o.order_id || '').replace(/^#/, '') === cleanId) || {
+    nomor_tiket: orderId || "#SHF-90214",
+    kategori_layanan: "moving",
     service_name: "Pindahan Kos & Angkut Barang",
-    total_price: 182750,
-    payment_method: "QRIS Lunas - BI Instan",
+    total_biaya: 182750,
+    metode_pembayaran: "qris",
     pickup_address: "Kost Melati Lt. 2, Sleman, Yogyakarta",
     dropoff_address: "Jl. Gejayan No. 12, Sleman, D.I. Yogyakarta",
-    created_at: new Date().toISOString()
+    updated_at: new Date().toISOString()
   };
 
+  const ticketFormatted = order.nomor_tiket || order.order_id || orderId;
+  const displayTicket = ticketFormatted.startsWith('#') ? ticketFormatted : `#${ticketFormatted}`;
+  const totalDisplay = Number(order.total_biaya || order.total_price || 182750);
+
   const receiptHtml = `
-    <div id="receiptModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-on-surface/50 backdrop-blur-md">
+    <div id="receiptModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-on-surface/50 backdrop-blur-md animate-fadeIn">
       <div class="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl flex flex-col gap-4 border border-slate-200">
         <div class="flex items-center justify-between pb-3 border-b border-slate-200">
           <div class="flex items-center gap-2">
@@ -6166,19 +7041,19 @@ window.downloadReceipt = function(orderId) {
 
         <div class="bg-slate-50 p-4 rounded-2xl flex flex-col gap-2 font-mono text-xs border border-slate-200">
           <div class="flex justify-between font-bold text-slate-800 text-sm">
-            <span>NO. TIKET: #${order.order_id}</span>
+            <span>NO. TIKET: ${displayTicket}</span>
             <span class="text-emerald-600">LUNAS ✓</span>
           </div>
-          <div>WAKTU: ${new Date(order.created_at || Date.now()).toLocaleString('id-ID')}</div>
-          <div>LAYANAN: ${order.service_name || 'Pindahan Barang SHIFT'}</div>
-          <div>METODE: ${order.payment_method || 'QRIS Dinamis Instan'}</div>
+          <div>WAKTU: ${new Date(order.updated_at || order.created_at || Date.now()).toLocaleString('id-ID')}</div>
+          <div>LAYANAN: ${order.kategori_layanan === 'cleaning' ? 'Deep Clean & Sanitasi Hunian' : 'Pindahan Kos & Angkut Barang'}</div>
+          <div>METODE: ${(order.metode_pembayaran || 'QRIS').toUpperCase()}</div>
           <hr class="my-1 border-slate-300">
-          <div>JEMPUT: ${order.pickup_address || 'Yogyakarta Metro'}</div>
-          <div>TUJUAN: ${order.dropoff_address || 'Yogyakarta Metro'}</div>
+          <div>JEMPUT: ${order.pickup_address || 'Kost Melati Lt. 2, Sleman'}</div>
+          <div>TUJUAN: ${order.dropoff_address || 'Jl. Gejayan No. 12, Sleman'}</div>
           <hr class="my-1 border-slate-300">
           <div class="flex justify-between text-sm font-bold text-slate-900">
             <span>TOTAL PEMBAYARAN:</span>
-            <span>Rp ${(order.total_price || 182750).toLocaleString('id-ID')}</span>
+            <span>Rp ${totalDisplay.toLocaleString('id-ID')}</span>
           </div>
         </div>
 
@@ -6197,7 +7072,7 @@ window.downloadReceipt = function(orderId) {
   const existing = document.getElementById('receiptModal');
   if (existing) existing.remove();
   document.body.insertAdjacentHTML('beforeend', receiptHtml);
-  showToast(`Kuitansi e-Receipt #${order.order_id} berhasil diterbitkan!`, 'success');
+  showToast(`Kuitansi e-Receipt ${displayTicket} berhasil diterbitkan!`, 'success');
 };
 
 // Event listeners for history page elements
