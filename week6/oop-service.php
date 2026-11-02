@@ -3,7 +3,7 @@
  * =========================================================================
  * IMPLEMENTASI WEEK 6 (SPRINT 05) - OBJECT-ORIENTED PROGRAMMING (OOP) - SHIFT
  * - Week 6 Task 01: Create a Class (Blueprint class untuk layanan SHIFT)
- * - Week 6 Task 02: Add Properties & Methods (Encapsulation public/private, constructor, data & behavior)
+ * - Week 6 Task 02: Add Properties & Methods (Encapsulation, constructor, data & behavior)
  * - Week 6 Task 03: Generate Dynamic Content with Object (Output HTML dinamis berbasis objek)
  * =========================================================================
  */
@@ -275,7 +275,7 @@ class ShiftService {
               </div>
             </div>
 
-            <!-- Konten: Label, Judul & Deskripsi (dari $this->serviceName, $this->serviceDescription) -->
+            <!-- Konten: Label, Judul & Deskripsi (dari \$this->serviceName, \$this->serviceDescription) -->
             <div>
               <span class="text-xs font-extrabold text-primary uppercase tracking-wider">Layanan Prioritas #{$nomorLabel}</span>
               <h3 class="text-lg sm:text-xl text-on-surface font-extrabold {$hoverTxt} transition-colors mt-0.5 break-words leading-snug">
@@ -286,7 +286,7 @@ class ShiftService {
               </p>
             </div>
 
-            <!-- Fitur Unggulan (dirender oleh renderFeatureList() dari $this->features) -->
+            <!-- Fitur Unggulan (dirender oleh renderFeatureList() dari \$this->features) -->
             <div class="p-3 rounded-2xl bg-surface-container-low/60 border border-slate-100">
               <span class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block mb-2">Fitur Unggulan:</span>
               <ul class="flex flex-col gap-1.5">
@@ -294,7 +294,7 @@ class ShiftService {
               </ul>
             </div>
 
-            <!-- Tarif Mulai Dari (dirender oleh formatHarga() dari $this->basePrice) -->
+            <!-- Tarif Mulai Dari (dirender oleh formatHarga() dari \$this->basePrice) -->
             <div class="p-3 sm:p-3.5 rounded-2xl bg-surface-container-low/70 border border-slate-100 flex items-center justify-between gap-2 flex-wrap">
               <div class="flex flex-col min-w-0">
                 <span class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Tarif Mulai Dari</span>
@@ -306,7 +306,7 @@ class ShiftService {
             </div>
           </div>
 
-          <!-- Tombol CTA (dari $this->buttonText, $this->bookingLink, $this->onClickAction) -->
+          <!-- Tombol CTA (dari \$this->buttonText, \$this->bookingLink, \$this->onClickAction) -->
           <div class="pt-4 mt-4 border-t border-slate-100 relative z-10">
             <a href="{$link}"
                onclick="{$onclick}; return false;"
@@ -354,7 +354,7 @@ $movingService = new ShiftService(
     hoverTextClass:     "group-hover:text-primary",
     buttonText:         "Pesan Jasa Pindahan",
     buttonClass:        "bg-primary hover:bg-primary-container text-on-primary",
-    bookingLink:        "../week5/booking.html?service=moving",
+    bookingLink:        "./booking.html?service=moving",
     onClickAction:      "selectServiceCategory('moving')"
 );
 
@@ -374,7 +374,7 @@ $cleaningService = new ShiftService(
     hoverTextClass:     "group-hover:text-secondary",
     buttonText:         "Pesan Deep Cleaning",
     buttonClass:        "bg-secondary-container hover:bg-secondary-fixed text-on-secondary-container font-extrabold",
-    bookingLink:        "../week5/cleaning.html",
+    bookingLink:        "./cleaning.html",
     onClickAction:      "selectServiceCategory('cleaning')"
 );
 
@@ -394,7 +394,7 @@ $helperService = new ShiftService(
     hoverTextClass:     "group-hover:text-tertiary",
     buttonText:         "Pesan Kru Angkut",
     buttonClass:        "bg-tertiary hover:bg-tertiary-container text-on-tertiary font-bold",
-    bookingLink:        "../week5/booking.html?service=moving&type=helper",
+    bookingLink:        "./booking.html?service=moving&type=helper",
     onClickAction:      "selectServiceCategory('moving')"
 );
 
@@ -414,7 +414,7 @@ $expressService = new ShiftService(
     hoverTextClass:     "group-hover:text-error",
     buttonText:         "Pesan Armada Express",
     buttonClass:        "bg-on-surface hover:bg-inverse-surface text-surface font-bold",
-    bookingLink:        "../week5/booking.html?service=moving&type=premium",
+    bookingLink:        "./booking.html?service=moving&type=premium",
     onClickAction:      "selectServiceCategory('moving')"
 );
 
@@ -434,7 +434,7 @@ $allInclusiveService = new ShiftService(
     hoverTextClass:     "group-hover:text-primary",
     buttonText:         "Pesan Paket All-Inclusive",
     buttonClass:        "bg-primary hover:bg-primary-container text-on-primary font-bold",
-    bookingLink:        "../week5/booking.html?service=all-inclusive",
+    bookingLink:        "./booking.html?service=all-inclusive",
     onClickAction:      "selectServiceCategory('moving')"
 );
 
@@ -454,7 +454,7 @@ $sanitasiService = new ShiftService(
     hoverTextClass:     "group-hover:text-secondary",
     buttonText:         "Pesan Sanitasi & Pest Control",
     buttonClass:        "bg-secondary-container hover:bg-secondary-fixed text-on-secondary-container font-extrabold",
-    bookingLink:        "../week5/booking.html?service=cleaning&type=pestcontrol",
+    bookingLink:        "./booking.html?service=cleaning&type=pestcontrol",
     onClickAction:      "selectServiceCategory('cleaning')"
 );
 
@@ -592,7 +592,7 @@ $allServices = [
   <header class="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] border-b border-slate-100">
     <div class="h-20 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-2 sm:gap-4">
       <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-        <a class="flex items-center gap-2 group shrink-0" href="../week5/index.php">
+        <a class="flex items-center gap-2 group shrink-0" href="./index.php">
           <div class="w-10 h-10 bg-primary rounded-2xl flex items-center justify-center text-white shadow-[0_4px_12px_rgba(0,97,148,0.25)] shrink-0 group-hover:scale-105 transition-transform">
             <span class="material-symbols-outlined text-[24px]">local_shipping</span>
           </div>
@@ -603,10 +603,10 @@ $allServices = [
         </a>
       </div>
       <nav class="hidden md:flex items-center gap-1.5 bg-surface-container-low/80 p-1.5 rounded-full">
-        <a class="px-4 py-1.5 rounded-full text-xs sm:text-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" href="../week5/index.php">Beranda</a>
+        <a class="px-4 py-1.5 rounded-full text-xs sm:text-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" href="./index.php">Beranda</a>
         <a class="px-4 py-1.5 rounded-full text-xs sm:text-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" href="../week5/layanan.php">Katalog Week 5</a>
         <a aria-current="page" class="px-4 py-1.5 transition-colors bg-surface-container-high text-on-surface font-semibold rounded-full text-xs sm:text-sm" href="./oop-service.php">OOP Week 6</a>
-        <a class="px-4 py-1.5 rounded-full text-xs sm:text-sm text-primary font-bold hover:bg-primary-fixed/40 transition-colors" href="../week5/mitra.html">Portal Mitra</a>
+        <a class="px-4 py-1.5 rounded-full text-xs sm:text-sm text-primary font-bold hover:bg-primary-fixed/40 transition-colors" href="./mitra.html">Portal Mitra</a>
       </nav>
       <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
         <div class="hidden sm:flex items-center gap-1.5 bg-gradient-to-r from-primary/10 to-primary-fixed/60 border border-primary/20 px-3 py-1.5 rounded-full">
@@ -619,10 +619,10 @@ $allServices = [
       </div>
     </div>
     <div id="mobileNavMenu" class="hidden md:hidden border-t border-slate-100 bg-surface/95 backdrop-blur-2xl px-4 py-4 shadow-xl flex flex-col gap-2">
-      <a class="px-4 py-2.5 rounded-xl font-medium text-sm text-on-surface-variant hover:bg-surface-container-high transition-colors flex items-center gap-2" href="../week5/index.php"><span class="material-symbols-outlined text-[20px]">home</span> Beranda</a>
+      <a class="px-4 py-2.5 rounded-xl font-medium text-sm text-on-surface-variant hover:bg-surface-container-high transition-colors flex items-center gap-2" href="./index.php"><span class="material-symbols-outlined text-[20px]">home</span> Beranda</a>
       <a class="px-4 py-2.5 rounded-xl font-medium text-sm text-on-surface-variant hover:bg-surface-container-high transition-colors flex items-center gap-2" href="../week5/layanan.php"><span class="material-symbols-outlined text-[20px]">category</span> Katalog Week 5</a>
       <a class="px-4 py-2.5 rounded-xl font-medium text-sm bg-primary-fixed/50 text-primary font-bold flex items-center gap-2" href="./oop-service.php"><span class="material-symbols-outlined text-[20px]">code</span> OOP Catalog Week 6</a>
-      <a class="px-4 py-2.5 rounded-xl font-medium text-sm text-primary font-bold hover:bg-primary-fixed/40 transition-colors flex items-center gap-2" href="../week5/mitra.html"><span class="material-symbols-outlined text-[20px]">badge</span> Portal Mitra</a>
+      <a class="px-4 py-2.5 rounded-xl font-medium text-sm text-primary font-bold hover:bg-primary-fixed/40 transition-colors flex items-center gap-2" href="./mitra.html"><span class="material-symbols-outlined text-[20px]">badge</span> Portal Mitra</a>
     </div>
   </header>
 
@@ -889,10 +889,10 @@ foreach ($allServices as $svc) {
         <span>&copy; <?php echo $currentYear; ?> <?php echo $companyName; ?>. All Rights Reserved.</span>
       </div>
       <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
-        <a href="../week5/index.php" class="hover:text-primary transition-colors font-semibold">Beranda</a>
+        <a href="./index.php" class="hover:text-primary transition-colors font-semibold">Beranda</a>
         <a href="../week5/layanan.php" class="hover:text-primary transition-colors font-semibold">Week 5 Prosedural</a>
         <a href="./oop-service.php" class="text-primary font-bold">Week 6 OOP</a>
-        <a href="../week5/auth.html?path=role-selection" class="hover:text-primary transition-colors font-semibold">Portal Akses</a>
+        <a href="./auth.html?path=role-selection" class="hover:text-primary transition-colors font-semibold">Portal Akses</a>
       </div>
     </div>
   </footer>
@@ -912,7 +912,7 @@ foreach ($allServices as $svc) {
     }
     function selectServiceCategory(category) {
       console.log('[SHIFT OOP] Service category selected:', category);
-      window.location.href = '../week5/booking.html?service=' + category;
+      window.location.href = './booking.html?service=' + category;
     }
   </script>
 
