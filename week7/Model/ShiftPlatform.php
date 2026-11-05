@@ -58,13 +58,20 @@ class ShiftPlatform {
     /** @var array Spesifikasi armada operasional logistik SHIFT */
     private array $fleetSpecs = [];
 
+    /** @var array Keunggulan & Trust Badges SHIFT */
+    private array $trustBadges = [];
+
+    /** @var array Fitur Keunggulan Utama (Why Choose Us) */
+    private array $whyChooseFeatures = [];
+
     /**
      * Constructor ShiftPlatform
-     * Menginisialisasi katalog layanan operasional dan spesifikasi armada logistik.
+     * Menginisialisasi katalog layanan operasional, spesifikasi armada, dan badges keunggulan.
      */
     public function __construct() {
         $this->initServices();
         $this->initFleetSpecs();
+        $this->initBadgesAndFeatures();
     }
 
     /**
@@ -81,15 +88,14 @@ class ShiftPlatform {
                 'category'        => 'moving',
                 'category_label'  => 'Pindahan & Logistik',
                 'nama'            => 'Jasa Pindahan Kos & Rumah (Moving & Armada)',
-                'deskripsi'       => 'Layanan pindahan praktis untuk kamar kos, apartemen, kontrakan, hingga rumah keluarga dengan opsi armada motor kargo, pick-up bak/box, hingga truk engkel serta live GPS tracking real-time dan kalkulasi tangga/lift presisi.',
+                'deskripsi'       => 'Layanan pindahan praktis untuk kamar kos, apartemen, kontrakan, hingga rumah keluarga dengan opsi armada motor kargo, pick-up bak/box, hingga truk engkel serta live GPS tracking real-time dan kalkulasi rute presisi.',
                 'harga_dasar'     => 50000,
                 'harga_formatted' => 'Rp 50.000',
                 'features'        => [
-                    'Armada Motor Kargo & Pick-Up Box',
+                    'Armada Pick-Up & Truk Engkel Siap',
                     'Live GPS Tracking Real-Time',
-                    'Helper Angkut Termasuk',
-                    'Packing Bubble Wrap Protektif',
-                    'Estimasi Jarak & Lantai Tangga/Lift'
+                    'Helper Angkut Profesional Termasuk',
+                    'Packing Bubble Wrap Protektif'
                 ],
                 'ikon'            => 'local_shipping',
                 'badge'           => 'Armada Siap 24/7',
@@ -114,11 +120,10 @@ class ShiftPlatform {
                 'harga_dasar'     => 85000,
                 'harga_formatted' => 'Rp 85.000',
                 'features'        => [
-                    'Sterilisasi UV-C Profesional',
-                    'Hydro-Vacuum Kasur & Sofa',
+                    'Sterilisasi Sinar UV-C Profesional',
+                    'Hydro-Vacuum Kasur & Sofa Tungau',
                     'Disinfeksi Eco-Friendly SNI',
-                    'Pembersihan Kerak Bathroom',
-                    'Teknisi Bersertifikat BNSP'
+                    'Pembersihan Kerak Bathroom Tuntas'
                 ],
                 'ikon'            => 'cleaning_services',
                 'badge'           => 'Steril UV-C & Eco-Clean',
@@ -145,9 +150,8 @@ class ShiftPlatform {
                 'features'        => [
                     'Kru Terlatih & Terverifikasi',
                     'Angkut Perabotan Berat Aman',
-                    'Bongkar-Pasang Furniture',
-                    'Packing Kardus Profesional',
-                    'Penataan Rapi di Lokasi Baru'
+                    'Bongkar-Pasang Furniture Rapi',
+                    'Safety Packing Kardus Protektif'
                 ],
                 'ikon'            => 'engineering',
                 'badge'           => 'Kru Terlatih & Terverifikasi',
@@ -167,24 +171,23 @@ class ShiftPlatform {
                 'nomor'           => 4,
                 'category'        => 'moving',
                 'category_label'  => 'Armada Skala Besar',
-                'nama'            => 'Armada Express & Premium (Truk & Container)',
-                'deskripsi'       => 'Layanan armada premium untuk pindahan skala besar menggunakan truk engkel, truk double, hingga container 20-40 ft dengan proteksi kargo asuransi penuh dan jadwal fleksibel.',
+                'nama'            => 'Armada Express & Premium (Truk & Box)',
+                'deskripsi'       => 'Layanan armada premium untuk pindahan skala besar menggunakan truk engkel, truk double, hingga box tertutup dengan proteksi kargo asuransi penuh dan jadwal fleksibel.',
                 'harga_dasar'     => 250000,
                 'harga_formatted' => 'Rp 250.000',
                 'features'        => [
-                    'Truk Engkel & Double Tersedia',
-                    'Container 20ft & 40ft Option',
-                    'Asuransi Kargo Penuh Included',
-                    'Jadwal Penjemputan Fleksibel',
-                    'Koordinator Armada Dedicated'
+                    'Truk Engkel & Double Siap Jalan',
+                    'Proteksi Tertutup Bebas Hujan & Debu',
+                    'Asuransi Muatan Penuh Included',
+                    'Jadwal Penjemputan Fleksibel 24 Jam'
                 ],
                 'ikon'            => 'airport_shuttle',
                 'badge'           => 'Premium & Terjamin',
-                'badge_color'     => 'bg-error-container text-on-error-container',
-                'icon_bg'         => 'bg-error-container/60 text-error group-hover:bg-error group-hover:text-on-error',
-                'hover_text'      => 'group-hover:text-error',
+                'badge_color'     => 'bg-primary-fixed text-on-primary-fixed',
+                'icon_bg'         => 'bg-primary-fixed/60 text-primary group-hover:bg-primary group-hover:text-on-primary',
+                'hover_text'      => 'group-hover:text-primary',
                 'btn_text'        => 'Pesan Armada Express',
-                'btn_class'       => 'bg-on-surface hover:bg-inverse-surface text-surface font-bold',
+                'btn_class'       => 'bg-primary hover:bg-primary-container text-on-primary font-bold',
                 'link'            => './booking.html?service=moving&type=premium',
                 'action_onclick'  => "selectServiceCategory('moving')"
             ],
@@ -204,17 +207,16 @@ class ShiftPlatform {
                     'Bundling Armada + Kru + Packing',
                     'Deep Cleaning Asal & Tujuan',
                     'Material Bubble Wrap & Kardus',
-                    'Koordinator Personal Dedicated',
-                    'Garansi Kepuasan 100% atau Refund'
+                    'Garansi Kepuasan & Asuransi 100%'
                 ],
                 'ikon'            => 'inventory_2',
                 'badge'           => 'All-Inclusive Bundle',
-                'badge_color'     => 'bg-primary-fixed text-on-primary-fixed',
-                'icon_bg'         => 'bg-primary-fixed/60 text-on-primary-fixed group-hover:bg-primary group-hover:text-on-primary',
-                'hover_text'      => 'group-hover:text-primary',
+                'badge_color'     => 'bg-secondary-container text-on-secondary-container',
+                'icon_bg'         => 'bg-secondary-fixed/60 text-on-secondary-fixed group-hover:bg-secondary-container group-hover:text-on-secondary-container',
+                'hover_text'      => 'group-hover:text-secondary',
                 'btn_text'        => 'Pesan Paket All-Inclusive',
-                'btn_class'       => 'bg-primary hover:bg-primary-container text-on-primary font-bold',
-                'link'            => './booking.html?service=all-inclusive',
+                'btn_class'       => 'bg-secondary-container hover:bg-secondary-fixed text-on-secondary-container font-extrabold',
+                'link'            => './booking.html?service=moving&package=allinclusive',
                 'action_onclick'  => "selectServiceCategory('moving')"
             ],
 
@@ -225,25 +227,24 @@ class ShiftPlatform {
                 'nomor'           => 6,
                 'category'        => 'cleaning',
                 'category_label'  => 'Pest Control & Sanitasi',
-                'nama'            => 'Jasa Sanitasi & Pest Control Profesional',
-                'deskripsi'       => 'Pengendalian hama terpadu (rayap, tikus, kecoa, nyamuk) menggunakan bahan kimia food-grade ramah anak & hewan peliharaan, dengan sertifikasi Kemenkes RI dan garansi 3 bulan.',
+                'nama'            => 'Jasa Sanitasi & Pest Control Khusus',
+                'deskripsi'       => 'Pengendalian hama terpadu (rayap, kutu kasur, kecoa, serangga) menggunakan cairan food-grade ramah anak & hewan peliharaan, bersertifikasi aman dan tuntas bergaransi.',
                 'harga_dasar'     => 125000,
                 'harga_formatted' => 'Rp 125.000',
                 'features'        => [
-                    'Pengendalian Rayap & Tikus',
+                    'Pengendalian Hama & Serangga Efektif',
                     'Bahan Kimia Food-Grade Aman',
-                    'Sertifikasi Kemenkes RI',
-                    'Garansi 3 Bulan Bebas Hama',
-                    'Teknisi Berseragam & ID Resmi'
+                    'Sertifikasi Ramah Lingkungan SNI',
+                    'Garansi Bebas Hama Tuntas'
                 ],
                 'ikon'            => 'pest_control',
-                'badge'           => 'Kemenkes RI Certified',
-                'badge_color'     => 'bg-secondary-fixed text-on-secondary-fixed',
-                'icon_bg'         => 'bg-secondary-fixed/60 text-secondary group-hover:bg-secondary-container group-hover:text-on-secondary-container',
-                'hover_text'      => 'group-hover:text-secondary',
-                'btn_text'        => 'Pesan Sanitasi & Pest Control',
-                'btn_class'       => 'bg-secondary-container hover:bg-secondary-fixed text-on-secondary-container font-extrabold',
-                'link'            => './booking.html?service=cleaning&type=pestcontrol',
+                'badge'           => 'Higienis & Tersertifikasi',
+                'badge_color'     => 'bg-tertiary-fixed text-on-tertiary-fixed-variant',
+                'icon_bg'         => 'bg-tertiary-fixed/60 text-tertiary group-hover:bg-tertiary group-hover:text-on-tertiary',
+                'hover_text'      => 'group-hover:text-tertiary',
+                'btn_text'        => 'Pesan Sanitasi Khusus',
+                'btn_class'       => 'bg-tertiary hover:bg-tertiary-container text-on-tertiary font-bold',
+                'link'            => './cleaning.html?service=pestcontrol',
                 'action_onclick'  => "selectServiceCategory('cleaning')"
             ]
         ];
@@ -289,9 +290,61 @@ class ShiftPlatform {
         ];
     }
 
+    /**
+     * Inisialisasi data Trust Badges dan Why Choose Features
+     */
+    private function initBadgesAndFeatures(): void {
+        $this->trustBadges = [
+            ["title" => "Asuransi 100%", "subtitle" => "Barang Aman Terjamin", "icon" => "verified", "color" => "bg-primary-fixed/50 text-primary"],
+            ["title" => "Lacak GPS Live", "subtitle" => "Pantau Real-Time", "icon" => "my_location", "color" => "bg-secondary-fixed/50 text-secondary"],
+            ["title" => "Mitra Terlatih", "subtitle" => "Driver & Helper Handal", "icon" => "badge", "color" => "bg-tertiary-fixed/50 text-tertiary"],
+            ["title" => "Tarif Presisi", "subtitle" => "Tanpa Biaya Tersembunyi", "icon" => "savings", "color" => "bg-emerald-100 text-emerald-800"]
+        ];
+
+        $this->whyChooseFeatures = [
+            [
+                "icon" => "calculate",
+                "icon_color" => "bg-primary-fixed/50 text-primary",
+                "title" => "Kalkulasi GPS Transparan",
+                "description" => "Harga dihitung otomatis dari rute km presisi. Tidak ada biaya siluman di lokasi penjemputan maupun tujuan."
+            ],
+            [
+                "icon" => "verified",
+                "icon_color" => "bg-secondary-fixed/50 text-secondary",
+                "title" => "Garansi & Asuransi 100%",
+                "description" => "Jaminan kompensasi penuh jika perabotan rusak atau hasil pengerjaan deep clean hunian kurang memuaskan."
+            ],
+            [
+                "icon" => "map",
+                "icon_color" => "bg-tertiary-fixed/50 text-tertiary",
+                "title" => "Pelacakan Live GPS",
+                "description" => "Pantau koordinat pergerakan armada driver atau jadwal kedatangan tim cleaner secara real-time via web."
+            ],
+            [
+                "icon" => "support_agent",
+                "icon_color" => "bg-emerald-100 text-emerald-800",
+                "title" => "Mitra Terlatih & CS 24/7",
+                "description" => "Driver, helper, & cleaner bersertifikasi dengan dukungan hotline Customer Service WhatsApp 24 jam nonstop."
+            ]
+        ];
+    }
+
     // =========================================================================
     // MODEL METHODS (DATA ACCESS & BUSINESS LOGIC)
     // =========================================================================
+
+    /**
+     * Mendapatkan ucapan salam dinamis berdasarkan jam sistem
+     *
+     * @return string
+     */
+    public function getGreeting(): string {
+        $jam = (int)date('H');
+        if ($jam >= 4 && $jam < 11) return "Selamat Pagi";
+        if ($jam >= 11 && $jam < 15) return "Selamat Siang";
+        if ($jam >= 15 && $jam < 18) return "Selamat Sore";
+        return "Selamat Malam";
+    }
 
     /**
      * Mendapatkan profil lengkap informasi operasional platform SHIFT
@@ -300,15 +353,15 @@ class ShiftPlatform {
      */
     public function getProfile(): array {
         return [
-            'name'         => $this->name,
-            'coordinator'  => $this->coordinator,
-            'period'       => $this->period,
-            'status'       => $this->status,
-            'tagline'      => $this->tagline,
-            'appVersion'   => $this->appVersion,
-            'companyName'  => $this->companyName,
-            'coverage'     => $this->coverage,
-            'csHotline'    => $this->csHotline,
+            'name'           => $this->name,
+            'coordinator'    => $this->coordinator,
+            'period'         => $this->period,
+            'status'         => $this->status,
+            'tagline'        => $this->tagline,
+            'appVersion'     => $this->appVersion,
+            'companyName'    => $this->companyName,
+            'coverage'       => $this->coverage,
+            'csHotline'      => $this->csHotline,
             'total_services' => count($this->services),
         ];
     }
@@ -347,6 +400,24 @@ class ShiftPlatform {
      */
     public function getFleetSpecs(): array {
         return $this->fleetSpecs;
+    }
+
+    /**
+     * Mengembalikan koleksi trust badges
+     *
+     * @return array
+     */
+    public function getTrustBadges(): array {
+        return $this->trustBadges;
+    }
+
+    /**
+     * Mengembalikan daftar fitur keunggulan utama (Why Choose Us)
+     *
+     * @return array
+     */
+    public function getWhyChooseFeatures(): array {
+        return $this->whyChooseFeatures;
     }
 
     /**

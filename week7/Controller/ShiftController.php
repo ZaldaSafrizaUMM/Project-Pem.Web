@@ -41,18 +41,20 @@ class ShiftController {
     /**
      * Method index()
      * Menyiapkan seluruh data profil utama dan katalog lengkap layanan SHIFT.
-     * Mengembalikan data array yang siap diteruskan ke View layer.
+     * Mengembalikan data bundle yang siap diteruskan ke View layer.
      *
      * @return array Data bundle utama untuk View
      */
     public function index(): array {
         return [
-            'shift'            => $this->model,
-            'profile'          => $this->model->getProfile(),
-            'services'         => $this->model->getServices(),
-            'fleetSpecs'       => $this->model->getFleetSpecs(),
-            'selectedCategory' => 'all',
-            'totalServices'    => count($this->model->getServices()),
+            'shift'             => $this->model,
+            'profile'           => $this->model->getProfile(),
+            'services'          => $this->model->getServices(),
+            'fleetSpecs'        => $this->model->getFleetSpecs(),
+            'trustBadges'       => $this->model->getTrustBadges(),
+            'whyChooseFeatures' => $this->model->getWhyChooseFeatures(),
+            'selectedCategory'  => 'all',
+            'totalServices'     => count($this->model->getServices()),
         ];
     }
 
@@ -75,12 +77,14 @@ class ShiftController {
         $filteredServices = $this->model->getServicesByCategory($category);
 
         return [
-            'shift'            => $this->model,
-            'profile'          => $this->model->getProfile(),
-            'services'         => $filteredServices,
-            'fleetSpecs'       => $this->model->getFleetSpecs(),
-            'selectedCategory' => $category,
-            'totalServices'    => count($filteredServices),
+            'shift'             => $this->model,
+            'profile'           => $this->model->getProfile(),
+            'services'          => $filteredServices,
+            'fleetSpecs'        => $this->model->getFleetSpecs(),
+            'trustBadges'       => $this->model->getTrustBadges(),
+            'whyChooseFeatures' => $this->model->getWhyChooseFeatures(),
+            'selectedCategory'  => $category,
+            'totalServices'     => count($filteredServices),
         ];
     }
 
@@ -98,8 +102,8 @@ class ShiftController {
         // 2. Olah data melalui Controller & Model
         $viewData = $this->show($requestedCategory);
 
-        // 3. Ekstrak data agar variabel ($shift, $profile, $services, $fleetSpecs, $selectedCategory, $totalServices)
-        //    langsung dapat diakses secara bersih di dalam View
+        // 3. Ekstrak data agar variabel ($shift, $profile, $services, $fleetSpecs, $trustBadges, $whyChooseFeatures, $selectedCategory, $totalServices)
+        //    langsung dapat diakses secara bersih di dalam View tanpa logika bisnis
         extract($viewData);
 
         // 4. Sertakan file View untuk merender antarmuka HTML

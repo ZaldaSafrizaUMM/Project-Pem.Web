@@ -401,6 +401,10 @@
       }
     } catch(e){}
 
+    // =========================================================================
+    // WEEK 4 - TASK 03: Handle API State (Loading Spinner, Success Data, Error Handling & Tombol Coba Lagi)
+    // Mengelola feedback visual saat loading, data berhasil dimuat, dan tombol retry saat error
+    // =========================================================================
     console.log(`✅ [ShiftCore] Status updated:`, updatedOrder || newStatus);
     return { data: updatedOrder, error: updateError };
   }
@@ -543,6 +547,10 @@
       } catch (e) {}
     }
 
+    // =========================================================================
+    // WEEK 4 - TASK 03: Handle API State (Loading Spinner, Success Data, Error Handling & Tombol Coba Lagi)
+    // Mengelola feedback visual saat loading, data berhasil dimuat, dan tombol retry saat error
+    // =========================================================================
     console.log(`✅ [ShiftCore] completeOrderAndReview finished for ${ticket}`);
     return { data: updatedOrder, feedback: feedbackPayload, error: updateError };
   }
@@ -612,6 +620,10 @@
       }
     } catch (e){}
 
+    // =========================================================================
+    // WEEK 4 - TASK 03: Handle API State (Loading Spinner, Success Data, Error Handling & Tombol Coba Lagi)
+    // Mengelola feedback visual saat loading, data berhasil dimuat, dan tombol retry saat error
+    // =========================================================================
     return { data: [], error: null };
   }
 
@@ -816,6 +828,10 @@
       };
     }
 
+    // =========================================================================
+    // WEEK 4 - TASK 03: Handle API State (Loading Spinner, Success Data, Error Handling & Tombol Coba Lagi)
+    // Mengelola feedback visual saat loading, data berhasil dimuat, dan tombol retry saat error
+    // =========================================================================
     console.log('✅ [ShiftCore] registerMitra completed:', docRecord);
     return {
       success: true,

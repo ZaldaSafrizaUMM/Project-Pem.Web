@@ -816,13 +816,13 @@ window.renderAuthHeaderNav = function() {
 
     if (!isLoggedIn) {
       container.innerHTML = `
-        <div class="flex items-center gap-2">
-          <a href="./auth.html?path=login-customer" class="px-3.5 py-1.5 rounded-full bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-md text-label-md font-bold transition-all flex items-center gap-1 shadow-sm border border-slate-200/60 cursor-pointer">
-            <span class="material-symbols-outlined text-primary text-[17px]">login</span>
+        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <a href="./auth.html?mode=signin" class="px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-[11px] sm:text-xs md:text-sm font-bold transition-all flex items-center gap-1 shadow-sm border border-slate-200/60 cursor-pointer whitespace-nowrap">
+            <span class="material-symbols-outlined text-primary text-[15px] sm:text-[17px]">login</span>
             <span>Masuk</span>
           </a>
-          <a href="./auth.html?path=register-customer" class="px-4 py-1.5 rounded-full bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-bold transition-all flex items-center gap-1 shadow-md cursor-pointer">
-            <span class="material-symbols-outlined text-[17px]">person_add</span>
+          <a href="./auth.html?mode=signup" class="px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-primary hover:bg-primary-container text-on-primary text-[11px] sm:text-xs md:text-sm font-bold transition-all flex items-center gap-1 shadow-md cursor-pointer whitespace-nowrap">
+            <span class="material-symbols-outlined text-[15px] sm:text-[17px]">person_add</span>
             <span>Daftar</span>
           </a>
         </div>
@@ -945,11 +945,11 @@ window.openAuthRequiredModal = function(targetRedirectUrl) {
         </div>
 
         <div class="grid grid-cols-2 gap-2">
-          <a href="./auth.html?path=login-customer&redirect=${encodeURIComponent(target)}" class="w-full py-3 px-3 rounded-2xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-lg text-label-lg font-bold text-center flex items-center justify-center gap-1.5 shadow-sm transition-all border border-slate-200">
+          <a href="./auth.html?mode=signin&redirect=${encodeURIComponent(target)}" class="w-full py-3 px-3 rounded-2xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-lg text-label-lg font-bold text-center flex items-center justify-center gap-1.5 shadow-sm transition-all border border-slate-200">
             <span class="material-symbols-outlined text-primary text-[18px]">login</span>
             <span>Masuk</span>
           </a>
-          <a href="./auth.html?path=register-customer&redirect=${encodeURIComponent(target)}" class="w-full py-3 px-3 rounded-2xl bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg font-bold text-center flex items-center justify-center gap-1.5 shadow-md transition-all">
+          <a href="./auth.html?mode=signup&redirect=${encodeURIComponent(target)}" class="w-full py-3 px-3 rounded-2xl bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg font-bold text-center flex items-center justify-center gap-1.5 shadow-md transition-all">
             <span class="material-symbols-outlined text-[18px]">person_add</span>
             <span>Daftar Akun</span>
           </a>
@@ -1079,6 +1079,17 @@ function initAuthEngine() {
   const urlParams = new URLSearchParams(window.location.search);
   const pathParam = urlParams.get('path');
   const tabParam = urlParams.get('tab');
+  const modeParam = urlParams.get('mode') || (window.location.hash ? window.location.hash.replace('#', '') : null);
+
+  if (modeParam === 'signup' || modeParam === 'register') {
+    if (typeof window.switchAuthMode === 'function') {
+      window.switchAuthMode('signup');
+    }
+  } else if (modeParam === 'signin' || modeParam === 'login') {
+    if (typeof window.switchAuthMode === 'function') {
+      window.switchAuthMode('signin');
+    }
+  }
 
   if (pathParam && typeof window.handleAuthNavigationPath === 'function') {
     window.handleAuthNavigationPath(pathParam);
@@ -1086,7 +1097,7 @@ function initAuthEngine() {
     window.handleAuthNavigationPath(tabParam);
   } else {
     const roleSec = document.getElementById('roleSelectionSection');
-    if (roleSec) {
+    if (roleSec && typeof window.handleAuthNavigationPath === 'function') {
       window.handleAuthNavigationPath('role-selection');
     }
   }
@@ -3384,11 +3395,20 @@ window.handleConfirmPayment = async function() {
       }, 800);
     }
   } catch (err) {
+    // =========================================================================
+    // WEEK 4 - TASK 03: Handle API State (Loading Spinner, Success Data, Error Handling & Tombol Coba Lagi)
+    // Mengelola feedback visual saat loading, data berhasil dimuat, dan tombol retry saat error
+    // =========================================================================
     console.error('❌ handleConfirmPayment error:', err);
     showToast('Gagal memverifikasi: ' + err.message, 'error');
     if (confirmBtn) {
       confirmBtn.disabled = false;
-      confirmBtn.innerHTML = originalBtnHtml;
+      confirmBtn.innerHTML = `
+        <span class="flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-[18px]">refresh</span>
+          <span>Coba Lagi Verifikasi</span>
+        </span>
+      `;
     }
   }
 };
@@ -3534,11 +3554,20 @@ window.navigateToPayment = async function() {
       window.location.href = `./payment.html?ticket=${encodeURIComponent(finalTicket)}`;
     }, 500);
   } catch (err) {
+    // =========================================================================
+    // WEEK 4 - TASK 03: Handle API State (Loading Spinner, Success Data, Error Handling & Tombol Coba Lagi)
+    // Mengelola feedback visual saat loading, data berhasil dimuat, dan tombol retry saat error
+    // =========================================================================
     console.error('❌ navigateToPayment error:', err);
     showToast('Gagal memproses pesanan: ' + err.message, 'error');
     if (ctaBtn) {
       ctaBtn.disabled = false;
-      ctaBtn.innerHTML = originalHtml;
+      ctaBtn.innerHTML = `
+        <span class="flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-[18px]">refresh</span>
+          <span>Coba Lagi Pesan</span>
+        </span>
+      `;
     }
   }
 };
@@ -3750,6 +3779,10 @@ window.calculateCleaningTariff = function() {
   showToast('Estimasi tarif bersih-bersih berhasil dihitung!', 'success');
 };
 
+// =========================================================================
+// WEEK 4 - TASK 01: Connect to API (Fetch API & Parsing JSON)
+// Menghubungkan aplikasi SHIFT ke endpoint REST API & mem-parsing data JSON
+// =========================================================================
 window.navigateToCleaningPayment = async function() {
   // --- AUTO-KALKULASI: Jika belum dihitung, hitung dulu secara otomatis ---
   if (!state.cleaning.isCalculated) {
@@ -3818,6 +3851,10 @@ window.navigateToCleaningPayment = async function() {
     createdAt: new Date().toISOString()
   };
 
+  // =========================================================================
+  // WEEK 4 - TASK 03: Handle API State (Loading Spinner, Success Data, Error Handling & Tombol Coba Lagi)
+  // Mengelola feedback visual saat loading, data berhasil dimuat, dan tombol retry saat error
+  // =========================================================================
   // Button loading feedback
   const ctaBtn = document.querySelector('button[onclick*="navigateToCleaningPayment"]');
   let originalHtml = '';
@@ -3881,11 +3918,20 @@ window.navigateToCleaningPayment = async function() {
       window.location.href = `./payment.html?service=cleaning&ticket=${encodeURIComponent(finalTicket)}`;
     }, 500);
   } catch (err) {
+    // =========================================================================
+    // WEEK 4 - TASK 03: Handle API State (Loading Spinner, Success Data, Error Handling & Tombol Coba Lagi)
+    // Mengelola feedback visual saat loading, data berhasil dimuat, dan tombol retry saat error
+    // =========================================================================
     console.error('❌ navigateToCleaningPayment error:', err);
     showToast('Gagal memproses pesanan cleaning: ' + err.message, 'error');
     if (ctaBtn) {
       ctaBtn.disabled = false;
-      ctaBtn.innerHTML = originalHtml;
+      ctaBtn.innerHTML = `
+        <span class="flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-[18px]">refresh</span>
+          <span>Coba Lagi Pesan Cleaning</span>
+        </span>
+      `;
     }
   }
 };
@@ -4945,7 +4991,11 @@ window.handleAuthNavigationPath = function(path) {
     window.switchAuthTab('customer');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } else if (cleanPath === 'register-customer') {
-    window.location.href = './booking.html';
+    if (custSec) custSec.classList.remove('hidden');
+    window.switchAuthTab('customer');
+    const firstInput = document.getElementById('onboardFirstName');
+    if (firstInput) firstInput.focus();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   } else if (cleanPath === 'login-mitra') {
     if (mitraLoginSec) mitraLoginSec.classList.remove('hidden');
     window.switchAuthTab('mitra_login');
@@ -5425,6 +5475,10 @@ window.handleWhatsappQuickReg = function() {
   }, 400);
 };
 
+// =========================================================================
+// WEEK 4 - TASK 01: Connect to API (Fetch API & Parsing JSON)
+// Menghubungkan aplikasi SHIFT ke endpoint REST API & mem-parsing data JSON
+// =========================================================================
 window.handleCustomerOnboardingSubmit = async function(e) {
   if (e) e.preventDefault();
 
@@ -5642,6 +5696,10 @@ window.switchRoleTabInForm = function(roleKey) {
   window.selectMitraCategory(roleKey);
 };
 
+// =========================================================================
+// WEEK 4 - TASK 01: Connect to API (Fetch API & Parsing JSON)
+// Menghubungkan aplikasi SHIFT ke endpoint REST API & mem-parsing data JSON
+// =========================================================================
 async function uploadFileToSupabaseStorage(file, docName, userId) {
   if (!file) return null;
 
@@ -5770,6 +5828,10 @@ window.handleMitraDocumentUpload = async function(inputEl, previewId) {
   }
 };
 
+// =========================================================================
+// WEEK 4 - TASK 01: Connect to API (Fetch API & Parsing JSON)
+// Menghubungkan aplikasi SHIFT ke endpoint REST API & mem-parsing data JSON
+// =========================================================================
 window.handleMitraRegistrationSubmit = async function(e) {
   if (e) e.preventDefault();
 
@@ -5779,6 +5841,10 @@ window.handleMitraRegistrationSubmit = async function(e) {
     return;
   }
 
+  // =========================================================================
+  // WEEK 4 - TASK 03: Handle API State (Loading Spinner, Success Data, Error Handling & Tombol Coba Lagi)
+  // Mengelola feedback visual saat loading, data berhasil dimuat, dan tombol retry saat error
+  // =========================================================================
   const submitBtn = document.getElementById('btnSubmitDriverForm') || document.getElementById('submitBtn');
   let originalBtnHtml = '';
   if (submitBtn) {
@@ -5881,8 +5947,21 @@ window.handleMitraRegistrationSubmit = async function(e) {
     }
     console.log('✅ Mitra registered in Supabase Storage & mitra_documents:', regResult);
   } catch (err) {
+    // =========================================================================
+    // WEEK 4 - TASK 03: Handle API State (Loading Spinner, Success Data, Error Handling & Tombol Coba Lagi)
+    // Mengelola feedback visual saat loading, data berhasil dimuat, dan tombol retry saat error
+    // =========================================================================
     console.error('❌ Exception in registerMitra:', err);
     showToast('Catatan upload dokumen: ' + err.message, 'warning');
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `
+        <span class="flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-[18px]">refresh</span>
+          <span>Coba Lagi Kirim Pendaftaran</span>
+        </span>
+      `;
+    }
   }
 
   if (submitBtn) {
@@ -6418,6 +6497,10 @@ window.renderSavedAddressGrid = function() {
   `).join('');
 };
 
+// =========================================================================
+// WEEK 4 - TASK 01: Connect to API (Fetch API & Parsing JSON)
+// Menghubungkan aplikasi SHIFT ke endpoint REST API & mem-parsing data JSON
+// =========================================================================
 window.saveAddress = async function(e) {
   if (e) e.preventDefault();
 
@@ -6487,6 +6570,10 @@ window.removeAddress = function(addrId) {
   showToast('Alamat berhasil dihapus dari daftar tersimpan.', 'info');
 };
 
+// =========================================================================
+// WEEK 4 - TASK 01: Connect to API (Fetch API & Parsing JSON)
+// Menghubungkan aplikasi SHIFT ke endpoint REST API & mem-parsing data JSON
+// =========================================================================
 window.submitTopup = async function() {
   const amount = typeof selectedTopupAmount !== 'undefined' ? selectedTopupAmount : 200000;
   if (!state.user) state.user = {};
